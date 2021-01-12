@@ -13,8 +13,10 @@ import com.zepben.evolve.cim.iec61970.base.core.PhaseCode
 import com.zepben.evolve.cim.iec61970.base.core.Terminal
 import com.zepben.evolve.cim.iec61970.base.wires.AcLineSegment
 import com.zepben.evolve.cim.iec61970.base.wires.Breaker
+import com.zepben.evolve.cim.iec61970.base.wires.EnergySource
 import com.zepben.evolve.cim.iec61970.base.wires.PowerTransformer
 import com.zepben.evolve.services.network.NetworkService
+import com.zepben.evolve.services.network.testdata.TestNetworks
 import com.zepben.evolve.services.network.tracing.Tracing
 import com.zepben.evolve.services.network.tracing.TracingTest
 import com.zepben.evolve.services.network.tracing.phases.PhaseInferrer
@@ -34,9 +36,15 @@ internal class TestNetwork1(){
 
     var service: NetworkService = NetworkService()
     init{
-        val acls1 = add_acls(mRID = "acls1",phs = PhaseCode.ABC)
+        val source1 = EnergySource(mRID = "source")
+        val t_s1 = Terminal().apply { conductingEquipment =source1
+            phases = PhaseCode.ABC }
+        service.add(source1)
+        service.add(t_s1)
+        val acls1 = add_acls(mRID = "acls1",phs = PhaseCode.XY)
         val acls2 = add_acls(mRID = "acls2",phs = PhaseCode.AB)
         val acls3 = add_acls(mRID = "acls3",phs = PhaseCode.ABC)
+        service.connect(acls1.getTerminal(1)!!, t_s1)
         acls1.getTerminal(2)?.let { acls2.getTerminal(1)?.let { it1 -> service.connect(it, it1) } }
         acls2.getTerminal(2)?.let { acls3.getTerminal(1)?.let { it1 -> service.connect(it, it1) } }
     }
@@ -71,14 +79,36 @@ internal class TestNetwork1(){
     }
     @Test
     internal fun basic_tracing() {
-        val net = TestNetwork1()
-        val acls1 = net.service.get(ConductingEquipment::class, mRID = "acls1")!!
-        val expected = net.service.setOf<ConductingEquipment>()
+        val acls1 = service.get(ConductingEquipment::class, mRID = "acls1")!!
+        val expected = service.setOf<ConductingEquipment>()
         val visited: MutableSet<ConductingEquipment> = HashSet()
+        print(expected)
         Tracing.connectedEquipmentTrace().addStepAction{ce, _ -> visited.add(ce)}.run(acls1)
         assertThat(visited, equalTo(expected))
+    }
+
+    @Test internal fun set_phases_test() {
+
+        println(service.get<AcLineSegment>("acls1")!!.getTerminal(1)!!.tracedPhases)
+        println(service.get<AcLineSegment>("acls2")!!.getTerminal(1)!!.tracedPhases)
+        println(service.get<AcLineSegment>("acls3")!!.getTerminal(1)!!.tracedPhases)
+        Tracing.setPhases().run(service)
+        println(service.get<AcLineSegment>("acls1")!!.getTerminal(1)!!.tracedPhases)
+        println(service.get<AcLineSegment>("acls2")!!.getTerminal(1)!!.tracedPhases)
+        println(service.get<AcLineSegment>("acls3")!!.getTerminal(1)!!.tracedPhases)
+    }
+
+    @Test
+    internal fun set_phases_test_2(){
+        val n = TestNetworks.getNetwork(1)
+        print(n.setOf<ConductingEquipment>().forEach{ce -> println(ce.getTerminal(1)!!.tracedPhases)})
+        Tracing.setPhases().run(n)
+        print(n.setOf<ConductingEquipment>().forEach{ce -> println(ce.getTerminal(1)!!.tracedPhases)})
 
     }
+
+
+
 }
 
 internal class PhaseBalancingTest {
