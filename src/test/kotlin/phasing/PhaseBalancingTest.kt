@@ -58,10 +58,12 @@ internal class TestNetwork1(){
         return acls
     }
 
+    @Test
     internal fun acls1() {
         val net =  TestNetwork1()
         assertThat(net.service.get(AcLineSegment::class, mRID ="acls1")?.mRID, equalTo("acls1"))
     }
+
     @Test
     internal fun acls1_phases() {
         val net = TestNetwork1()
