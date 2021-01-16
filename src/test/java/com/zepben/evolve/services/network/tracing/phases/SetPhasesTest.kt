@@ -12,10 +12,7 @@
 package com.zepben.evolve.services.network.tracing.phases
 
 import com.zepben.evolve.cim.iec61968.assetinfo.OverheadWireInfo
-import com.zepben.evolve.cim.iec61970.base.core.ConductingEquipment
-import com.zepben.evolve.cim.iec61970.base.core.PhaseCode
-import com.zepben.evolve.cim.iec61970.base.core.Substation
-import com.zepben.evolve.cim.iec61970.base.core.Terminal
+import com.zepben.evolve.cim.iec61970.base.core.*
 import com.zepben.evolve.cim.iec61970.base.wires.*
 import com.zepben.evolve.cim.iec61970.base.wires.SinglePhaseKind.*
 import com.zepben.evolve.services.network.NetworkService
@@ -479,7 +476,6 @@ class SetPhasesTest {
         Tracing.setPhases().run(start.getTerminal(1)!!, emptyList())
         PhaseLogger.trace(start)
     }
-
     // Get a terminal from an asset in the network
     private fun getT(n: NetworkService, id: String, terminalId: Int) =
         n.get<ConductingEquipment>(id)!!.getTerminal(terminalId)!!
@@ -522,6 +518,18 @@ class SetPhasesTest {
     private fun ConductingEquipment.addTerminals(count: Int, phases: PhaseCode = PhaseCode.ABC) {
         for (i in 1..count)
             addTerminal(Terminal().also { it.conductingEquipment = this; it.phases = phases })
+    }
+
+    @Test
+    // Set Phases from an known phases of a Feeder NormalHeadTerminal
+    internal fun setPhasesfromKnownHeadTerminal() {
+        val network = NetworkService()
+        val terminal = Terminal("t1").apply { phases = PhaseCode.AB}
+        val feeder = Feeder().apply { normalHeadTerminal = terminal}
+        network.add(terminal)
+        network.add(feeder)
+        Tracing.setPhases().run(network)
+        checkExpectedPhases(terminal, arrayOf(A, B), arrayOf(OUT, OUT))
     }
 }
 

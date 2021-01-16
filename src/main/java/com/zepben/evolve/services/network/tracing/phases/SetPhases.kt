@@ -9,6 +9,7 @@ package com.zepben.evolve.services.network.tracing.phases
 
 import com.zepben.annotations.EverythingIsNonnullByDefault
 import com.zepben.evolve.cim.iec61970.base.core.ConductingEquipment
+import com.zepben.evolve.cim.iec61970.base.core.Feeder
 import com.zepben.evolve.cim.iec61970.base.core.Terminal
 import com.zepben.evolve.cim.iec61970.base.wires.Breaker
 import com.zepben.evolve.cim.iec61970.base.wires.EnergySource
@@ -37,8 +38,8 @@ class SetPhases {
     private val feederCbErrorsLogged = mutableSetOf<String>()
 
     fun run(network: NetworkService) {
-        applyPhasesFromSources(network)
-
+        //applyPhasesFromSources(network)
+        setPhasesforEachHeadTerminal(network)
         val terminals = network.sequenceOf<EnergySource>()
             .filter { it.numPhases() > 0 }
             .flatMap { it.terminals.asSequence() }
@@ -174,6 +175,30 @@ class SetPhases {
             else -> FeederProcessingStatus.NONE
         }
     }
+
+    private fun setPhasesforEachHeadTerminal(network: NetworkService) {
+        network.sequenceOf<Feeder>().forEach(::setPhasesforHeadTerminal)
+    }
+
+    private fun setPhasesforHeadTerminal(feeder: Feeder) {
+        val headTerminal = feeder.normalHeadTerminal
+        if (headTerminal == null) {
+            logger.warn(
+                "Setting of phases for headTerminal ${headTerminal} fails." +
+                    "phases of headTerminal is None!" +
+                    "Tracing of phases for Feeder ${feeder.mRID} is not feasible!"
+            )
+            return
+        }
+        val nominalPhases = mutableSetOf<SinglePhaseKind>()
+        nominalPhases.addAll(headTerminal.phases.singlePhases())
+
+        headTerminal.phases.singlePhases().forEach{phase ->
+            headTerminal.normalPhases(phase).add(phase, PhaseDirection.OUT)
+            headTerminal.currentPhases(phase).add(phase, PhaseDirection.OUT)
+        }
+    }
+
 
     private fun applyPhasesFromSources(network: NetworkService) {
         network.sequenceOf<EnergySource>().filter { it.numPhases() > 0 }.forEach(::applyPhasesFromSource)
