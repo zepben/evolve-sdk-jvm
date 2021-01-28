@@ -8,6 +8,7 @@
 
 package com.zepben.evolve.examples.networks
 
+import com.zepben.evolve.cim.iec61968.assetinfo.OverheadWireInfo
 import com.zepben.evolve.cim.iec61970.base.core.BaseVoltage
 import com.zepben.evolve.cim.iec61970.base.core.ConductingEquipment
 import com.zepben.evolve.cim.iec61970.base.core.ConnectivityNode
@@ -33,15 +34,7 @@ import com.zepben.evolve.services.network.NetworkService
     # create transformer
     pp.create_transformer(net, bus3, bus4, name="110kV/20kV transformer",
                                    std_type="25 MVA 110/20 kV")
-    # create lines
-    pp.create_line(net, bus1, bus2, length_km=10,
-                           std_type="N2XS(FL)2Y 1x300 RM/35 64/110 kV", name="Line 1")
-    line2 = pp.create_line(net, bus5, bus6, length_km=2.0,
-                           std_type="NA2XS2Y 1x240 RM/25 12/20 kV", name="Line 2")
-    line3 = pp.create_line(net, bus6, bus7, length_km=3.5,
-                           std_type="48-AL1/8-ST1A 20.0", name="Line 3")
-    line4 = pp.create_line(net, bus7, bus5, length_km=2.5,
-                           std_type="NA2XS2Y 1x240 RM/25 12/20 kV", name="Line 4")
+
 
     # create bus-bus switches
     pp.create_switch(net, bus2, bus3, et="b", type="CB")
@@ -75,15 +68,30 @@ fun simpleNetwork(): BaseService {
     val bv20  = BaseVoltage().apply { nominalVoltage = 20000}
     val bus1 = net.createBus{name="HV Busbar";baseVoltage = bv110}
     val bus2 = net.createBus{ name="HV Busbar 2"; baseVoltage = bv110}
-    net.createBus{name="HV Transformer Bus"; baseVoltage = bv110}
-    net.createBus{name="MV Transformer Bus"; baseVoltage =bv20}
-    net.createBus{name="MV Main Bus"; baseVoltage =bv20}
-    net.createBus{name="MV Bus 1"; baseVoltage =bv20}
-    net.createBus{name="MV Bus 2"; baseVoltage =bv20}
+    val bus3 = net.createBus{name="HV Transformer Bus"; baseVoltage = bv110}
+    val bus4 = net.createBus{name="MV Transformer Bus"; baseVoltage =bv20}
+    val bus5 = net.createBus{name="MV Main Bus"; baseVoltage =bv20}
+    val bus6 = net.createBus{name="MV Bus 1"; baseVoltage =bv20}
+    val bus7 = net.createBus{name="MV Bus 2"; baseVoltage =bv20}
     net.createTransformer(2, info = "25 MVA 110/20 kV"){name = "110kV/20kV transformer"}
     // TODO: How to associated PowerTrandformerEndInfo to a PowerTranformerInfo?
     net.createEnergySource(){}
-    net.createLine(bus1 = bus1, bus2 = bus2){name="Line 1"; length = 10.0}
+
+    /* # create lines
+        pp.create_line(net, bus1, bus2, length_km=10,
+            std_type="N2XS(FL)2Y 1x300 RM/35 64/110 kV", name="Line 1")
+    line2 = pp.create_line(net, bus5, bus6, length_km=2.0,
+        std_type="NA2XS2Y 1x240 RM/25 12/20 kV", name="Line 2")
+    line3 = pp.create_line(net, bus6, bus7, length_km=3.5,
+        std_type="48-AL1/8-ST1A 20.0", name="Line 3")
+    line4 = pp.create_line(net, bus7, bus5, length_km=2.5,
+        std_type="NA2XS2Y 1x240 RM/25 12/20 kV", name="Line 4") */
+
+    net.createLine(bus1,bus2, std_type= "N2XS(FL)2Y 1x300 RM/35 64/110 kV"){length = 10.0; name="Line 1"}
+    net.createLine(bus5,bus6){length = 2.0;  name="Line 2"}
+    net.createLine(bus5,bus6){length = 3.5;  name="Line 3"}
+    net.createLine(bus5,bus6){length = 2.5;  name="Line 4"}
+
 
     return net
 }

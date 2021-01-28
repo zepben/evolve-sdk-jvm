@@ -14,7 +14,6 @@ import com.zepben.evolve.cim.iec61970.base.core.IdentifiedObject
 import com.zepben.evolve.cim.iec61970.base.core.Terminal
 import com.zepben.evolve.cim.iec61970.base.wires.Junction
 import com.zepben.evolve.cim.iec61970.base.wires.PowerTransformer
-import com.zepben.evolve.examples.networks.getAvailableTransformerInfo
 import com.zepben.evolve.examples.networks.simpleNetwork
 import com.zepben.evolve.services.common.BaseService
 import org.hamcrest.CoreMatchers.*
@@ -43,6 +42,6 @@ class SimpleNetworkTest {
         assertThat(net.setOf<PowerTransformer>(), notNullValue())
         assertThat(net.setOf<PowerTransformer>().size, equalTo(1))
         val trafo = net.setOf<PowerTransformer>().find {it.name == "110kV/20kV transformer"}!!
-        assertThat(trafo.assetInfo!!.mRID, equalTo(getAvailableTransformerInfo("25 MVA 110/20 kV").mRID))
+        assertThat(trafo.assetInfo!!.mRID, equalTo("25 MVA 110/20 kV"))
     }
 }
