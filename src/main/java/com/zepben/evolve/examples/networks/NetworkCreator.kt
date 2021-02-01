@@ -21,23 +21,35 @@ import com.zepben.evolve.services.network.NetworkService
 import com.zepben.protobuf.np.CreateTransformerEndInfoResponse
 
 
-fun NetworkService.createBus(numTerminals: Int = 0, init: Junction.() -> Unit): Junction = create(::Junction, numTerminals, init)
-// TODO: Figure out how to add Voltage to Buses - Looks like we need to add topologicalNode to support the relationship to BaseVoltage. Meanwhile using Junction.
-fun NetworkService.createEnergySource(numTerminals: Int = 1, init: EnergySource.() -> Unit): EnergySource = create(::EnergySource, numTerminals,  init)
+fun NetworkService.createBus(init: Junction.() -> Unit): Junction {
+    // TODO: Figure out how to add Voltage to Buses - Looks like we need to add topologicalNode to support the relationship to BaseVoltage. Meanwhile using Junction.
+    val bus = Junction().apply(init)
+    val t = Terminal()
+    this.tryAdd(t)
+    this.tryAdd(bus)
+    t.conductingEquipment = bus
+    bus.addTerminal(t)
+    return bus
+}
+
+fun NetworkService.createEnergySource(bus: Junction, numTerminals: Int = 1, init: EnergySource.() -> Unit): EnergySource = create(::EnergySource, bus, numTerminals,  init)
 fun NetworkService.createConnectivityNode(init: ConnectivityNode.()-> Unit): ConnectivityNode{
     val cn = ConnectivityNode().apply(init)
     this.add(cn)
     return cn
 }
-fun NetworkService.createTransformer(numEnds: Int = 2, info: String = "25 MVA 110/20 kV", init: PowerTransformer.() -> Unit): PowerTransformer{
+fun NetworkService.createTransformer(bus1: Junction, bus2: Junction, numEnds: Int = 2, info: String = "25 MVA 110/20 kV", init: PowerTransformer.() -> Unit): PowerTransformer{
     val pt = PowerTransformer().apply(init)
     this.add(pt)
+    pt.createTerminals(numEnds, this)
+    pt.connect2buses(bus1, bus2, this)
     for (i in 1..numEnds) {
         val end = PowerTransformerEnd().apply {powerTransformer = pt}
         this.tryAdd(end)
         pt.addEnd(end)
+        end.terminal = pt.getTerminal(i)
+        // TODO: How to associated PowerTrandformerEndInfo to a PowerTranformerInfo?
     }
-    pt.createTerminals(numEnds, this)
     val ptInfo = getAvailableTransformerInfo(info)
     pt.apply{assetInfo=ptInfo}
     return pt
@@ -47,16 +59,41 @@ fun NetworkService.createLine(bus1:  Junction, bus2: Junction, std_type: String 
                               init: AcLineSegment.() -> Unit): AcLineSegment{
     val acls = AcLineSegment().apply(init)
     acls.createTerminals(2,this)
-    val terminalBus1 = Terminal().apply { conductingEquipment = bus1 }
-    val terminalBus2 = Terminal().apply { conductingEquipment = bus2 }
-    bus1.addTerminal(terminalBus1)
-    bus2.addTerminal(terminalBus2)
-    this.tryAdd(terminalBus1)
-    this.tryAdd(terminalBus2)
     this.tryAdd(acls)
-    this.connect(acls.getTerminal(1)!!, terminalBus1)
-    this.connect(acls.getTerminal(2)!!, terminalBus2)
+    acls.connect2buses(bus1, bus2, this)
     return acls.apply{assetInfo = getAvailableLineStdTypes(std_type)}
+}
+
+private fun getAvailableLineStdTypes(id: String): WireInfo
+{
+    val list = mutableListOf<WireInfo>()
+    list.add(OverheadWireInfo("N2XS(FL)2Y 1x300 RM/35 64/110 kV").apply {ratedCurrent = 0})
+    list.add(OverheadWireInfo("NA2XS2Y 1x240 RM/25 12/20 kV").apply {ratedCurrent = 0})
+    list.add(OverheadWireInfo("48-AL1/8-ST1A 20.0").apply {ratedCurrent = 0})
+    return list.find {it.mRID == id}!!
+}
+
+
+
+private fun <T : ConductingEquipment> NetworkService.create(creator: () -> T, bus: Junction, numTerminals: Int = 1, init: T.() -> Unit): T {
+    val obj = creator().apply { createTerminals(numTerminals, NetworkService()) }.apply(init)
+    this.tryAdd(obj)
+    this.connect(obj.getTerminal(1)!!, bus.getTerminal(1)!!)
+    return obj
+}
+
+private fun ConductingEquipment.createTerminals(num: Int, net: NetworkService) {
+    for (i in 1..num) {
+        val terminal = Terminal()
+        net.tryAdd(terminal)
+        terminal.conductingEquipment = this
+        addTerminal(terminal)
+    }
+}
+
+private fun ConductingEquipment.connect2buses(bus1: Junction, bus2: Junction, net: NetworkService){
+    net.connect(this.getTerminal(1)!!, bus1.getTerminal(1)!!)
+    net.connect(this.getTerminal(2)!!, bus2.getTerminal(1)!!)
 }
 
 /*  {
@@ -169,30 +206,5 @@ private fun getAvailableTransformerInfo(mrid: String): PowerTransformerInfo
 
  */
 
-private fun getAvailableLineStdTypes(id: String): WireInfo
-{
-    val list = mutableListOf<WireInfo>()
-    //TODO: set up raetedCurrent with double values. Right now the attribute ratedCurrent is Int.
-    list.add(OverheadWireInfo("N2XS(FL)2Y 1x300 RM/35 64/110 kV").apply {ratedCurrent = 0})
-    list.add(OverheadWireInfo("NA2XS2Y 1x240 RM/25 12/20 kV").apply {ratedCurrent = 0})
-    list.add(OverheadWireInfo("48-AL1/8-ST1A 20.0").apply {ratedCurrent = 0})
-    return list.find {it.mRID == id}!!
-}
 
-
-
-private fun <T : ConductingEquipment> NetworkService.create(creator: () -> T, numTerminals: Int = 1, init: T.() -> Unit): T {
-    val obj = creator().apply { createTerminals(numTerminals, NetworkService()) }.apply(init)
-    this.tryAdd(obj)
-    return obj
-}
-
-private fun ConductingEquipment.createTerminals(num: Int, net: NetworkService) {
-    for (i in 1..num) {
-        val terminal = Terminal()
-        net.tryAdd(terminal)
-        terminal.conductingEquipment = this
-        addTerminal(terminal)
-    }
-}
 
