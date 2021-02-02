@@ -13,6 +13,7 @@ import com.zepben.evolve.cim.iec61968.assetinfo.CableInfo
 import com.zepben.evolve.cim.iec61968.assetinfo.OverheadWireInfo
 import com.zepben.evolve.cim.iec61968.assetinfo.PowerTransformerInfo
 import com.zepben.evolve.cim.iec61968.assetinfo.WireInfo
+import com.zepben.evolve.cim.iec61970.base.core.BaseVoltage
 import com.zepben.evolve.cim.iec61970.base.core.ConductingEquipment
 import com.zepben.evolve.cim.iec61970.base.core.ConnectivityNode
 import com.zepben.evolve.cim.iec61970.base.core.Terminal
@@ -21,9 +22,9 @@ import com.zepben.evolve.services.network.NetworkService
 import com.zepben.protobuf.np.CreateTransformerEndInfoResponse
 
 
-fun NetworkService.createBus(init: Junction.() -> Unit): Junction {
+fun NetworkService.createBus(bv:  BaseVoltage, init: Junction.() -> Unit): Junction {
     // TODO: Figure out how to add Voltage to Buses - Looks like we need to add topologicalNode to support the relationship to BaseVoltage. Meanwhile using Junction.
-    val bus = Junction().apply(init)
+    val bus = Junction().apply{baseVoltage=bv}.apply(init)
     val t = Terminal()
     this.tryAdd(t)
     this.tryAdd(bus)
@@ -32,7 +33,8 @@ fun NetworkService.createBus(init: Junction.() -> Unit): Junction {
     return bus
 }
 
-fun NetworkService.createEnergySource(bus: Junction, numTerminals: Int = 1, init: EnergySource.() -> Unit): EnergySource = create(::EnergySource, bus, numTerminals,  init)
+fun NetworkService.createEnergySource(bus: Junction, init: EnergySource.() -> Unit): EnergySource = create(::EnergySource, bus, numTerminals = 1,  init)
+fun NetworkService.createLoad(bus: Junction, init: EnergyConsumer.() -> Unit): EnergyConsumer = create(::EnergyConsumer, bus, numTerminals = 1, init)
 fun NetworkService.createConnectivityNode(init: ConnectivityNode.()-> Unit): ConnectivityNode{
     val cn = ConnectivityNode().apply(init)
     this.add(cn)
@@ -64,12 +66,45 @@ fun NetworkService.createLine(bus1:  Junction, bus2: Junction, std_type: String 
     return acls.apply{assetInfo = getAvailableLineStdTypes(std_type)}
 }
 
+
+
 private fun getAvailableLineStdTypes(id: String): WireInfo
 {
+    /* linetypes = {
+        # Cables, all from S.744, Heuck: Elektrische Energieversorgung - Vierweg+Teubner 2013
+        # additional MV cables from Werth: Netzberechnung mit Erzeugungsporfilen (Dreiecksverlegung)
+              # High Voltage
+        "N2XS(FL)2Y 1x300 RM/35 64/110 kV":
+        {"c_nf_per_km": 144,
+            "r_ohm_per_km": 0.060,
+            "x_ohm_per_km": 0.144,
+            "max_i_ka": 0.588,
+            "type": "cs",
+            "q_mm2": 300,
+            "alpha": alpha_cu}, */
     val list = mutableListOf<WireInfo>()
-    list.add(OverheadWireInfo("N2XS(FL)2Y 1x300 RM/35 64/110 kV").apply {ratedCurrent = 0})
-    list.add(OverheadWireInfo("NA2XS2Y 1x240 RM/25 12/20 kV").apply {ratedCurrent = 0})
-    list.add(OverheadWireInfo("48-AL1/8-ST1A 20.0").apply {ratedCurrent = 0})
+    list.add(OverheadWireInfo("N2XS(FL)2Y 1x300 RM/35 64/110 kV").apply {ratedCurrent = 366})
+    /*
+    # Medium Voltage
+    "NA2XS2Y 1x240 RM/25 12/20 kV":
+        {"c_nf_per_km": 304,
+            "r_ohm_per_km": 0.122,
+            "x_ohm_per_km": 0.112,
+            "max_i_ka": 0.421,
+            "type": "cs",
+            "q_mm2": 240,
+            "alpha": alpha_al},*/
+    list.add(OverheadWireInfo("NA2XS2Y 1x240 RM/25 12/20 kV").apply {ratedCurrent = 421})
+    /*  "48-AL1/8-ST1A 20.0":
+        {"c_nf_per_km": 9.5,
+            "r_ohm_per_km": 0.5939,
+            "x_ohm_per_km": 0.372,
+            "max_i_ka": 0.210,
+            "type": "ol",
+            "q_mm2": 48,
+            "alpha": alpha_al},*/
+    list.add(OverheadWireInfo("48-AL1/8-ST1A 20.0").apply {ratedCurrent = 210})
+    //TODO:  Add all the line parameters
     return list.find {it.mRID == id}!!
 }
 
@@ -96,7 +131,9 @@ private fun ConductingEquipment.connect2buses(bus1: Junction, bus2: Junction, ne
     net.connect(this.getTerminal(2)!!, bus2.getTerminal(1)!!)
 }
 
-/*  {
+private fun getAvailableTransformerInfo(mrid: String): PowerTransformerInfo
+{
+    /*  {
       "i0_percent": 0.07,
       "pfe_kw": 14,
       "vkr_percent": 0.41,
@@ -133,78 +170,12 @@ private fun ConductingEquipment.connect2buses(bus1: Junction, bus2: Junction, ne
           "tap_step_degree": 0,
           "tap_step_percent": 2.5,
           "tap_phase_shifter": False}*/
-
-private fun getAvailableTransformerInfo(mrid: String): PowerTransformerInfo
-{
     val list = mutableListOf<PowerTransformerInfo>()
     list.add(PowerTransformerInfo("25 MVA 110/20 kV"))
     list.add(PowerTransformerInfo("0.63 MVA 10/0.4 kV"))
     return list.find { it.mRID == mrid}!!
 }
 
-/* linetypes = {
-        # Cables, all from S.744, Heuck: Elektrische Energieversorgung - Vierweg+Teubner 2013
-        # additional MV cables from Werth: Netzberechnung mit Erzeugungsporfilen (Dreiecksverlegung)
-        # Low Voltage
-        "NAYY 4x50 SE":
-        {"c_nf_per_km": 210,
-            "r_ohm_per_km": 0.642,
-            "x_ohm_per_km": 0.083,
-            "max_i_ka": 0.142,
-            "type": "cs",
-            "q_mm2": 50,
-            "alpha": alpha_al},
-        "NAYY 4x120 SE":
-        {"c_nf_per_km": 264,
-            "r_ohm_per_km": 0.225,
-            "x_ohm_per_km": 0.080,
-            "max_i_ka": 0.242,
-            "type": "cs",
-            "q_mm2": 120,
-            "alpha": alpha_al},
-        "NAYY 4x150 SE":
-        {"c_nf_per_km": 261,
-            "r_ohm_per_km": 0.208,
-            "x_ohm_per_km": 0.080,
-            "max_i_ka": 0.270,
-            "type": "cs",
-            "q_mm2": 150,
-            "alpha": alpha_al},
-        # High Voltage
-        "N2XS(FL)2Y 1x120 RM/35 64/110 kV":
-        {"c_nf_per_km": 112,
-            "r_ohm_per_km": 0.153,
-            "x_ohm_per_km": 0.166,
-            "max_i_ka": 0.366,
-            "type": "cs",
-            "q_mm2": 120,
-            "alpha": alpha_cu},
-        "N2XS(FL)2Y 1x185 RM/35 64/110 kV":
-        {"c_nf_per_km": 125,
-            "r_ohm_per_km": 0.099,
-            "x_ohm_per_km": 0.156,
-            "max_i_ka": 0.457,
-            "type": "cs",
-            "q_mm2": 185,
-            "alpha": alpha_cu},
-        "N2XS(FL)2Y 1x240 RM/35 64/110 kV":
-        {"c_nf_per_km": 135,
-            "r_ohm_per_km": 0.075,
-            "x_ohm_per_km": 0.149,
-            "max_i_ka": 0.526,
-            "type": "cs",
-            "q_mm2": 240,
-            "alpha": alpha_cu},
-        "N2XS(FL)2Y 1x300 RM/35 64/110 kV":
-        {"c_nf_per_km": 144,
-            "r_ohm_per_km": 0.060,
-            "x_ohm_per_km": 0.144,
-            "max_i_ka": 0.588,
-            "type": "cs",
-            "q_mm2": 300,
-            "alpha": alpha_cu},
-
- */
 
 
 
