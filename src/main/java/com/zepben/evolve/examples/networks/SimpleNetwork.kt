@@ -23,37 +23,21 @@ import com.zepben.evolve.services.network.NetworkService
 import kotlin.math.PI
 
 
-/*
-    # create bus-line switches
-    pp.create_switch(net, bus5, line2, et="l", type="LBS", closed=True)
-    pp.create_switch(net, bus6, line2, et="l", type="LBS", closed=True)
-    pp.create_switch(net, bus6, line3, et="l", type="LBS", closed=True)
-    pp.create_switch(net, bus7, line3, et="l", type="LBS", closed=False)
-    pp.create_switch(net, bus7, line4, et="l", type="LBS", closed=True)
-    pp.create_switch(net, bus5, line4, et="l", type="LBS", closed=True)
-
-    /*# create bus-bus switches
-        pp.create_switch(net, bus2, bus3, et="b", type="CB")
-    pp.create_switch(net, bus4, bus5, et="b", type="CB")*/
-
-   # create static generator
-    pp.create_sgen(net, bus7, p_mw=2, q_mvar=-0.5, name="static generator")
- */
 
 fun simpleNetwork(): BaseService {
     val net = NetworkService()
     val bv110 = BaseVoltage().apply { nominalVoltage = 110000}
     val bv20  = BaseVoltage().apply { nominalVoltage = 20000}
 
-/*
-# create buses
-bus1 = pp.create_bus(net, name="HV Busbar", vn_kv=110., type="b")
-bus2 = pp.create_bus(net, name="HV Busbar 2", vn_kv=110., type="b")
-bus3 = pp.create_bus(net, name="HV Transformer Bus", vn_kv=110., type="n")
-bus4 = pp.create_bus(net, name="MV Transformer Bus", vn_kv=20., type="n")
-bus5 = pp.create_bus(net, name="MV Main Bus", vn_kv=20., type="b")
-bus6 = pp.create_bus(net, name="MV Bus 1", vn_kv=20., type="b")
-bus7 = pp.create_bus(net, name="MV Bus 2", vn_kv=20., type="b")*/
+    /*
+    # create buses
+    bus1 = pp.create_bus(net, name="HV Busbar", vn_kv=110., type="b")
+    bus2 = pp.create_bus(net, name="HV Busbar 2", vn_kv=110., type="b")
+    bus3 = pp.create_bus(net, name="HV Transformer Bus", vn_kv=110., type="n")
+    bus4 = pp.create_bus(net, name="MV Transformer Bus", vn_kv=20., type="n")
+    bus5 = pp.create_bus(net, name="MV Main Bus", vn_kv=20., type="b")
+    bus6 = pp.create_bus(net, name="MV Bus 1", vn_kv=20., type="b")
+    bus7 = pp.create_bus(net, name="MV Bus 2", vn_kv=20., type="b")*/
     val bus1 = net.createBus(bv110){name="HV Busbar"}
     val bus2 = net.createBus(bv110){ name="HV Busbar 2"}
     val bus3 = net.createBus(bv20){name="HV Transformer Bus"}
@@ -65,7 +49,8 @@ bus7 = pp.create_bus(net, name="MV Bus 2", vn_kv=20., type="b")*/
     # create external grid
     pp.create_ext_grid(net, bus1, vm_pu=1.02, va_degree=50)   */
     // TODO: Update to the CIM class EquivalentInjection to make difference from physical EnergySources
-    net.createEnergySource(bus1){voltageMagnitude = bv110.nominalVoltage*1.02; voltageAngle = 50*PI/180}
+    net.createEnergySource(bus1){voltageMagnitude = bv110.nominalVoltage*1.02; voltageAngle = Math.toRadians(50.0)}
+
 
 /*    # create transformer
         pp.create_transformer(net, bus3, bus4, name="110kV/20kV transformer",
@@ -99,6 +84,37 @@ bus7 = pp.create_bus(net, name="MV Bus 2", vn_kv=20., type="b")*/
     /* max_q_mvar and min_q_mvar are  only  necessary for OPF. These paramenters could map to IEC61970/Base/Wires/RegulatingControl */
 
     net.createEnergySource(bus6){voltageMagnitude = bv110.nominalVoltage*1.03; activePower = 6.0}
+
+    /*# create static generator
+    pp.create_sgen(net, bus7, p_mw=2, q_mvar=-0.5, name="static generator")
+    */
+    net.createEnergySource(bus7){activePower = 6.0; reactivePower=-0.5; name = "static generator"}
+
+   /*
+    pp.Switches to CIM.Switch mapping:
+    CB” - circuit breaker -> Breaker
+    “LS” - load switch -> Breaker
+    “LBS” - load break switch -> Breaker
+    “DS” - disconnecting switch -> Disconnector*/
+
+    /* # create bus-line switches
+    pp.create_switch(net, bus5, line2, et="l", type="LBS", closed=True)
+    pp.create_switch(net, bus6, line2, et="l", type="LBS", closed=True)
+    pp.create_switch(net, bus6, line3, et="l", type="LBS", closed=True)
+    pp.create_switch(net, bus7, line3, et="l", type="LBS", closed=False)
+    pp.create_switch(net, bus7, line4, et="l", type="LBS", closed=True)
+    pp.create_switch(net, bus5, line4, et="l", type="LBS", closed=True)*/
+
+    // TODO:  create bus-line switches is not supported by Evolve
+
+    /*
+    /*# create bus-bus switches
+    pp.create_switch(net, bus2, bus3, et="b", type="CB")
+    pp.create_switch(net, bus4, bus5, et="b", type="CB")*/
+     */
+
+    net.createBreaker(bus2, bus3){}
+    net.createBreaker(bus4, bus5){}
 
 
     return net

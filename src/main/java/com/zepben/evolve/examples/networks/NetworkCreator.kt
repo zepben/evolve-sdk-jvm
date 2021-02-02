@@ -44,7 +44,7 @@ fun NetworkService.createTransformer(bus1: Junction, bus2: Junction, numEnds: In
     val pt = PowerTransformer().apply(init)
     this.add(pt)
     pt.createTerminals(numEnds, this)
-    pt.connect2buses(bus1, bus2, this)
+    pt.connectBuses(bus1, bus2, this)
     for (i in 1..numEnds) {
         val end = PowerTransformerEnd().apply {powerTransformer = pt}
         this.tryAdd(end)
@@ -62,8 +62,34 @@ fun NetworkService.createLine(bus1:  Junction, bus2: Junction, std_type: String 
     val acls = AcLineSegment().apply(init)
     acls.createTerminals(2,this)
     this.tryAdd(acls)
-    acls.connect2buses(bus1, bus2, this)
+    acls.connectBuses(bus1, bus2, this)
     return acls.apply{assetInfo = getAvailableLineStdTypes(std_type)}
+}
+
+fun NetworkService.createBreaker(bus1: Junction, bus2: Junction, init: Breaker.() -> Unit): Breaker {
+    val breaker = Breaker().apply(init)
+    breaker.createTerminals(2,this)
+    this.tryAdd(breaker)
+    breaker.connectBuses(bus1, bus2, this)
+    return breaker
+}
+
+fun NetworkService.createBreaker(bus: Junction, line: AcLineSegment, init: Breaker.() -> Unit): Breaker {
+    val breaker = Breaker().apply(init)
+    breaker.createTerminals(2,this)
+    this.tryAdd(breaker)
+    breaker.connectBusToLine(bus,line, this)
+    return breaker
+}
+
+fun Breaker.connectBusToLine(bus: Junction, line: AcLineSegment, net: NetworkService) {
+    net.connect(this.getTerminal(1)!!, bus.getTerminal(1)!!)
+    net.connect(this.getTerminal(2)!!, line.getTerminal(1)!!)
+}
+
+private fun ConductingEquipment.connectBuses(bus1: Junction, bus2: Junction, net: NetworkService){
+    net.connect(this.getTerminal(1)!!, bus1.getTerminal(1)!!)
+    net.connect(this.getTerminal(2)!!, bus2.getTerminal(1)!!)
 }
 
 
@@ -126,10 +152,6 @@ private fun ConductingEquipment.createTerminals(num: Int, net: NetworkService) {
     }
 }
 
-private fun ConductingEquipment.connect2buses(bus1: Junction, bus2: Junction, net: NetworkService){
-    net.connect(this.getTerminal(1)!!, bus1.getTerminal(1)!!)
-    net.connect(this.getTerminal(2)!!, bus2.getTerminal(1)!!)
-}
 
 private fun getAvailableTransformerInfo(mrid: String): PowerTransformerInfo
 {
