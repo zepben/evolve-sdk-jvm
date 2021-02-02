@@ -38,9 +38,6 @@ import kotlin.math.PI
 
    # create static generator
     pp.create_sgen(net, bus7, p_mw=2, q_mvar=-0.5, name="static generator")
-
-    # create shunt
-    pp.create_shunt(net, bus3, q_mvar=-0.96, p_mw=0, name='Shunt')
  */
 
 fun simpleNetwork(): BaseService {
@@ -67,7 +64,7 @@ bus7 = pp.create_bus(net, name="MV Bus 2", vn_kv=20., type="b")*/
 /*
     # create external grid
     pp.create_ext_grid(net, bus1, vm_pu=1.02, va_degree=50)   */
-    // TODO: Update to the CIM class EquivalentInjection to make diffrence from physical EnergySources
+    // TODO: Update to the CIM class EquivalentInjection to make difference from physical EnergySources
     net.createEnergySource(bus1){voltageMagnitude = bv110.nominalVoltage*1.02; voltageAngle = 50*PI/180}
 
 /*    # create transformer
@@ -102,7 +99,6 @@ bus7 = pp.create_bus(net, name="MV Bus 2", vn_kv=20., type="b")*/
     /* max_q_mvar and min_q_mvar are  only  necessary for OPF. These paramenters could map to IEC61970/Base/Wires/RegulatingControl */
 
     net.createEnergySource(bus6){voltageMagnitude = bv110.nominalVoltage*1.03; activePower = 6.0}
-
 
 
     return net
