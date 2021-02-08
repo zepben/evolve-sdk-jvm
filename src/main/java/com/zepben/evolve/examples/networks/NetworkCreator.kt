@@ -9,17 +9,16 @@
 package com.zepben.evolve.examples.networks
 
 
-import com.zepben.evolve.cim.iec61968.assetinfo.CableInfo
 import com.zepben.evolve.cim.iec61968.assetinfo.OverheadWireInfo
 import com.zepben.evolve.cim.iec61968.assetinfo.PowerTransformerInfo
 import com.zepben.evolve.cim.iec61968.assetinfo.WireInfo
+import com.zepben.evolve.cim.iec61968.assets.AssetInfo
 import com.zepben.evolve.cim.iec61970.base.core.BaseVoltage
 import com.zepben.evolve.cim.iec61970.base.core.ConductingEquipment
 import com.zepben.evolve.cim.iec61970.base.core.ConnectivityNode
 import com.zepben.evolve.cim.iec61970.base.core.Terminal
 import com.zepben.evolve.cim.iec61970.base.wires.*
 import com.zepben.evolve.services.network.NetworkService
-import com.zepben.protobuf.np.CreateTransformerEndInfoResponse
 
 
 fun NetworkService.createBus(bv:  BaseVoltage, init: Junction.() -> Unit): Junction {
@@ -40,7 +39,7 @@ fun NetworkService.createConnectivityNode(init: ConnectivityNode.()-> Unit): Con
     this.add(cn)
     return cn
 }
-fun NetworkService.createTransformer(bus1: Junction, bus2: Junction, numEnds: Int = 2, info: String = "25 MVA 110/20 kV", init: PowerTransformer.() -> Unit): PowerTransformer{
+fun NetworkService.createTransformer(bus1: Junction, bus2: Junction, numEnds: Int = 2, ptInfo: PowerTransformerInfo?, init: PowerTransformer.() -> Unit): PowerTransformer{
     val pt = PowerTransformer().apply(init)
     this.add(pt)
     pt.createTerminals(numEnds, this)
@@ -52,8 +51,7 @@ fun NetworkService.createTransformer(bus1: Junction, bus2: Junction, numEnds: In
         end.terminal = pt.getTerminal(i)
         // TODO: How to associated PowerTrandformerEndInfo to a PowerTranformerInfo?
     }
-    val ptInfo = getAvailableTransformerInfo(info)
-    pt.apply{assetInfo=ptInfo}
+    pt.apply{assetInfo = ptInfo }
     return pt
 }
 
@@ -153,49 +151,20 @@ private fun ConductingEquipment.createTerminals(num: Int, net: NetworkService) {
 }
 
 
-private fun getAvailableTransformerInfo(mrid: String): PowerTransformerInfo
-{
-    /*  {
-      "i0_percent": 0.07,
-      "pfe_kw": 14,
-      "vkr_percent": 0.41,
-      "sn_mva": 25,
-      "vn_lv_kv": 20.0,
-      "vn_hv_kv": 110.0,
-      "vk_percent": 12,
-      "shift_degree": 150,
-      "vector_group": "YNd5",
-      "tap_side": "hv",
-      "tap_neutral": 0,
-      "tap_min": -9,
-      "tap_max": 9,
-      "tap_step_degree": 0,
-      "tap_step_percent": 1.5,
-      "tap_phase_shifter": False}
+fun NetworkService.getAvailablePowerTransformerInfo(mrid: String): PowerTransformerInfo? {
 
-
-      // 0.63 MVA 10/0.4 kV Trafo Union wnr
-      "0.63 MVA 10/0.4 kV" to PowerTransformerInfo().apply {  }
-      {"sn_mva": 0.63,
-          "vn_hv_kv": 10,
-          "vn_lv_kv": 0.4,
-          "vk_percent": 4,
-          "vkr_percent": 1.0794,
-          "pfe_kw": 1.18,
-          "i0_percent": 0.1873,
-          "shift_degree": 150,
-          "vector_group": "Dyn5",
-          "tap_side": "hv",
-          "tap_neutral": 0,
-          "tap_min": -2,
-          "tap_max": 2,
-          "tap_step_degree": 0,
-          "tap_step_percent": 2.5,
-          "tap_phase_shifter": False}*/
-    val list = mutableListOf<PowerTransformerInfo>()
-    list.add(PowerTransformerInfo("25 MVA 110/20 kV"))
-    list.add(PowerTransformerInfo("0.63 MVA 10/0.4 kV"))
-    return list.find { it.mRID == mrid}!!
+    // TODO: Consider when the instance is already in the NetworkService and it is matching with the Type. Check: <is> keyword
+    var info  = this.get<PowerTransformerInfo>(mrid)
+    if(info == null) {
+        info = when (mrid) {
+        //TODO: Add all the parameters to the PowerTranformerEndInfo. See std_type.py in pandapower for input data.
+        "0.4 MVA 20/0.4 kV" -> PowerTransformerInfo(mrid).apply {}
+        "25 MVA 110/20 kV" -> PowerTransformerInfo(mrid).apply {}
+        "0.63 MVA 10/0.4 kV" -> PowerTransformerInfo(mrid).apply {}
+        else -> null }
+        this.add(info!!)
+    }
+    return info
 }
 
 

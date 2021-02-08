@@ -73,7 +73,7 @@ class NetworkCreatorTest {
     }
     @Test
     internal fun createTransformerTest(){
-        val pt = net.createTransformer(bus1, bus2){}
+        val pt = net.createTransformer(bus1, bus2, ptInfo = net.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV")){}
         assertThat(pt,instanceOf(PowerTransformer::class.java))
         assertThat(pt.numEnds(), equalTo(2))
         assertThat(pt.numEnds(), equalTo(pt.numTerminals()))
