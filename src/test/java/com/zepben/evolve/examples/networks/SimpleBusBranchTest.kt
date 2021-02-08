@@ -37,4 +37,14 @@ class SimpleBusBranchTest {
         assertThat(net.setOf<EnergyConsumer>(), notNullValue())
         assertThat(net.setOf<BaseVoltage>(), notNullValue())
     }
+    @Test
+    internal fun numberOfObject(){
+        assertThat(net.setOf<PowerTransformer>().size, equalTo(1))
+        assertThat(net.setOf<AcLineSegment>().size, equalTo(1))
+        assertThat(net.setOf<Junction>().size, equalTo(3))
+        assertThat(net.setOf<EnergySource>().size, equalTo(1))
+        assertThat(net.setOf<EnergyConsumer>().size, equalTo(1))
+        assertThat(net.setOf<BaseVoltage>().size, equalTo(2))
+        assertThat(net.setOf<ConnectivityNode>().size, equalTo(3))
+    }
 }

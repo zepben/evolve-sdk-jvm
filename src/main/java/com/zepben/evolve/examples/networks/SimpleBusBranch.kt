@@ -30,8 +30,7 @@ fun simpleBusBranchNetwork(): BaseService {
     net.createLoad(bus = b3){p = 100000.0; q =50000.0; name = "Load"}
 
     // Create branch elements
-    val ptinfo = net.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV")?: error("Not TransformerInfo found")
-    net.createTransformer(bus1 = b1, bus2 = b2, ptInfo = ptinfo){name="Trafo"}
-    net.createLine(bus1 = b2, bus2 = b3){length = 100.0; name="Line"}
+    net.createTransformer(bus1 = b1, bus2 = b2, ptInfo = net.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV")){name="Trafo"}
+    net.createLine(bus1 = b2, bus2 = b3){length = 100.0; name="Line"; perLengthSequenceImpedance = net.getAvailablePerLengthSequenceImpedance("NAYY 4x150 SE")}
     return net
 }

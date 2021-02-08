@@ -8,13 +8,12 @@
 
 package com.zepben.evolve.examples.networks
 
+import com.zepben.evolve.cim.iec61968.assetinfo.OverheadWireInfo
+import com.zepben.evolve.cim.iec61968.assetinfo.PowerTransformerInfo
 import com.zepben.evolve.cim.iec61970.base.core.BaseVoltage
 import com.zepben.evolve.cim.iec61970.base.core.ConnectivityNode
 import com.zepben.evolve.cim.iec61970.base.core.IdentifiedObject
-import com.zepben.evolve.cim.iec61970.base.wires.AcLineSegment
-import com.zepben.evolve.cim.iec61970.base.wires.EnergyConsumer
-import com.zepben.evolve.cim.iec61970.base.wires.Junction
-import com.zepben.evolve.cim.iec61970.base.wires.PowerTransformer
+import com.zepben.evolve.cim.iec61970.base.wires.*
 import com.zepben.evolve.services.network.NetworkService
 import org.hamcrest.CoreMatchers.*
 import org.hamcrest.MatcherAssert.assertThat
@@ -61,7 +60,6 @@ class NetworkCreatorTest {
         val bus = net.createBus(bv){}
         val obj= net.createEnergySource(bus){name = n; assertThat(this.name, equalTo(name))}
         assertThat(net.get<IdentifiedObject>(obj.mRID), equalTo(obj))
-       //assertThat(obj.numTerminals(), equalTo(1))
     }
 
 
@@ -82,4 +80,25 @@ class NetworkCreatorTest {
         assertThat(pt.getEnd(1)!!.terminal!!.connectivityNode, equalTo(bus1.getTerminal(1)!!.connectivityNode))
         assertThat(pt.getEnd(2)!!.terminal!!.connectivityNode, equalTo(bus2.getTerminal(1)!!.connectivityNode))
     }
+
+    @Test
+    internal fun getAvailablePowerTransformerInfoTest() {
+        val info = net.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV")
+        assertThat(info, instanceOf(PowerTransformerInfo::class.java))
+    }
+
+    @Test
+    internal fun getAvailableWireInfoTest() {
+        val info = net.getAvailableWireInfo("N2XS(FL)2Y 1x300 RM/35 64/110 kV" )
+        assertThat(info, instanceOf(OverheadWireInfo::class.java))
+        assertThat(info.ratedCurrent, equalTo(366))
+    }
+
+    @Test
+    internal fun etAvailablePerLengthSequenceImpedanceTest() {
+        val info = net.getAvailablePerLengthSequenceImpedance("N2XS(FL)2Y 1x300 RM/35 64/110 kV" )
+        assertThat(info, instanceOf(PerLengthSequenceImpedance::class.java))
+        assertThat(info.r, equalTo(0.060/1000))
+    }
+
 }
