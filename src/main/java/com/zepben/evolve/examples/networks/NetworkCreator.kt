@@ -13,13 +13,31 @@ import com.zepben.evolve.cim.iec61968.assetinfo.OverheadWireInfo
 import com.zepben.evolve.cim.iec61968.assetinfo.PowerTransformerInfo
 import com.zepben.evolve.cim.iec61968.assetinfo.WireInfo
 import com.zepben.evolve.cim.iec61968.assets.AssetInfo
-import com.zepben.evolve.cim.iec61970.base.core.BaseVoltage
-import com.zepben.evolve.cim.iec61970.base.core.ConductingEquipment
-import com.zepben.evolve.cim.iec61970.base.core.ConnectivityNode
-import com.zepben.evolve.cim.iec61970.base.core.Terminal
+import com.zepben.evolve.cim.iec61970.base.core.*
+import com.zepben.evolve.cim.iec61970.base.diagramlayout.DiagramObject
+import com.zepben.evolve.cim.iec61970.base.diagramlayout.DiagramObjectStyle
 import com.zepben.evolve.cim.iec61970.base.wires.*
+import com.zepben.evolve.services.diagram.DiagramService
 import com.zepben.evolve.services.network.NetworkService
 
+
+fun NetworkService.createDiagram(): DiagramService{
+    val diagram = DiagramService()
+    val list = this.sequenceOf<ConductingEquipment>()
+    // TODO: Fix the list creation of ConductingEquipments
+    diagram.add(DiagramObject().apply { style = DiagramObjectStyle.USAGE_POINT })
+    list.forEach{
+       val diaObj =  when (it){
+            is Junction -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.JUNCTION}
+            is PowerTransformer -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.DIST_TRANSFORMER}
+            is EnergySource -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.ENERGY_SOURCE}
+            is EnergyConsumer -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.USAGE_POINT}
+            else -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.JUNCTION}
+        }
+        diagram.add(diaObj)
+    }
+    return diagram
+}
 
 fun NetworkService.createBus(bv:  BaseVoltage, init: Junction.() -> Unit): Junction {
     // TODO: Figure out how to add Voltage to Buses - Looks like we need to add topologicalNode to support the relationship to BaseVoltage. Meanwhile using Junction.
