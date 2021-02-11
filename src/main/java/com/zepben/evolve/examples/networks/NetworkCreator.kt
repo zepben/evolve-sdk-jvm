@@ -23,8 +23,7 @@ import com.zepben.evolve.services.network.NetworkService
 
 fun NetworkService.createDiagram(): DiagramService{
     val diagram = DiagramService()
-    val list = this.sequenceOf<ConductingEquipment>()
-    // TODO: Fix the list creation of ConductingEquipments
+    val list = this.listOf<ConductingEquipment>()
     diagram.add(DiagramObject().apply { style = DiagramObjectStyle.USAGE_POINT })
     list.forEach{
        val diaObj =  when (it){

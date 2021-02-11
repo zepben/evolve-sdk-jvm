@@ -59,7 +59,7 @@ class SimpleBusBranchNetwork {
 fun main(){
 
     val net = SimpleBusBranchNetwork().createNetwork()
-    val diag = SimpleBusBranchNetwork().createDiagram()
+    val diag =net.createDiagram()
     val databaseFile = "cim.db"
     val writer = DatabaseWriter(databaseFile)
     val metaData = MetadataCollection().apply { add(DataSource("Zepben", version = "0.1")) }
