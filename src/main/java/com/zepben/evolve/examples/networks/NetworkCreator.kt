@@ -56,6 +56,7 @@ fun NetworkService.createLine(bus1:  Junction, bus2: Junction,
     acls.createTerminals(2,this)
     this.tryAdd(acls)
     acls.connectBuses(bus1, bus2, this)
+    acls.apply{}
     return acls.apply{}
 }
 
