@@ -17,7 +17,8 @@ import org.junit.jupiter.api.Test
 
 
 class SimpleBusBranchTest {
-    val net = SimpleBusBranchNetwork().createNetwork()
+    val net = SimpleBusBranchNetwork().getNetworkService()
+    //TODO: Test for getDiagramService
 
     @Test
     internal fun basicServiceCreated() {

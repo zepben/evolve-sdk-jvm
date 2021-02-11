@@ -11,8 +11,10 @@ package com.zepben.evolve.examples.networks
 import com.zepben.evolve.cim.iec61968.common.Location
 import com.zepben.evolve.cim.iec61968.common.PositionPoint
 import com.zepben.evolve.cim.iec61970.base.core.BaseVoltage
+import com.zepben.evolve.cim.iec61970.base.core.ConductingEquipment
 import com.zepben.evolve.cim.iec61970.base.diagramlayout.DiagramObject
 import com.zepben.evolve.cim.iec61970.base.diagramlayout.DiagramObjectStyle
+import com.zepben.evolve.cim.iec61970.base.wires.*
 import com.zepben.evolve.database.sqlite.DatabaseWriter
 import com.zepben.evolve.services.common.BaseService
 import com.zepben.evolve.services.common.meta.DataSource
@@ -23,7 +25,21 @@ import com.zepben.evolve.services.network.NetworkService
 class SimpleBusBranchNetwork {
     // Create empty network
     val net = NetworkService()
-    fun createNetwork(): NetworkService {
+    val diag = DiagramService()
+
+    init {createNetwork();createDiagram()}
+
+    fun getNetworkService(): NetworkService {return net}
+
+    fun getDiagramService(): DiagramService {return diag}
+
+    fun writeDb(dbpath: String){
+        val writer = DatabaseWriter(dbpath)
+        val metaData = MetadataCollection().apply { add(DataSource("Zepben", version = "0.1")) }
+        writer.save(metaData, listOf(net, diag))
+    }
+
+    private fun createNetwork() {
         // Create buses
         val bvHV = BaseVoltage().apply { nominalVoltage = 20000 }
         val bvLV = BaseVoltage().apply { nominalVoltage = 400 }
@@ -35,9 +51,14 @@ class SimpleBusBranchNetwork {
         val locBus1 = Location().addPoint(PositionPoint(xPosition = 149.12896209173016, yPosition = -35.2782842195893))
         val locBus2 = Location().addPoint(PositionPoint(xPosition = 149.12893605401285, yPosition = -35.278532666462475))
         val locBus3 = Location().addPoint(PositionPoint(xPosition = 149.1286965530321, yPosition = -35.279374652396726))
+
         b1.apply { location = locBus1 }
         b1.apply { location = locBus2 }
         b1.apply { location = locBus3 }
+
+        net.add(locBus1)
+        net.add(locBus2)
+        net.add(locBus3)
 
         // Create bus elements
         net.createEnergySource(bus = b1) { voltageMagnitude = 1.02 * bvHV.nominalVoltage; name = "Grid Connection" }
@@ -48,21 +69,28 @@ class SimpleBusBranchNetwork {
         net.createLine(bus1 = b2, bus2 = b3) {
             length = 100.0; name = "Line"; perLengthSequenceImpedance = net.getAvailablePerLengthSequenceImpedance("NAYY 4x150 SE")
         }
-        return net
     }
 
-    fun createDiagram(): DiagramService {
-        return net.createDiagram()
+    private fun createDiagram(){
+        val list = net.listOf<ConductingEquipment>()
+        diag.add(DiagramObject().apply { style = DiagramObjectStyle.USAGE_POINT })
+        list.forEach{
+            val diaObj =  when (it){
+                is Junction -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.JUNCTION}
+                is PowerTransformer -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.DIST_TRANSFORMER}
+                is EnergySource -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.ENERGY_SOURCE}
+                is EnergyConsumer -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.USAGE_POINT}
+                is AcLineSegment -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.CONDUCTOR_11000}
+                else -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.JUNCTION}
+            }
+            diag.add(diaObj)
+        }
     }
 }
 
 fun main(){
-
-    val net = SimpleBusBranchNetwork().createNetwork()
-    val diag =net.createDiagram()
-    val databaseFile = "cim.db"
-    val writer = DatabaseWriter(databaseFile)
-    val metaData = MetadataCollection().apply { add(DataSource("Zepben", version = "0.1")) }
-    writer.save(metaData, listOf(net, diag))
+    val net = SimpleBusBranchNetwork()
+    net.writeDb("F:\\Data\\ewb\\zepben\\2021-02-11\\2021-02-11-network-model.sqlite")
+    //TODO: Equipments Bus 2, Bus 3, Trafo and ACLines are not appearing in the EWB map.
 }
 
