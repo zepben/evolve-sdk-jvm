@@ -47,35 +47,28 @@ class SimpleBusBranchNetwork {
         net.add(bvHV)
         net.add(bvLV)
         // Create Locations for buses
-        val point1 = PositionPoint(xPosition = 149.12896209173016, yPosition = -35.2782842195893)
-        val point2 = PositionPoint(xPosition = 149.12893605401285, yPosition = -35.278532666462475)
-        val point3 = PositionPoint(xPosition = 149.1286965530321, yPosition = -35.279374652396726)
-        val locBus1 = Location().addPoint(point1)
-        val locBus2 = Location().addPoint(point2)
-        val locBus3 = Location().addPoint(point3)
-        net.add(locBus1)
-        net.add(locBus2)
-        net.add(locBus3)
+        val point1 = PositionPoint(xPosition = 149.12791965570293, yPosition = -35.277592101000934)
+        val point2 = PositionPoint(xPosition =  149.12779472660375, yPosition = -35.278183862759285)
+        val loc1 = Location().addPoint(point1)
+        val loc2 = Location().addPoint(point2)
+        net.add(loc1)
+        net.add(loc2)
         // Create buses
-        val b1 = net.createBus(bvHV) { name = "Bus 1"; location = locBus1}
-        val b2 = net.createBus(bvLV) { name = "Bus 2"; location = locBus2}
-        val b3 = net.createBus(bvLV) { name = "Bus 3"; location = locBus3}
+        val b1 = net.createBus(bvHV) { name = "Bus 1"; location = loc1}
+        val b2 = net.createBus(bvLV) { name = "Bus 2"; location = loc1}
+        val b3 = net.createBus(bvLV) { name = "Bus 3"; location = loc2}
         // Create EnergySource
-        val energySource = net.createEnergySource(bus = b1) { voltageMagnitude = 1.02 * bvHV.nominalVoltage; name = "Grid Connection"; location = locBus1}
+        val energySource = net.createEnergySource(bus = b1) { voltageMagnitude = 1.02 * bvHV.nominalVoltage; name = "Grid Connection"; location = loc1}
         // Create Feeder
         // val fdr = Feeder().apply { normalHeadTerminal = energySource.getTerminal(1)}
         // net.add(fdr)
         // Create Load
-        net.createLoad(bus = b3) { p = 100000.0; q = 50000.0; name = "Load"; location = locBus3}
-        // Create location for the PowerTransformer
-        val locTx = Location().addPoint(PositionPoint(xPosition =  149.128891789997, yPosition =  -35.27844728544802))
-        net.add(locTx)
+        net.createLoad(bus = b3) { p = 100000.0; q = 50000.0; name = "Load"; location = loc2}
         // Create Transformer
         val tx = net.createTransformer(bus1 = b1, bus2 = b2, ptInfo = net.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV"))
-        {name = "Trafo"; location=locTx}
-
+        {name = "Trafo"; location=loc1}
         // Create location for the Line
-        val locLine = Location().addPoint(point2).addPoint(point2)
+        val locLine = Location().addPoint(point1).addPoint(point2)
         net.add(locLine)
         // Create Line
         val line = net.createLine(bus1 = b2, bus2 = b3) {
@@ -90,11 +83,12 @@ class SimpleBusBranchNetwork {
         val di = Diagram().apply { diagramStyle = DiagramStyle.GEOGRAPHIC; numDiagramObjects =1}
         diag.add(di)
         val diagramObject = DiagramObject(mRID = line.mRID + "-do").apply { identifiedObjectMRID = line.mRID; style = DiagramObjectStyle.CONDUCTOR_LV; diagram = di}
+        diagramObject.addPoint(DiagramObjectPoint(xPosition = point1.xPosition, yPosition = point1.yPosition))
         diagramObject.addPoint(DiagramObjectPoint(xPosition = point2.xPosition, yPosition = point2.yPosition))
-        diagramObject.addPoint(DiagramObjectPoint(xPosition = point3.xPosition, yPosition = point3.yPosition))
         line.apply {numDiagramObjects = 1}
         di.addDiagramObject(diagramObject)
         diag.add(diagramObject)
+        addDiagramObjects()
     }
 
     private fun addDiagramObjects(){
