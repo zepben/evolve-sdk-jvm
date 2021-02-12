@@ -78,38 +78,40 @@ class SimpleBusBranchNetwork {
             location = locLine
             baseVoltage = bvLV
         }
-
-        // Create DiagramObject for branch elements
-        val di = Diagram().apply { diagramStyle = DiagramStyle.GEOGRAPHIC; numDiagramObjects =1}
-        diag.add(di)
-        val diagramObject = DiagramObject(mRID = line.mRID + "-do").apply { identifiedObjectMRID = line.mRID; style = DiagramObjectStyle.CONDUCTOR_LV; diagram = di}
-        diagramObject.addPoint(DiagramObjectPoint(xPosition = point1.xPosition, yPosition = point1.yPosition))
-        diagramObject.addPoint(DiagramObjectPoint(xPosition = point2.xPosition, yPosition = point2.yPosition))
-        line.apply {numDiagramObjects = 1}
-        di.addDiagramObject(diagramObject)
-        diag.add(diagramObject)
-        addDiagramObjects()
     }
 
     private fun addDiagramObjects(){
+        val di = Diagram().apply { diagramStyle = DiagramStyle.GEOGRAPHIC; numDiagramObjects =1}
+        diag.add(di)
+        // Add DiagramObject for ConductingEquipments
         val list = net.listOf<ConductingEquipment>()
         diag.add(DiagramObject().apply { style = DiagramObjectStyle.USAGE_POINT })
         list.forEach{
-            val diaObj =  when (it){
+            val diagramObject =  when (it){
+                is AcLineSegment -> addDiagramObjectstoAcLineSegs(it, di)
                 is Junction -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.JUNCTION}
                 is PowerTransformer -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.DIST_TRANSFORMER}
                 is EnergySource -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.ENERGY_SOURCE}
                 is EnergyConsumer -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.USAGE_POINT}
                 else -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.JUNCTION}
             }
-            diag.add(diaObj)
+            di.addDiagramObject(diagramObject)
+            diag.add(diagramObject)
         }
+    }
+    private fun addDiagramObjectstoAcLineSegs(acLineSegment: AcLineSegment, di: Diagram): DiagramObject{
+        // Create DiagramObject for AcLineSegments
+        val diagramObject = DiagramObject(mRID = acLineSegment.mRID + "-do").apply { identifiedObjectMRID = acLineSegment.mRID; style = DiagramObjectStyle.CONDUCTOR_LV; diagram = di}
+        val point1 = acLineSegment.location!!.getPoint(0)!!
+        val point2 = acLineSegment.location!!.getPoint(1)!!
+        diagramObject.addPoint(DiagramObjectPoint(xPosition = point1.xPosition, yPosition = point1.yPosition))
+        diagramObject.addPoint(DiagramObjectPoint(xPosition = point2.xPosition, yPosition = point2.yPosition))
+        return diagramObject
     }
 }
 
 fun main(){
     val net = SimpleBusBranchNetwork()
     net.writeDb("F:\\Data\\ewb\\zepben\\2021-02-11\\2021-02-11-network-model.sqlite")
-    //TODO: Equipments Bus 2, Bus 3, Trafo and ACLines are not appearing in the EWB map.
 }
 
