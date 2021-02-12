@@ -26,18 +26,19 @@ import com.zepben.evolve.services.network.NetworkService
 class SimpleBusBranchNetwork {
     // Create empty network
     val net = NetworkService()
-    val diag = DiagramService()
+    val diagService = DiagramService()
+    val diag = Diagram().apply { diagramStyle = DiagramStyle.GEOGRAPHIC}
 
-    init {createNetwork()}
+    init {createNetwork(); addDiagram()}
 
     fun getNetworkService(): NetworkService {return net}
 
-    fun getDiagramService(): DiagramService {return diag}
+    fun getDiagramService(): DiagramService {return diagService}
 
     fun writeDb(dbpath: String){
         val writer = DatabaseWriter(dbpath)
         val metaData = MetadataCollection().apply { add(DataSource("Zepben", version = "0.1")) }
-        writer.save(metaData, listOf(net, diag))
+        writer.save(metaData, listOf(net, diagService))
     }
 
     private fun createNetwork() {
@@ -80,28 +81,31 @@ class SimpleBusBranchNetwork {
         }
     }
 
+    private fun addDiagram(){
+        diagService.add(diag)
+        addDiagramObjects()
+    }
+
     private fun addDiagramObjects(){
-        val di = Diagram().apply { diagramStyle = DiagramStyle.GEOGRAPHIC; numDiagramObjects =1}
-        diag.add(di)
         // Add DiagramObject for ConductingEquipments
         val list = net.listOf<ConductingEquipment>()
-        diag.add(DiagramObject().apply { style = DiagramObjectStyle.USAGE_POINT })
         list.forEach{
             val diagramObject =  when (it){
-                is AcLineSegment -> addDiagramObjectstoAcLineSegs(it, di)
+                is AcLineSegment -> addDiagramObjectsToAcLineSegments(it)
                 is Junction -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.JUNCTION}
                 is PowerTransformer -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.DIST_TRANSFORMER}
                 is EnergySource -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.ENERGY_SOURCE}
                 is EnergyConsumer -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.USAGE_POINT}
                 else -> DiagramObject().apply {identifiedObjectMRID = it.mRID; style = DiagramObjectStyle.JUNCTION}
             }
-            di.addDiagramObject(diagramObject)
-            diag.add(diagramObject)
+            diagramObject.apply {diagram=diag}
+            diag.addDiagramObject(diagramObject)
+            diagService.add(diagramObject)
         }
     }
-    private fun addDiagramObjectstoAcLineSegs(acLineSegment: AcLineSegment, di: Diagram): DiagramObject{
+    private fun addDiagramObjectsToAcLineSegments(acLineSegment: AcLineSegment): DiagramObject{
         // Create DiagramObject for AcLineSegments
-        val diagramObject = DiagramObject(mRID = acLineSegment.mRID + "-do").apply { identifiedObjectMRID = acLineSegment.mRID; style = DiagramObjectStyle.CONDUCTOR_LV; diagram = di}
+        val diagramObject = DiagramObject(mRID = acLineSegment.mRID + "-do").apply { identifiedObjectMRID = acLineSegment.mRID; style = DiagramObjectStyle.CONDUCTOR_LV; diagram = diagram}
         val point1 = acLineSegment.location!!.getPoint(0)!!
         val point2 = acLineSegment.location!!.getPoint(1)!!
         diagramObject.addPoint(DiagramObjectPoint(xPosition = point1.xPosition, yPosition = point1.yPosition))
