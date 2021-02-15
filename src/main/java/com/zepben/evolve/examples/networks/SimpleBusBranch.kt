@@ -44,7 +44,7 @@ class SimpleBusBranchNetwork {
     private fun createNetwork() {
         // Create BaseVoltages
         val bvHV = BaseVoltage(mRID= "20kV").apply {nominalVoltage = 20000; name = "20kV"}
-        val bvLV = BaseVoltage(mRID= "415V").apply { nominalVoltage = 400; name = "415V"}
+        val bvLV = BaseVoltage(mRID= "415V").apply { nominalVoltage = 3000; name = "415V"}
         net.add(bvHV)
         net.add(bvLV)
         // Create Locations for buses
@@ -60,19 +60,20 @@ class SimpleBusBranchNetwork {
         val b3 = net.createBus(bvLV) { name = "Bus 3"; location = loc2}
         // Create EnergySource
         val energySource = net.createEnergySource(bus = b1) { voltageMagnitude = 1.02 * bvHV.nominalVoltage; name = "Grid Connection"; location = loc1}
+        // TODO: Replace  createEnergySource with creation of EquivalentInjection
         // Create Feeder
-        // val fdr = Feeder().apply { normalHeadTerminal = energySource.getTerminal(1)}
-        // net.add(fdr)
+        val fdr = Feeder().apply { normalHeadTerminal = energySource.getTerminal(1)}
+        net.add(fdr)
         // Create Load
         net.createLoad(bus = b3) { p = 100000.0; q = 50000.0; name = "Load"; location = loc2}
         // Create Transformer
-        val tx = net.createTransformer(bus1 = b1, bus2 = b2, ptInfo = net.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV"))
+        net.createTransformer(bus1 = b1, bus2 = b2, ptInfo = net.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV"))
         {name = "Trafo"; location=loc1}
         // Create location for the Line
         val locLine = Location().addPoint(point1).addPoint(point2)
         net.add(locLine)
         // Create Line
-        val line = net.createLine(bus1 = b2, bus2 = b3) {
+        net.createLine(bus1 = b2, bus2 = b3) {
             length = 100.0;
             name = "Line";
             perLengthSequenceImpedance = net.getAvailablePerLengthSequenceImpedance("NAYY 4x150 SE")
@@ -84,6 +85,7 @@ class SimpleBusBranchNetwork {
     private fun addDiagram(){
         diagService.add(diag)
         addDiagramObjects()
+        //TODO: In ?voltages geo view the acls does not appear.
     }
 
     private fun addDiagramObjects(){

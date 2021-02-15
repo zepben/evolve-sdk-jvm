@@ -37,7 +37,7 @@ fun NetworkService.createConnectivityNode(init: ConnectivityNode.()-> Unit): Con
 fun NetworkService.createTransformer(bus1: Junction, bus2: Junction, numEnds: Int = 2, ptInfo: PowerTransformerInfo?, init: PowerTransformer.() -> Unit): PowerTransformer{
     val pt = PowerTransformer().apply(init)
     this.add(pt)
-    pt.createTerminals(numEnds, this)
+    createTerminals(numEnds, pt)
     pt.connectBuses(bus1, bus2, this)
     for (i in 1..numEnds) {
         val end = PowerTransformerEnd().apply {powerTransformer = pt}
@@ -53,7 +53,7 @@ fun NetworkService.createTransformer(bus1: Junction, bus2: Junction, numEnds: In
 fun NetworkService.createLine(bus1:  Junction, bus2: Junction,
                               init: AcLineSegment.() -> Unit): AcLineSegment{
     val acls = AcLineSegment().apply(init)
-    acls.createTerminals(2,this)
+    createTerminals(2,acls)
     this.tryAdd(acls)
     acls.connectBuses(bus1, bus2, this)
     acls.apply{}
@@ -62,17 +62,9 @@ fun NetworkService.createLine(bus1:  Junction, bus2: Junction,
 
 fun NetworkService.createBreaker(bus1: Junction, bus2: Junction, init: Breaker.() -> Unit): Breaker {
     val breaker = Breaker().apply(init)
-    breaker.createTerminals(2,this)
+    createTerminals(2,breaker)
     this.tryAdd(breaker)
     breaker.connectBuses(bus1, bus2, this)
-    return breaker
-}
-
-fun NetworkService.createBreaker(bus: Junction, line: AcLineSegment, init: Breaker.() -> Unit): Breaker {
-    val breaker = Breaker().apply(init)
-    breaker.createTerminals(2,this)
-    this.tryAdd(breaker)
-    breaker.connectBusToLine(bus,line, this)
     return breaker
 }
 
@@ -85,7 +77,6 @@ private fun ConductingEquipment.connectBuses(bus1: Junction, bus2: Junction, net
     net.connect(this.getTerminal(1)!!, bus1.getTerminal(1)!!)
     net.connect(this.getTerminal(2)!!, bus2.getTerminal(1)!!)
 }
-
 
 
 fun NetworkService.getAvailableWireInfo(mrid: String): OverheadWireInfo
@@ -130,18 +121,19 @@ fun NetworkService.getAvailablePerLengthSequenceImpedance(mrid: String): PerLeng
 }
 
 private fun <T : ConductingEquipment> NetworkService.create(creator: () -> T, bus: Junction, numTerminals: Int = 1, init: T.() -> Unit): T {
-    val obj = creator().apply { createTerminals(numTerminals, NetworkService()) }.apply(init)
-    this.tryAdd(obj)
+    val obj = creator().apply(init)
+    this.createTerminals(numTerminals, obj)
     this.connect(obj.getTerminal(1)!!, bus.getTerminal(1)!!)
     return obj
     }
 
-private fun ConductingEquipment.createTerminals(num: Int, net: NetworkService) {
+private fun NetworkService.createTerminals(num: Int, ce: ConductingEquipment) {
     for (i in 1..num) {
     val terminal = Terminal()
-    net.tryAdd(terminal)
-    terminal.conductingEquipment = this
-    addTerminal(terminal)
+    this.tryAdd(terminal)
+    terminal.conductingEquipment = ce
+    ce.addTerminal(terminal)
+    this.tryAdd(ce)
     }
 }
 

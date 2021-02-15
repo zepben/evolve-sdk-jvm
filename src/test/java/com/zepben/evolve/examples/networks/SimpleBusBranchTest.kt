@@ -47,5 +47,6 @@ class SimpleBusBranchTest {
         assertThat(net.setOf<EnergyConsumer>().size, equalTo(1))
         assertThat(net.setOf<BaseVoltage>().size, equalTo(2))
         assertThat(net.setOf<ConnectivityNode>().size, equalTo(3))
+        assertThat(net.setOf<Terminal>().size, equalTo(9))
     }
 }
