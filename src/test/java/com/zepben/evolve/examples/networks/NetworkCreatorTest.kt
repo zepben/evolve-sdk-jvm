@@ -29,8 +29,8 @@ class NetworkCreatorTest {
 
 
     @Test
-    internal fun  createLoadTest(){
-        val expected = net.createLoad(bus1){ p = 1.0; q = 1.0}
+    internal fun  createEnergyConsumerTest(){
+        val expected = net.createEnergyConsumer(bus1){ p = 1.0; q = 1.0}
         val result = net.get<EnergyConsumer>(expected.mRID)
         assertThat(result, equalTo(expected))
         assertThat(result!!.numTerminals(), equalTo(1))

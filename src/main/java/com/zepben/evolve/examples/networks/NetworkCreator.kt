@@ -28,7 +28,7 @@ fun NetworkService.createBus(bv:  BaseVoltage, init: Junction.() -> Unit): Junct
 }
 
 fun NetworkService.createEnergySource(bus: Junction, init: EnergySource.() -> Unit): EnergySource = create(::EnergySource, bus, numTerminals = 1,  init)
-fun NetworkService.createLoad(bus: Junction, init: EnergyConsumer.() -> Unit): EnergyConsumer = create(::EnergyConsumer, bus, numTerminals = 1, init)
+fun NetworkService.createEnergyConsumer(bus: Junction, init: EnergyConsumer.() -> Unit): EnergyConsumer = create(::EnergyConsumer, bus, numTerminals = 1, init)
 fun NetworkService.createConnectivityNode(init: ConnectivityNode.()-> Unit): ConnectivityNode{
     val cn = ConnectivityNode().apply(init)
     this.add(cn)

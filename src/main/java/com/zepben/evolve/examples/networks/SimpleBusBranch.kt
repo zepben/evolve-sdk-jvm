@@ -65,7 +65,7 @@ class SimpleBusBranchNetwork {
         val fdr = Feeder().apply { normalHeadTerminal = energySource.getTerminal(1)}
         net.add(fdr)
         // Create Load
-        net.createLoad(bus = b3) { p = 100000.0; q = 50000.0; name = "Load"; location = loc2}
+        net.createEnergyConsumer(bus = b3) { p = 100000.0; q = 50000.0; name = "Load"; location = loc2}
         // Create Transformer
         net.createTransformer(bus1 = b1, bus2 = b2, ptInfo = net.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV"))
         {name = "Trafo"; location=loc1}
