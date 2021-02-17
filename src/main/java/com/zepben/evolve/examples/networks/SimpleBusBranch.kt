@@ -67,7 +67,7 @@ class SimpleBusBranchNetwork {
         // Create EnergyConsumer
         net.createEnergyConsumer(bus = b3) { p = 100000.0; q = 50000.0; name = "Load"; location = loc2}
         // Create Transformer
-        net.createTransformer(bus1 = b1, bus2 = b2, ptInfo = net.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV"))
+        net.createTwoWindingTransformer(bus1 = b1, bus2 = b2, ptInfo = net.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV"))
         {name = "Trafo"; location=loc1}
         // Create location for the Line
         val locLine = Location().addPoint(point1).addPoint(point2)

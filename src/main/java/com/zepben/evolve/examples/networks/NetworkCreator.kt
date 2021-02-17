@@ -34,7 +34,7 @@ fun NetworkService.createConnectivityNode(init: ConnectivityNode.()-> Unit): Con
     this.add(cn)
     return cn
 }
-fun NetworkService.createTransformer(bus1: Junction, bus2: Junction, numEnds: Int = 2, ptInfo: PowerTransformerInfo?, init: PowerTransformer.() -> Unit): PowerTransformer{
+fun NetworkService.createTwoWindingTransformer(bus1: Junction, bus2: Junction, numEnds: Int = 2, ptInfo: PowerTransformerInfo?, init: PowerTransformer.() -> Unit): PowerTransformer{
     val pt = PowerTransformer().apply(init)
     this.add(pt)
     createTerminals(numEnds, pt)
@@ -46,7 +46,7 @@ fun NetworkService.createTransformer(bus1: Junction, bus2: Junction, numEnds: In
         end.terminal = pt.getTerminal(i)
         // TODO: How to associated PowerTrandformerEndInfo to a PowerTranformerInfo?
     }
-    pt.apply{assetInfo = ptInfo }
+    pt.apply{assetInfo = ptInfo}
     return pt
 }
 
