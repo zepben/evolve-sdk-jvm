@@ -25,58 +25,58 @@ import com.zepben.evolve.services.network.NetworkService
 
 class SimpleBusBranchNetwork {
     // Create empty network
-    val net = NetworkService()
+    val networkService = NetworkService()
     val diagService = DiagramService()
     val diag = Diagram().apply { diagramStyle = DiagramStyle.GEOGRAPHIC}
 
     init {createNetwork(); addDiagram()}
 
-    fun getNetworkService(): NetworkService {return net}
+    fun getNetwork(): NetworkService {return networkService}
 
     fun getDiagramService(): DiagramService {return diagService}
 
     fun writeDb(dbpath: String){
         val writer = DatabaseWriter(dbpath)
         val metaData = MetadataCollection().apply { add(DataSource("Zepben", version = "0.1")) }
-        writer.save(metaData, listOf(net, diagService))
+        writer.save(metaData, listOf(networkService, diagService))
     }
 
     private fun createNetwork() {
         // Create BaseVoltages
         val bvHV = BaseVoltage(mRID= "20kV").apply {nominalVoltage = 20000; name = "20kV"}
         val bvLV = BaseVoltage(mRID= "415V").apply { nominalVoltage = 3000; name = "415V"}
-        net.add(bvHV)
-        net.add(bvLV)
+        networkService.add(bvHV)
+        networkService.add(bvLV)
         // Create Locations for buses
         val point1 = PositionPoint(xPosition = 149.12791965570293, yPosition = -35.277592101000934)
         val point2 = PositionPoint(xPosition =  149.12779472660375, yPosition = -35.278183862759285)
         val loc1 = Location().addPoint(point1)
         val loc2 = Location().addPoint(point2)
-        net.add(loc1)
-        net.add(loc2)
+        networkService.add(loc1)
+        networkService.add(loc2)
         // Create buses
-        val b1 = net.createBus(bvHV) { name = "Bus 1"; location = loc1}
-        val b2 = net.createBus(bvLV) { name = "Bus 2"; location = loc1}
-        val b3 = net.createBus(bvLV) { name = "Bus 3"; location = loc2}
+        val b1 = networkService.createBus(bvHV) { name = "Bus 1"; location = loc1}
+        val b2 = networkService.createBus(bvLV) { name = "Bus 2"; location = loc1}
+        val b3 = networkService.createBus(bvLV) { name = "Bus 3"; location = loc2}
         // Create EnergySource
-        val energySource = net.createEnergySource(bus = b1) { voltageMagnitude = 1.02 * bvHV.nominalVoltage; name = "Grid Connection"; location = loc1}
+        val energySource = networkService.createEnergySource(bus = b1) { voltageMagnitude = 1.02 * bvHV.nominalVoltage; name = "Grid Connection"; location = loc1}
         // TODO: Replace  createEnergySource with creation of EquivalentInjection
         // Create Feeder
         val fdr = Feeder().apply { normalHeadTerminal = energySource.getTerminal(1)}
-        net.add(fdr)
+        networkService.add(fdr)
         // Create EnergyConsumer
-        net.createEnergyConsumer(bus = b3) { p = 100000.0; q = 50000.0; name = "Load"; location = loc2}
+        networkService.createEnergyConsumer(bus = b3) { p = 100000.0; q = 50000.0; name = "Load"; location = loc2}
         // Create Transformer
-        net.createTwoWindingTransformer(bus1 = b1, bus2 = b2, ptInfo = net.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV"))
+        networkService.createTwoWindingTransformer(bus1 = b1, bus2 = b2, ptInfo = networkService.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV"))
         {name = "Trafo"; location=loc1}
         // Create location for the Line
         val locLine = Location().addPoint(point1).addPoint(point2)
-        net.add(locLine)
+        networkService.add(locLine)
         // Create Line
-        net.createLine(bus1 = b2, bus2 = b3) {
+        networkService.createLine(bus1 = b2, bus2 = b3) {
             length = 100.0;
             name = "Line";
-            perLengthSequenceImpedance = net.getAvailablePerLengthSequenceImpedance("NAYY 4x150 SE")
+            perLengthSequenceImpedance = networkService.getAvailablePerLengthSequenceImpedance("NAYY 4x150 SE")
             location = locLine
             baseVoltage = bvLV
         }
@@ -90,7 +90,7 @@ class SimpleBusBranchNetwork {
 
     private fun addDiagramObjects(){
         // Add DiagramObject for ConductingEquipments
-        val list = net.listOf<ConductingEquipment>()
+        val list = networkService.listOf<ConductingEquipment>()
         list.forEach{
             val diagramObject =  when (it){
                 is AcLineSegment -> addDiagramObjectsToAcLineSegments(it)
@@ -117,7 +117,6 @@ class SimpleBusBranchNetwork {
 }
 
 fun main(){
-    val net = SimpleBusBranchNetwork()
-    net.writeDb("F:\\Data\\ewb\\zepben\\2021-02-11\\2021-02-11-network-model.sqlite")
+    SimpleBusBranchNetwork().writeDb("F:\\Data\\ewb\\zepben\\2021-02-11\\2021-02-11-network-model.sqlite")
 }
 

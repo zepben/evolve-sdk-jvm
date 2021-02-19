@@ -8,8 +8,13 @@
 
 package com.zepben.evolve.examples.networks
 import com.zepben.evolve.cim.iec61970.base.core.*
+import com.zepben.evolve.cim.iec61970.base.diagramlayout.Diagram
+import com.zepben.evolve.cim.iec61970.base.diagramlayout.DiagramObject
 import com.zepben.evolve.cim.iec61970.base.wires.*
 import com.zepben.evolve.services.common.BaseService
+import com.zepben.evolve.services.diagram.DiagramService
+import com.zepben.evolve.services.network.NetworkService
+import com.zepben.evolve.services.network.tracing.traversals.BasicTraversalTest
 import org.hamcrest.CoreMatchers.*
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
@@ -17,36 +22,43 @@ import org.junit.jupiter.api.Test
 
 
 class SimpleBusBranchTest {
-    val net = SimpleBusBranchNetwork().getNetworkService()
-    //TODO: Test for getDiagramService
+    val networkService = SimpleBusBranchNetwork().getNetwork()
+    val diagramService = SimpleBusBranchNetwork().getDiagramService()
 
     @Test
-    internal fun basicServiceCreated() {
-        assertThat(net, instanceOf(BaseService::class.java))
+    internal fun basicServicesCreated() {
+        assertThat(networkService, instanceOf(BaseService::class.java))
+        assertThat(diagramService, instanceOf(BaseService::class.java))
     }
 
     @Test
     internal fun notNullObjects() {
-        assertThat(net.setOf<IdentifiedObject>(), notNullValue())
-        assertThat(net.setOf<ConnectivityNode>(), notNullValue())
-        assertThat(net.setOf<ConductingEquipment>(), notNullValue())
-        assertThat(net.setOf<Terminal>(), notNullValue())
-        assertThat(net.setOf<Junction>(), notNullValue())
-        assertThat(net.setOf<PowerTransformer>(), notNullValue())
-        assertThat(net.setOf<AcLineSegment>(), notNullValue())
-        assertThat(net.setOf<EnergySource>(), notNullValue())
-        assertThat(net.setOf<EnergyConsumer>(), notNullValue())
-        assertThat(net.setOf<BaseVoltage>(), notNullValue())
+        assertThat(networkService.setOf<IdentifiedObject>(), notNullValue())
+        assertThat(networkService.setOf<ConnectivityNode>(), notNullValue())
+        assertThat(networkService.setOf<ConductingEquipment>(), notNullValue())
+        assertThat(networkService.setOf<Terminal>(), notNullValue())
+        assertThat(networkService.setOf<Junction>(), notNullValue())
+        assertThat(networkService.setOf<PowerTransformer>(), notNullValue())
+        assertThat(networkService.setOf<AcLineSegment>(), notNullValue())
+        assertThat(networkService.setOf<EnergySource>(), notNullValue())
+        assertThat(networkService.setOf<EnergyConsumer>(), notNullValue())
+        assertThat(networkService.setOf<BaseVoltage>(), notNullValue())
     }
     @Test
     internal fun numberOfObject(){
-        assertThat(net.setOf<PowerTransformer>().size, equalTo(1))
-        assertThat(net.setOf<AcLineSegment>().size, equalTo(1))
-        assertThat(net.setOf<Junction>().size, equalTo(3))
-        assertThat(net.setOf<EnergySource>().size, equalTo(1))
-        assertThat(net.setOf<EnergyConsumer>().size, equalTo(1))
-        assertThat(net.setOf<BaseVoltage>().size, equalTo(2))
-        assertThat(net.setOf<ConnectivityNode>().size, equalTo(3))
-        assertThat(net.setOf<Terminal>().size, equalTo(9))
+        assertThat(networkService.setOf<PowerTransformer>().size, equalTo(1))
+        assertThat(networkService.setOf<AcLineSegment>().size, equalTo(1))
+        assertThat(networkService.setOf<Junction>().size, equalTo(3))
+        assertThat(networkService.setOf<EnergySource>().size, equalTo(1))
+        assertThat(networkService.setOf<EnergyConsumer>().size, equalTo(1))
+        assertThat(networkService.setOf<BaseVoltage>().size, equalTo(2))
+        assertThat(networkService.setOf<ConnectivityNode>().size, equalTo(3))
+        assertThat(networkService.setOf<Terminal>().size, equalTo(9))
+    }
+
+    @Test
+    internal fun createDiagramServiceTest(){
+        assertThat(diagramService.setOf<DiagramObject>().size, equalTo(7))
+        assertThat(diagramService.setOf<Diagram>().size, equalTo(1))
     }
 }
