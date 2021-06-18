@@ -1,0 +1,217 @@
+---
+id: geojson-spec
+title: GeoJSON Specification
+---
+
+## GeoJSON Specification
+
+Below is a full Specification for a collection of GeoJSON features as supported by the evolve SDK, followed by property specifications for each type
+supported by the evolve SDK.
+
+Types for each field are described in line, either as a comment or as part of the field. Note some fields may only have specific values and these will also
+be listed alongside the expected type.
+
+Nullable fields can be excluded. Non-nullable fields must always be specified unless they have a specified default, in which case a missing field or null will
+result in the default being used.
+
+Fields containing IDs or lists of IDs should refer to features defined elsewhere in the GeoJSON, which should be of the indicated type. The resulting CIM
+objects will be linked during deserialisation of the GeoJSON.
+
+```
+
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "id": "string",
+            "geometry": null | {
+                "type": "string: Point | LineString",
+                "coordinates": [
+                    0.0,  // longitude TODO: check order
+                    0.0   // latitude
+                ]
+            },
+            "properties": {
+                "class": "string (see below sections for possible values)",
+                "name": "string",
+                "description": "string",
+                "numDiagramObjects": 0, // int
+                "names": [
+                    {
+                        "name": "string",
+                        "type": "string"
+                    },
+
+                    // ...
+                ],
+
+                // other type specific properties. See below specifications for each type for eligible fields.
+            }
+        },
+
+        // ...
+    ]
+}
+```
+
+## Type specific properties
+
+Each supported type has its own set of properties that can be specified alongside the existing fields defined above in the `properties` object. These
+properties are described below with examples.
+
+### CableInfo and OverheadWireInfo
+
+```
+{
+    "properties": {
+        // ...
+        "class": "string: CableInfo | OverheadWireInfo",
+        "ratedCurrent": null | int,
+        "material": null | "string: UNKNOWN (default) | aaac | acsr | acsrAz | aluminum | aluminumAlloy | aluminumAlloySteel | aluminumSteel | copper | copperCadmium | other | steel",
+    }
+}
+```
+
+### AcLineSegment
+
+```
+    "properties": {
+        "class": "AcLineSegment",
+        "inService": null | bool (default true),
+        "normallyInService": null | bool (default true),
+        "equipmentContainerIds": [ "string", /* ... */ ],
+        "usagePointIds": [ "string", /* ... */ ],
+        "operationalRestrictionIds": [ "string", /* ... */ ],
+        "currentFeederIds": [ "string", /* ... */ ],
+        "nominalVoltage": null | int,
+        "length": null | double (default 0.0),
+        "phases": null | "string: A | B | C | AN | BN | CN | AB | AC | BC | XN | YN | ABC | ABN | ACN | BCN | ABCN | X | Y | XY | XYN" (default: ABC)
+        "assetInfoId": null | "string",
+        "fromConductingEquipment": "string",
+        "toConductingEquipment": "string",
+        "perLengthSequenceImpedanceId": "string"
+    }
+
+```
+
+### PerLengthSequenceImpedance
+
+```
+    "properties": {
+        "class": "PerLengthSequenceImpedance",
+        "r": null | double,
+        "x": null | double,
+        "r0": null | double,
+        "x0": null | double,
+        "bch": null | double,
+        "gch": null | double,
+        "b0ch": null | double,
+        "g0ch": null | double
+    }
+
+```
+
+### PowerTransformer
+
+```
+    "properties": {
+        "class": "PowerTransformer",
+        "inService": null | bool (default true),
+        "normallyInService": null | bool (default true),
+        "equipmentContainerIds": [ "string", /* ... */ ],
+        "usagePointIds": [ "string", /* ... */ ],
+        "operationalRestrictionIds": [ "string", /* ... */ ],
+        "currentFeederIds": [ "string", /* ... */ ],
+        "nominalVoltage": null | int,
+        "assetInfoId": null | "string",
+        "vectorGroup": null | "string: UNKNOWN | (see VectorGroup enum below)",
+        "transformerUtilisation": null | double,
+        "ends": null | [
+            {
+                "id": null | "string",
+                "name": "string",
+                "description": "string",
+                "names": [
+                    {
+                        "name": "string",
+                        "type": "string"
+                    },
+                    // ...
+                ],
+                "endNumber": int,
+                "grounded": boolean (default false),
+                "rGround": null | double,
+                "xGround": null | double,
+                "ratedS": null | int,
+                "ratedU": null | int,
+                "connectionKind": null | "string: UNKNOWN_WINDING (default) | D | Y | Z | Yn | Zn | A | I",
+                "phaseAngleClock": null | int,
+                "r": null | double,
+                "x": null | double,
+                "r0": null | double,
+                "x0": null | double,
+                "b": null | double,
+                "b0": null | double,
+                "g": null | double,
+                "g0": null | double,
+            },
+            // ...
+        ]
+    }
+```
+
+
+#### VectorGroup
+
+Vector group of the transformer for protective relaying, e.g., Dyn1. For unbalanced transformers, this may not be simply
+determined from the constituent winding connections and phase angle displacements.
+
+The vectorGroup string consists of the following components in the order listed: high voltage winding connection, mid
+voltage winding connection(for three winding transformers), phase displacement clock number from 0 to 11,  low voltage
+winding connection phase displacement clock number from 0 to 11.   The winding connections are D(delta), Y(wye),
+YN(wye with neutral), Z(zigzag), ZN(zigzag with neutral), A(auto transformer). Upper case means the high voltage,
+lower case mid or low.The high voltage winding always has clock position 0 and is not included in the vector group
+string.  Some examples: YNy0(two winding wye to wye with no phase displacement), YNd11(two winding wye to delta with
+330 degrees phase displacement), YNyn0d5(three winding transformer wye with neutral high voltage, wye with neutral mid
+voltage and no phase displacement, delta low voltage with 150 degrees displacement).
+
+Phase displacement is defined as the angular difference between the phasors representing the voltages between the
+neutral point(real or imaginary) and the corresponding terminals of two windings, a positive sequence voltage system
+being applied to the high-voltage terminals, following each other in alphabetical sequence if they are lettered, or in
+numerical sequence if they are numbered: the phasors are assumed to rotate in a counter-clockwise sense.
+
+Valid values are:
+
+```
+UNKNOWN, DD0, DZ0, DZN0, YNY0, YNYN0, YY0, YYN0, ZD0, ZND0, DYN1, DZ1, DZN1, YD1, YND1, YNZN1, YZ1, YZN1, ZD1, ZND1, ZNYN1, ZY1, ZYN1, DY5, DYN5, YD5, YND5,
+YNZ5, YNZN5, YZ5, YZN5, ZNY5, ZNYN5, ZY5, ZYN5, DD6, DZ6, DZN6, YNY6, YNYN6, YY6, YYN6, ZD6, ZND6, DY7, DYN7, DZ7, DZN7, YD7, YND7, YNZN7, YZ7, YZN7, ZD7, ZND7,
+ZNYN7, ZY7, ZYN7, DY11, DYN11, YD11, YND11, YNZ11, YNZN11, YZ11, YZN11, ZNY11, ZNYN11, ZY11, ZYN11, DY1, Y0, YN0, D0, ZNY1, ZNY7, DDN0, DND0, DNYN1, DNYN11,
+YNDN1, YNDN11, TTN11
+```
+
+### Breaker, Disconnector, Fuse, Jumper, LoadBreakSwitch, Recloser
+
+```
+    "properties": {
+        "class": "Breaker | Disconnector | Fuse | Jumper | LoadBreakSwitch | Recloser",
+        "inService": null | bool (default true),
+        "normallyInService": null | bool (default true),
+        "equipmentContainerIds": [ "string", /* ... */ ],
+        "usagePointIds": [ "string", /* ... */ ],
+        "operationalRestrictionIds": [ "string", /* ... */ ],
+        "currentFeederIds": [ "string", /* ... */ ],
+        "nominalVoltage": null | int,
+        "assetInfoId": null | "string",
+        "normallyOpen": null | bool (default false),
+        "open": null | bool (default false),
+    }
+```
+
+
+## How things are mapped
+
+### BaseVoltage
+
+Any nominalVoltage property on a given ConductingEquipment class will cause a BaseVoltage with an id of the form "{voltage}-bv" to be created and added to the
+NetworkService, and the ConductingEquipment will have its corresponding baseVoltage assigned to the created BaseVoltage.
