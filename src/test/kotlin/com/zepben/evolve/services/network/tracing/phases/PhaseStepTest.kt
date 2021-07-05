@@ -7,7 +7,7 @@
  */
 package com.zepben.evolve.services.network.tracing.phases
 
-import com.nhaarman.mockitokotlin2.mock
+import org.mockito.kotlin.mock
 import com.zepben.evolve.cim.iec61970.base.core.ConductingEquipment
 import com.zepben.evolve.cim.iec61970.base.wires.SinglePhaseKind.*
 import com.zepben.testutils.junit.SystemLogExtension

@@ -8,7 +8,7 @@
 
 package com.zepben.evolve.cim.iec61968.assetinfo
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.zepben.evolve.cim.iec61970.base.wires.TransformerStarImpedance
 import com.zepben.evolve.cim.iec61970.base.wires.WindingConnection
 import com.zepben.evolve.services.network.NetworkService

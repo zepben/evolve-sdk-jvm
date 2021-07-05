@@ -7,7 +7,7 @@
  */
 package com.zepben.evolve.streaming.get
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.zepben.evolve.cim.iec61968.assetinfo.CableInfo
 import com.zepben.evolve.cim.iec61968.assetinfo.OverheadWireInfo
 import com.zepben.evolve.cim.iec61968.common.Location

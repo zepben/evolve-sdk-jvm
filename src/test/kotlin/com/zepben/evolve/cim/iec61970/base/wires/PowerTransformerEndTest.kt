@@ -7,7 +7,7 @@
  */
 package com.zepben.evolve.cim.iec61970.base.wires
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.zepben.evolve.cim.iec61968.assetinfo.PowerTransformerInfo
 import com.zepben.evolve.services.common.extensions.typeNameAndMRID
 import com.zepben.evolve.services.network.NetworkService

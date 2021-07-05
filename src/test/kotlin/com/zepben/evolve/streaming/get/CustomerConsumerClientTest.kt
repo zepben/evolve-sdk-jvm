@@ -7,10 +7,10 @@
  */
 package com.zepben.evolve.streaming.get
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.spy
-import com.nhaarman.mockitokotlin2.verify
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.verify
 import com.zepben.evolve.cim.iec61968.customers.Customer
 import com.zepben.evolve.cim.iec61968.customers.CustomerAgreement
 import com.zepben.evolve.streaming.get.ConsumerUtils.buildFromBuilder
