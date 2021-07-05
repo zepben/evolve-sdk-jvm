@@ -8,7 +8,6 @@
 
 package com.zepben.evolve.services.common.translator
 
-import com.zepben.evolve.cim.geojson.Feature
 import com.zepben.evolve.cim.iec61970.base.core.IdentifiedObject
 import com.zepben.evolve.cim.iec61970.base.core.Name
 import com.zepben.evolve.cim.iec61970.base.core.NameType

@@ -17,6 +17,8 @@ import com.zepben.evolve.cim.iec61968.common.Location
 import com.zepben.evolve.cim.iec61968.common.PositionPoint
 import com.zepben.evolve.cim.iec61970.base.core.*
 import com.zepben.evolve.cim.iec61970.base.wires.*
+import com.zepben.evolve.cim.iec61970.infiec61970.feeder.Circuit
+import com.zepben.evolve.cim.iec61970.infiec61970.feeder.Loop
 import com.zepben.evolve.services.common.Resolvers
 import com.zepben.evolve.services.common.translator.MissingPropertyException
 import com.zepben.evolve.services.common.translator.identifiedObjectToCim
@@ -122,6 +124,11 @@ fun conductingEquipmentToCim(feature: Feature, cim: ConductingEquipment, network
     }
 
 
+fun connectivityNodeContainerToCim(feature: Feature, cim: ConnectivityNodeContainer, networkService: NetworkService): ConnectivityNodeContainer =
+    cim.apply {
+        powerSystemResourceToCim(feature, cim, networkService)
+    }
+
 fun equipmentToCim(feature: Feature, cim: Equipment, networkService: NetworkService): Equipment =
     cim.apply {
         inService = feature.getBoolean("inService") ?: true
@@ -146,6 +153,26 @@ fun equipmentToCim(feature: Feature, cim: Equipment, networkService: NetworkServ
         powerSystemResourceToCim(feature, this, networkService)
     }
 
+fun equipmentContainerToCim(feature: Feature, cim: EquipmentContainer, networkService: NetworkService): EquipmentContainer =
+    cim.apply {
+        connectivityNodeContainerToCim(feature, cim, networkService)
+    }
+
+fun feederToCim(feature: Feature, networkService: NetworkService, headEquipment: MutableMap<String, String>): Feeder =
+    Feeder(feature.id).apply {
+        headEquipment[feature.id] = feature.getString("normalHeadEquipmentId") ?: throw MissingPropertyException("normalHeadEquipmentId")
+        networkService.resolveOrDeferReference(Resolvers.normalEnergizingSubstation(this), feature.getString("normalEnergizingSubstationId"))
+
+        equipmentContainerToCim(feature, this, networkService)
+    }
+
+fun geographicalRegionToCim(feature: Feature, networkService: NetworkService): GeographicalRegion =
+    GeographicalRegion(feature.id).apply {
+        feature.getStringList("subGeographicalRegionIds")?.forEach { subGeographicalRegionMRID ->
+            networkService.resolveOrDeferReference(Resolvers.subGeographicalRegions(this), subGeographicalRegionMRID)
+        }
+        identifiedObjectToCim(feature.properties, this, networkService)
+    }
 
 fun powerSystemResourceToCim(feature: Feature, cim: PowerSystemResource, networkService: NetworkService): PowerSystemResource =
     cim.apply {
@@ -154,6 +181,42 @@ fun powerSystemResourceToCim(feature: Feature, cim: PowerSystemResource, network
         location = locationToCim(networkService, feature.id, geometryToCim(feature.geometry))
 
         identifiedObjectToCim(feature.properties, this, networkService)
+    }
+
+fun siteToCim(feature: Feature, networkService: NetworkService): Site =
+    Site(feature.id).apply {
+        equipmentContainerToCim(feature, this, networkService)
+    }
+
+fun subGeographicalRegionToCim(feature: Feature, networkService: NetworkService): SubGeographicalRegion =
+    SubGeographicalRegion(feature.id).apply {
+        networkService.resolveOrDeferReference(Resolvers.geographicalRegion(this), feature.getString("geographicalRegionId"))
+
+        feature.getStringList("substationIds")?.forEach { substationMRID ->
+            networkService.resolveOrDeferReference(Resolvers.substations(this), substationMRID)
+        }
+
+        identifiedObjectToCim(feature.properties, this, networkService)
+    }
+
+fun substationToCim(feature: Feature, networkService: NetworkService): Substation =
+    Substation(feature.id).apply {
+        networkService.resolveOrDeferReference(Resolvers.subGeographicalRegion(this), feature.getString("subGeographicalRegionId"))
+
+        feature.getStringList("normalEnergizedFeederIds")?.forEach { normalEnergizedFeederMRID ->
+            networkService.resolveOrDeferReference(Resolvers.normalEnergizingFeeders(this), normalEnergizedFeederMRID)
+        }
+        feature.getStringList("loopIds")?.forEach { loopMRID ->
+            networkService.resolveOrDeferReference(Resolvers.loops(this), loopMRID)
+        }
+        feature.getStringList("normalEnergizedLoopIds")?.forEach { normalEnergizedLoopMRID ->
+            networkService.resolveOrDeferReference(Resolvers.normalEnergizedLoops(this), normalEnergizedLoopMRID)
+        }
+        feature.getStringList("circuitIds")?.forEach { circuitMRID ->
+            networkService.resolveOrDeferReference(Resolvers.circuits(this), circuitMRID)
+        }
+
+        equipmentContainerToCim(feature, this, networkService)
     }
 
 /************ IEC61970 WIRES ************/
@@ -196,6 +259,11 @@ fun fuseToCim(feature: Feature, networkService: NetworkService): Fuse =
 fun jumperToCim(feature: Feature, networkService: NetworkService): Jumper =
     Jumper(feature.id).apply {
         switchToCim(feature, this, networkService)
+    }
+
+fun lineToCim(feature: Feature, cim: Line, networkService: NetworkService): Line =
+    cim.apply {
+        equipmentContainerToCim(feature, this, networkService)
     }
 
 fun loadBreakSwitchToCim(feature: Feature, networkService: NetworkService): LoadBreakSwitch =
@@ -281,6 +349,7 @@ fun switchToCim(feature: Feature, cim: Switch, networkService: NetworkService): 
     }
 
 
+
 fun transformerEndToCim(end: Map<String, JsonElement>, cim: TransformerEnd, pt: PowerTransformer, networkService: NetworkService): TransformerEnd =
     cim.apply {
         // TODO: handle BaseVoltage, StarImpedance, RatioTapChanger
@@ -292,17 +361,55 @@ fun transformerEndToCim(end: Map<String, JsonElement>, cim: TransformerEnd, pt: 
         identifiedObjectToCim(end, this, networkService)
     }
 
-fun createTerminal(networkService: NetworkService, ce: ConductingEquipment, phaseCode: PhaseCode = PhaseCode.ABC): Terminal =
+/************ IEC61970 InfIEC61970 Feeder ************/
+
+fun circuitToCim(feature: Feature, networkService: NetworkService, endEquipment: MutableMap<String, MutableList<String>>): Circuit =
+    Circuit(feature.id).apply {
+        networkService.resolveOrDeferReference(Resolvers.loop(this), feature.getString("loopId"))
+
+        feature.getStringList("endEquipmentIds")?.forEach {
+            endEquipment.computeIfAbsent(feature.id) { mutableListOf() }.add(it)
+        } ?: throw MissingPropertyException("endEquipmentIds")
+
+        feature.getStringList("endSubstationIds")?.forEach { endSubstationMRID ->
+            networkService.resolveOrDeferReference(Resolvers.endSubstation(this), endSubstationMRID)
+        }
+
+        lineToCim(feature, this, networkService)
+    }
+
+fun loopToCim(feature: Feature, networkService: NetworkService): Loop =
+    Loop(feature.id).apply {
+        feature.getStringList("circuit")?.forEach { circuitMRID ->
+            networkService.resolveOrDeferReference(Resolvers.circuits(this), circuitMRID)
+        }
+
+        feature.getStringList("substation")?.forEach { substationMRID ->
+            networkService.resolveOrDeferReference(Resolvers.substations(this), substationMRID)
+        }
+
+        feature.getStringList("normalEnergizingSubstation")?.forEach { normalEnergizingSubstationMRID ->
+            networkService.resolveOrDeferReference(Resolvers.normalEnergizingSubstations(this), normalEnergizingSubstationMRID)
+        }
+
+        identifiedObjectToCim(feature.properties, this, networkService)
+    }
+
+
+/************ MISC ****************/
+
+internal fun createTerminal(networkService: NetworkService, ce: ConductingEquipment, phaseCode: PhaseCode = PhaseCode.ABC): Terminal =
     (ce.numTerminals() + 1).let { sn ->
         Terminal(ce.mRID + "-t" + sn).apply {
             conductingEquipment = ce
             sequenceNumber = sn
+            phases = phaseCode
             ce.addTerminal(this)
             networkService.add(this)
         }
     }
 
-fun connect(networkService: NetworkService, t1: Terminal, t2: Terminal) {
+internal fun connect(networkService: NetworkService, t1: Terminal, t2: Terminal) {
     if (t2.isConnected())
         networkService.connect(t1, t2)
     else {
@@ -312,33 +419,23 @@ fun connect(networkService: NetworkService, t1: Terminal, t2: Terminal) {
     }
 }
 
-//fun NetworkService.addFromGeojson(clazz: KClass<AcLineSegment>, geojson: Feature): AcLineSegment? = tryAddOrNull(acLineSegmentToCim(geojson, this))
-//
-//fun <T : IdentifiedObject> NetworkService.addFromGeojson(clazz: KClass<T>, geojson: Feature): T? {
-//    return when (clazz) {
-//        AcLineSegment::class -> tryAddOrNull(clazz.cast(acLineSegmentToCim(geojson, this)))
-//        Breaker::class -> tryAddOrNull(breakerToCim(geojson, this))
-//        CableInfo::class -> tryAddOrNull(cableInfoToCim(geojson, this))
-//        Disconnector::class -> tryAddOrNull(disconnectorToCim(geojson, this))
-//        Fuse::class -> tryAddOrNull(fuseToCim(geojson, this))
-//        Jumper::class -> tryAddOrNull(jumperToCim(geojson, this))
-//        LoadBreakSwitch::class -> tryAddOrNull(loadBreakSwitchToCim(geojson, this))
-//        OverheadWireInfo::class -> tryAddOrNull(overheadWireInfoToCim(geojson, this))
-//        PerLengthSequenceImpedance::class -> tryAddOrNull(perLengthSequenceImpedanceToCim(geojson, this))
-//        PowerTransformer::class -> tryAddOrNull(powerTransformerToCim(geojson, this))
-//        Recloser::class -> tryAddOrNull(recloserToCim(geojson, this))
-//        else -> throw IllegalArgumentException("Serialiasing class ${clazz.simpleName} from Geojson is not currently supported")
-//    }
-//}
-
 fun convertGeojsonToCim(featureCollection: FeatureCollection, networkService: NetworkService) {
     val connectivity = mutableListOf<Connectivity>()
+    val headEquipment = mutableMapOf<String, String>()
+    val endEquipment = mutableMapOf<String, MutableList<String>>()
 
     featureCollection.features.forEach { feature ->
         val clazz = feature.getString("class") ?: throw MissingPropertyException("Feature ${feature.id} missing required property 'class'")
 
         networkService.apply {
             when (clazz) {
+                "Feeder" -> tryAddOrNull(feederToCim(feature, this, headEquipment))
+                "GeographicalRegion" -> tryAddOrNull(geographicalRegionToCim(feature, this))
+                "Site" -> tryAddOrNull(siteToCim(feature, this))
+                "SubGeographicalRegion" -> tryAddOrNull(subGeographicalRegionToCim(feature, this))
+                "Substation" -> tryAddOrNull(substationToCim(feature, this))
+                "Circuit" -> tryAddOrNull(circuitToCim(feature, this, endEquipment))
+                "Loop" -> tryAddOrNull(loopToCim(feature, this))
                 "AcLineSegment" -> tryAddOrNull(acLineSegmentToCim(feature, this, connectivity))
                 "Breaker" -> tryAddOrNull(breakerToCim(feature, this))
                 "CableInfo" -> tryAddOrNull(cableInfoToCim(feature, this))
@@ -352,15 +449,15 @@ fun convertGeojsonToCim(featureCollection: FeatureCollection, networkService: Ne
                 "Recloser" -> tryAddOrNull(recloserToCim(feature, this))
                 else -> throw IllegalArgumentException("Serialiasing class $clazz from feature is not currently supported")
             }
-        } // ?: todo: handle metadata/hv_feeder?
-
+        }
     }
 
     createAndConnectTerminals(networkService, connectivity)
+    // TODO: set end terminals on circuits and head terminals on feeders
 }
 
 
-fun createAndConnectTerminals(networkService: NetworkService, connectivity: List<Connectivity>) {
+internal fun createAndConnectTerminals(networkService: NetworkService, connectivity: List<Connectivity>) {
     connectivity.forEach { c ->
         networkService.get<ConductingEquipment>(c.fromEquip)?.let { from ->
             networkService.get<ConductingEquipment>(c.toEquip)?.let { to ->

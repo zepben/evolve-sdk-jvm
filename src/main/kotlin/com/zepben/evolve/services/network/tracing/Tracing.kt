@@ -8,7 +8,10 @@
 package com.zepben.evolve.services.network.tracing
 
 import com.zepben.evolve.cim.iec61970.base.core.ConductingEquipment
+import com.zepben.evolve.cim.iec61970.base.core.Terminal
+import com.zepben.evolve.cim.iec61970.base.wires.SinglePhaseKind
 import com.zepben.evolve.services.network.tracing.feeder.AssignToFeeders
+import com.zepben.evolve.services.network.tracing.feeder.AssociatedTerminalTrace
 import com.zepben.evolve.services.network.tracing.phases.*
 import com.zepben.evolve.services.network.tracing.traversals.BasicQueue
 import com.zepben.evolve.services.network.tracing.traversals.BasicTracker
@@ -54,6 +57,7 @@ object Tracing {
      *
      * @return The new traversal instance.
      */
+    @JvmStatic
     fun normalConnectedEquipmentTrace(): BasicTraversal<ConductingEquipment> = ConnectedEquipmentTrace.newNormalConnectedEquipmentTrace()
 
     /**
@@ -62,6 +66,7 @@ object Tracing {
      *
      * @return The new traversal instance.
      */
+    @JvmStatic
     fun currentConnectedEquipmentTrace(): BasicTraversal<ConductingEquipment> = ConnectedEquipmentTrace.newCurrentConnectedEquipmentTrace()
 
     /**
@@ -183,4 +188,18 @@ object Tracing {
     @JvmStatic
     fun findWithUsagePoints(): FindWithUsagePoints = FindWithUsagePoints()
 
+    /**
+     * Returns a traversal that traces terminals containing a [SinglePhaseKind] from the start terminal using nominal phasing. You can add custom step
+     * actions and stop conditions to the returned traversal.
+     *
+     * NOTE: This does not correctly support un-ganged switching and will bypass them.
+     */
+    @JvmStatic
+    fun associatedTerminalTrace(): BasicTraversal<Terminal> = AssociatedTerminalTrace.newTrace()
+
+    @JvmStatic
+    fun normalAssociatedTerminalTrace(): BasicTraversal<Terminal> = AssociatedTerminalTrace.newNormalTrace()
+
+    @JvmStatic
+    fun currentAssociatedTerminalTrace(): BasicTraversal<Terminal> = AssociatedTerminalTrace.newCurrentTrace()
 }
