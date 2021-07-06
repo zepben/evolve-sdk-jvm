@@ -20,6 +20,7 @@ import com.zepben.evolve.cim.iec61970.base.wires.*
 import com.zepben.evolve.cim.iec61970.infiec61970.feeder.Circuit
 import com.zepben.evolve.cim.iec61970.infiec61970.feeder.Loop
 import com.zepben.evolve.services.common.Resolvers
+import com.zepben.evolve.services.common.extensions.typeNameAndMRID
 import com.zepben.evolve.services.common.translator.MissingPropertyException
 import com.zepben.evolve.services.common.translator.identifiedObjectToCim
 import com.zepben.evolve.services.network.NetworkService
@@ -380,15 +381,15 @@ fun circuitToCim(feature: Feature, networkService: NetworkService, endEquipment:
 
 fun loopToCim(feature: Feature, networkService: NetworkService): Loop =
     Loop(feature.id).apply {
-        feature.getStringList("circuit")?.forEach { circuitMRID ->
+        feature.getStringList("circuitId")?.forEach { circuitMRID ->
             networkService.resolveOrDeferReference(Resolvers.circuits(this), circuitMRID)
         }
 
-        feature.getStringList("substation")?.forEach { substationMRID ->
+        feature.getStringList("substationIds")?.forEach { substationMRID ->
             networkService.resolveOrDeferReference(Resolvers.substations(this), substationMRID)
         }
 
-        feature.getStringList("normalEnergizingSubstation")?.forEach { normalEnergizingSubstationMRID ->
+        feature.getStringList("normalEnergizingSubstationIds")?.forEach { normalEnergizingSubstationMRID ->
             networkService.resolveOrDeferReference(Resolvers.normalEnergizingSubstations(this), normalEnergizingSubstationMRID)
         }
 
@@ -453,7 +454,8 @@ fun convertGeojsonToCim(featureCollection: FeatureCollection, networkService: Ne
     }
 
     createAndConnectTerminals(networkService, connectivity)
-    // TODO: set end terminals on circuits and head terminals on feeders
+    connectFeederTerminals(networkService, headEquipment)
+    connectCircuitTerminals(networkService, endEquipment)
 }
 
 
@@ -465,5 +467,31 @@ internal fun createAndConnectTerminals(networkService: NetworkService, connectiv
                 connect(networkService, createTerminal(networkService, c.conductor, c.conductorPhaseCode), createTerminal(networkService, to))
             }
         }
+    }
+}
+
+internal fun connectFeederTerminals(networkService: NetworkService, headEquipment: Map<String, String>) {
+    headEquipment.forEach { (feederId, equipmentId) ->
+        networkService.get<Feeder>(feederId)?.apply {
+            val ce = networkService.get<ConductingEquipment>(equipmentId) ?: throw MissingPropertyException("Equipment $equipmentId referenced by ${typeNameAndMRID()} was not present in the network - did it get processed?")
+            normalHeadTerminal = ce.terminals.last()
+            ce.addContainer(this)
+            addEquipment(ce)
+        } ?: throw IllegalStateException("Feeder $feederId was not present in network - it should have been added. Check previous errors.")
+    }
+}
+
+internal fun connectCircuitTerminals(networkService: NetworkService, endEquipment: Map<String, List<String>>) {
+    endEquipment.forEach { (circuitId, equipmentIds) ->
+        networkService.get<Circuit>(circuitId)?.apply {
+            equipmentIds.forEach { equipmentId ->
+                val ce = networkService.get<ConductingEquipment>(equipmentId)
+                    ?: throw MissingPropertyException("Equipment $equipmentId referenced by ${typeNameAndMRID()} was not present in the network - did it get processed?")
+
+                addEndTerminal(ce.terminals.first())
+                ce.addContainer(this)
+                addEquipment(ce)
+            }
+        } ?: throw IllegalStateException("Circuit $circuitId was not present in network - it should have been added. Check previous errors.")
     }
 }

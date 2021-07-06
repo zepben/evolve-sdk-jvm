@@ -60,17 +60,87 @@ objects will be linked during deserialisation of the GeoJSON.
 Each supported type has its own set of properties that can be specified alongside the existing fields defined above in the `properties` object. These
 properties are described below with examples.
 
+### Feeder
+
+```
+    "properties": {
+        "class": "Feeder",
+        "normalHeadEquipmentId": null | "string",
+        "normalEnergizingSubstationId": null | "string"
+    }
+```
+
+### GeographicalRegion
+
+```
+    "properties": {
+        "class": "GeographicalRegion",
+        "subGeographicalRegionIds": null | [ "string", ... ]
+    }
+```
+
+### Site
+
+```
+    "properties": {
+        "class": "Site"
+    }
+```
+
+### SubGeographicalRegion
+
+```
+    "properties": {
+        "class": "SubGeographicalRegion",
+        "geographicalRegionId": null | "string"
+        "substationIds": null | [ "string", ... ]
+    }
+```
+
+### Substation
+
+```
+    "properties": {
+        "class": "Substation",
+        "subGeographicalRegionId": null | "string"
+        "normalEnergizedFeederIds": null | [ "string", ... ]
+        "loopIds": null | [ "string", ... ]
+        "normalEnergizedLoopIds": null | [ "string", ... ]
+        "circuitIds": null | [ "string", ... ]
+    }
+```
+
+### Loop
+
+```
+    "properties": {
+        "class": "Loop",
+        "circuitId": null | "string",
+        "substationIds": null | [ "string", ... ],
+        "normalEnergizingSubstationIds": null | [ "string", ... ]
+    }
+```
+
+### Circuit
+
+```
+    "properties": {
+        "class": "Circuit",
+        "loopId": null | "string",
+        "endEquipmentIds": null | [ "string", ... ],
+        "endSubstationIds": null | [ "string", ... ]
+    }
+```
+
 ### CableInfo and OverheadWireInfo
 
 ```
-{
     "properties": {
         // ...
         "class": "string: CableInfo | OverheadWireInfo",
         "ratedCurrent": null | int,
         "material": null | "string: UNKNOWN (default) | aaac | acsr | acsrAz | aluminum | aluminumAlloy | aluminumAlloySteel | aluminumSteel | copper | copperCadmium | other | steel",
     }
-}
 ```
 
 ### AcLineSegment

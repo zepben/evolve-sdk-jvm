@@ -10,6 +10,7 @@ package com.zepben.evolve.services.network.translator
 
 import com.zepben.evolve.cim.iec61968.common.Location
 import com.zepben.evolve.cim.iec61968.common.PositionPoint
+import com.zepben.evolve.services.common.UNKNOWN_DOUBLE
 import com.zepben.evolve.services.network.NetworkService
 import kotlinx.serialization.json.*
 
@@ -62,4 +63,4 @@ fun Map<String, JsonElement>.getInt(key: String): Int? = this[key]?.jsonPrimitiv
 
 fun Map<String, JsonElement>.getBoolean(key: String): Boolean? = this[key]?.jsonPrimitive?.booleanOrNull
 
-fun Map<String, JsonElement>.getDouble(key: String): Double = this[key]?.jsonPrimitive?.let { it.doubleOrNull ?: it.intOrNull?.toDouble() ?: Double.NaN } ?: 0.0
+fun Map<String, JsonElement>.getDouble(key: String): Double = this[key]?.jsonPrimitive?.let { it.doubleOrNull ?: it.intOrNull?.toDouble() ?: UNKNOWN_DOUBLE } ?: 0.0
