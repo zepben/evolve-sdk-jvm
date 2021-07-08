@@ -3,21 +3,88 @@ id: geojson-spec
 title: GeoJSON Specification
 ---
 
-## GeoJSON Specification
+Our GeoJSON specification is based on our CIM profile with some caveats described below in [exceptions](#exceptions).
 
-Below is a full Specification for a collection of GeoJSON features as supported by the evolve SDK, followed by property specifications for each type
-supported by the evolve SDK.
+Most CIM classes can be represented as a GeoJson `Feature`, with the class, attributes and associations defined in the `properties` object of the Feature.
+All `properties` objects must at minimum have a `class` property which should correspond to the desired CIM class. It can then have any CIM field possible
+for that particular class according to our [CIM profile](https://zepben.github.io/evolve/docs/cim/evolve/).
 
-Types for each field are described in line, either as a comment or as part of the field. Note some fields may only have specific values and these will also
-be listed alongside the expected type.
+All CIM fields are effectively nullable, with many receiving defaults if they are not specified. Omission of a CIM attribute for a type implies that field
+is either null or should receive the configured default. You must refer to the SDK for this information.
 
-Nullable fields can be excluded. Non-nullable fields must always be specified unless they have a specified default, in which case a missing field or null will
-result in the default being used.
+For all primitive fields the translation between Json types and Java/Kotlin is the following:
 
-Fields containing IDs or lists of IDs should refer to features defined elsewhere in the GeoJSON, which should be of the indicated type. The resulting CIM
-objects will be linked during deserialisation of the GeoJSON.
+|    Json     | Java/Kotlin              |
+| ----------- | -------------------------|
+| string      | String                   |
+| int         | Int                      |
+| float       | Double                   |
+| boolean     | Boolean                  |
+| object      | Map<String, JsonElement\> |
+| array       | List<JsonElement\>        |
 
+:::note
+At this point we only support objects keyed by strings, and a value can be any valid Json type.
+:::
+
+There is some special handling for enumerations, associations, and geometry listed below.
+## Enumerations
+
+Any Enumeration property should be specified using its string representation, for example:
 ```
+phases: "ABC"
+wireMaterialKind: "aluminum"
+vectorGroup: "DYN11"
+```
+
+## Associations
+
+Associations between objects are represented as string IDs or lists of IDs and should refer to features defined elsewhere in the GeoJSON,
+which should be of the indicated type as per their [CIM documentation](https://zepben.github.io/evolve/docs/cim/evolve/). These fields will use
+the name of the association as per the CIM model appended with `Id` or `Ids` as per the [Examples](#examples) sections.
+
+:::warning
+There are exceptions to the above rule. Notably Terminals, ConnectivityNodes, and Locations are not present in the GeoJSON spec. See [Exceptions](#exceptions) below.
+:::
+
+## Datetimes
+
+Fields with a datetime type must be passed as an int representing seconds since the epoch (1970-01-01) unless otherwise specified.
+
+## Geometry
+
+We currently support Point, LineString, and Polygon geometry types, where Polygon is only used to define an area for a `Substation`. For consistency all
+coordinates are represented as an array of arrays, with a Point being an array with a single array inside it containing a double longitude and latitude.
+As per the GeoJson spec, a LineString and a Polygon must have more than one set of coordinates and thus must always be an array containing more than one
+array of doubles. Additionally for a Polygon, the first set of coordinates must be _exactly_ the same as the last set.
+
+:::warning
+Coordinate sets must be in `longitude, latitude` order.
+:::
+
+Some types may also have a null or omitted geometry. It is valid for the following types:
+
+1. Anything extending `AssetInfo`
+1. Anything extending `OrganisationRole`
+1. Anything extending `Document`
+1. Anything extending `Asset`
+1. Anything extending `Measurement` or `MeasurementValue`
+1. Anything extending `RemotePoint`
+1. Anything extending `PerLengthLineParameter`
+1. Anything extending `TransformerEnd`
+1. `BaseVoltage`
+1. `RatioTapChanger`
+1. `TransformerStarImpedance`
+1. `Organisation`
+1. `OperationalRestriction`
+1. `Diagram`
+
+## Base GeoJSON structure
+
+The below spec describes the basic structure, where the `properties` object contains all the relevant attributes of the corresponding CIM class,
+and the `geometry` providing the longitude and latitude for anything that is a PowerSystemResource.
+
+```json
 
 {
     "type": "FeatureCollection",
@@ -26,262 +93,348 @@ objects will be linked during deserialisation of the GeoJSON.
             "type": "Feature",
             "id": "string",
             "geometry": null | {
-                "type": "string: Point | LineString",
+                "type": "string: Point | LineString | Polygon",
                 "coordinates": [
-                    0.0,  // longitude TODO: check order
-                    0.0   // latitude
-                ]
-            },
-            "properties": {
-                "class": "string (see below sections for possible values)",
-                "name": "string",
-                "description": "string",
-                "numDiagramObjects": 0, // int
-                "names": [
-                    {
-                        "name": "string",
-                        "type": "string"
-                    },
+                    [
+                        0.0,  // longitude
+                        0.0   // latitude
+                    ],
 
                     // ...
-                ],
+                ]
+            },
 
-                // other type specific properties. See below specifications for each type for eligible fields.
+            "properties": {
+                "class": "string",  // Must be a valid CIM class name (case sensitive)
+
+                // other CIM properties for `class`. See CIM documentation for relevant fields
             }
         },
 
-        // ...
+        // other features
     ]
 }
 ```
 
-## Type specific properties
+## Exceptions
 
-Each supported type has its own set of properties that can be specified alongside the existing fields defined above in the `properties` object. These
-properties are described below with examples.
+Not all CIM properties are straight 1 to 1 mappings, see the sections below for additional and remapped properties.
 
-### Feeder
+### Equipment
 
-```
-    "properties": {
-        "class": "Feeder",
-        "normalHeadEquipmentId": null | "string",
-        "normalEnergizingSubstationId": null | "string"
-    }
-```
+Any type that extends `Equipment` has two extra optional properties `circuitId` and `substationId`. These properties can be set on any equipment
+to associate it with the corresponding `Circuit` or `Substation`. For example:
 
-### GeographicalRegion
-
-```
-    "properties": {
-        "class": "GeographicalRegion",
-        "subGeographicalRegionIds": null | [ "string", ... ]
-    }
-```
-
-### Site
-
-```
-    "properties": {
-        "class": "Site"
-    }
-```
-
-### SubGeographicalRegion
-
-```
-    "properties": {
-        "class": "SubGeographicalRegion",
-        "geographicalRegionId": null | "string"
-        "substationIds": null | [ "string", ... ]
-    }
-```
-
-### Substation
-
-```
-    "properties": {
-        "class": "Substation",
-        "subGeographicalRegionId": null | "string"
-        "normalEnergizedFeederIds": null | [ "string", ... ]
-        "loopIds": null | [ "string", ... ]
-        "normalEnergizedLoopIds": null | [ "string", ... ]
-        "circuitIds": null | [ "string", ... ]
-    }
-```
-
-### Loop
-
-```
-    "properties": {
-        "class": "Loop",
-        "circuitId": null | "string",
-        "substationIds": null | [ "string", ... ],
-        "normalEnergizingSubstationIds": null | [ "string", ... ]
-    }
-```
-
-### Circuit
-
-```
-    "properties": {
-        "class": "Circuit",
-        "loopId": null | "string",
-        "endEquipmentIds": null | [ "string", ... ],
-        "endSubstationIds": null | [ "string", ... ]
-    }
-```
-
-### CableInfo and OverheadWireInfo
-
-```
-    "properties": {
-        // ...
-        "class": "string: CableInfo | OverheadWireInfo",
-        "ratedCurrent": null | int,
-        "material": null | "string: UNKNOWN (default) | aaac | acsr | acsrAz | aluminum | aluminumAlloy | aluminumAlloySteel | aluminumSteel | copper | copperCadmium | other | steel",
-    }
-```
-
-### AcLineSegment
-
-```
+```json
+{
+    "type": "Feature",
+    "id": "acls001",
     "properties": {
         "class": "AcLineSegment",
-        "inService": null | bool (default true),
-        "normallyInService": null | bool (default true),
-        "equipmentContainerIds": [ "string", /* ... */ ],
-        "usagePointIds": [ "string", /* ... */ ],
-        "operationalRestrictionIds": [ "string", /* ... */ ],
-        "currentFeederIds": [ "string", /* ... */ ],
-        "nominalVoltage": null | int,
-        "length": null | double (default 0.0),
-        "phases": null | "string: A | B | C | AN | BN | CN | AB | AC | BC | XN | YN | ABC | ABN | ACN | BCN | ABCN | X | Y | XY | XYN" (default: ABC)
-        "assetInfoId": null | "string",
-        "fromConductingEquipment": "string",
-        "toConductingEquipment": "string",
-        "perLengthSequenceImpedanceId": "string"
+        "circuitId": "CRC001"
     }
-
-```
-
-### PerLengthSequenceImpedance
-
-```
+}
+{
+    "type": "Feature",
+    "id": "busbar001",
     "properties": {
-        "class": "PerLengthSequenceImpedance",
-        "r": null | double,
-        "x": null | double,
-        "r0": null | double,
-        "x0": null | double,
-        "bch": null | double,
-        "gch": null | double,
-        "b0ch": null | double,
-        "g0ch": null | double
+        "class": "AcLineSegment",
+        "substationId": "SUB001"
     }
-
+}
 ```
 
-### PowerTransformer
+### Terminals, phasing, and connectivity
 
-```
+Terminals and ConnectivityNodes are not present in the specification, and instead created from special properties on AcLineSegments.
+An AcLineSegment has two properties, `fromId` and `toId` which indicate the connectivity between `ConductingEquipment`. A `fromId` or `toId` is a
+string id that points to any other feature defined in the GeoJson that is a ConductingEquipment, or a PowerTransformerEnd.
+
+Terminals and ConnectivityNodes will be created between each AcLineSegment and the equipment referenced by its `fromId` and `toId`.
+
+Because of this, phases are also recorded on `AcLineSegments` and applied to the generated terminals. A phase on an AcLineSegment can
+be any valid [PhaseCode](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/Core/PhaseCode).
+
+An example of the above exceptions:
+
+```json
+{
+    "type": "Feature",
+    "id": "acls001",
+    "geometry": {
+        "type": "LineString",
+        "coordinates": [
+            [
+                32.432321,  // longitude
+                12.434541   // latitude
+            ],
+            [
+                32.432325,
+                12.435423
+            ]
+        ]
+    },
     "properties": {
-        "class": "PowerTransformer",
-        "inService": null | bool (default true),
-        "normallyInService": null | bool (default true),
-        "equipmentContainerIds": [ "string", /* ... */ ],
-        "usagePointIds": [ "string", /* ... */ ],
-        "operationalRestrictionIds": [ "string", /* ... */ ],
-        "currentFeederIds": [ "string", /* ... */ ],
-        "nominalVoltage": null | int,
-        "assetInfoId": null | "string",
-        "vectorGroup": null | "string: UNKNOWN | (see VectorGroup enum below)",
-        "transformerUtilisation": null | double,
-        "ends": null | [
-            {
-                "id": null | "string",
-                "name": "string",
-                "description": "string",
-                "names": [
-                    {
-                        "name": "string",
-                        "type": "string"
-                    },
-                    // ...
-                ],
-                "endNumber": int,
-                "grounded": boolean (default false),
-                "rGround": null | double,
-                "xGround": null | double,
-                "ratedS": null | int,
-                "ratedU": null | int,
-                "connectionKind": null | "string: UNKNOWN_WINDING (default) | D | Y | Z | Yn | Zn | A | I",
-                "phaseAngleClock": null | int,
-                "r": null | double,
-                "x": null | double,
-                "r0": null | double,
-                "x0": null | double,
-                "b": null | double,
-                "b0": null | double,
-                "g": null | double,
-                "g0": null | double,
-            },
-            // ...
+        "class": "AcLineSegment",
+        "inService": true,
+        "normallyInService": true,
+        "length": 12.0,
+        "phases": "ABC"     // Terminals on acls001, breaker001, and tfn001-end1 will get phase ABC.
+        "assetInfoId": "cableinfo001",
+        "fromId": "breaker001",
+        "toId": "tfn001-end1",
+        "perLengthSequenceImpedanceId": "plsi001"
+    }
+}
+```
+
+#### Feeders, Circuit, AuxiliaryEquipment
+
+These types all have references to Terminals in some form, however as Terminals are not defined in the specification another method must be used
+to refer to the Terminal for each type.
+
+For a Feeder the terminal property will instead refer to the corresponding `ConductingEquipment` for the terminal.
+
+##### Feeder
+```json
+"properties": {
+    "class": "Feeder",
+    "normalHeadEquipmentId": "BREAKER001",
+}
+```
+At runtime the `normalHeadTerminal` of the `Feeder` will be the most downstream Terminal of `BREAKER001` based on tracing out from the root of the network.
+
+##### Circuit
+
+```json
+"properties": {
+    "class": "Circuit",
+    "endEquipmentIds": ["BREAKER001", "BREAKER002", "BREAKER003"]
+}
+```
+
+At runtime the `endTerminals` of the `Circuit` will be the terminals of the breakers closest to the transmission network.
+
+##### AuxiliaryEquipment
+
+An AuxiliaryEquipment supports two equipment properties `equipmentId1` and `equipmentId2`:
+
+```json
+"properties": {
+    "class": "FaultIndicator",
+    "equipmentId1": "PT001",
+    "equipmentId2": "ACLS001"
+}
+```
+At runtime the terminal chosen will be the first Terminal from `equipmentId1` that connects to `equipmentId2`.
+
+
+### PowerTransformerEnd
+
+A PowerTransformerEnd references a Terminal like the above types, however we allow PowerTransformerEnd to be connected to AcLineSegments,
+and we use this connectivity to determine which Terminal is associated with the end. This means `toId` and `fromId` on an `AcLineSegment` should prefer to
+reference the individual PowerTransformerEnd it's connected to, rather than the PowerTransformer.
+
+### Location
+
+Locations are not defined as part of the spec, and instead can only be sent alongside an existing feature. A locations PositionPoints are inferred
+from each features geometry. However `mainAddress` is an optional property that can be present on any class that has an associated Location.
+A `mainAddress` is an object made up of the fields in [StreetAddress](https://zepben.github.io/evolve/docs/cim/evolve/IEC61968/Common/StreetAddress) and [TownDetail](https://zepben.github.io/evolve/docs/cim/evolve/IEC61968/Common/TownDetail).
+
+For example, the below will generate a Location associated with ACLS001 with 2 PositionPoints, associated with a StreetAddress with a postalCode of 1234, and
+a townDetail with a name of "123 Smith Street" and a stateOrProvince of "ACT".
+
+```json
+{
+    "type": "Feature",
+    "id": "ACLS001",
+    "geometry": {
+        "type": "LineString",
+        "coordinates": [
+            [ 149.098897, -35.285061 ],
+            [ 149.098897, -35.285061 ]
         ]
     }
-```
-
-
-#### VectorGroup
-
-Vector group of the transformer for protective relaying, e.g., Dyn1. For unbalanced transformers, this may not be simply
-determined from the constituent winding connections and phase angle displacements.
-
-The vectorGroup string consists of the following components in the order listed: high voltage winding connection, mid
-voltage winding connection(for three winding transformers), phase displacement clock number from 0 to 11,  low voltage
-winding connection phase displacement clock number from 0 to 11.   The winding connections are D(delta), Y(wye),
-YN(wye with neutral), Z(zigzag), ZN(zigzag with neutral), A(auto transformer). Upper case means the high voltage,
-lower case mid or low.The high voltage winding always has clock position 0 and is not included in the vector group
-string.  Some examples: YNy0(two winding wye to wye with no phase displacement), YNd11(two winding wye to delta with
-330 degrees phase displacement), YNyn0d5(three winding transformer wye with neutral high voltage, wye with neutral mid
-voltage and no phase displacement, delta low voltage with 150 degrees displacement).
-
-Phase displacement is defined as the angular difference between the phasors representing the voltages between the
-neutral point(real or imaginary) and the corresponding terminals of two windings, a positive sequence voltage system
-being applied to the high-voltage terminals, following each other in alphabetical sequence if they are lettered, or in
-numerical sequence if they are numbered: the phasors are assumed to rotate in a counter-clockwise sense.
-
-Valid values are:
-
-```
-UNKNOWN, DD0, DZ0, DZN0, YNY0, YNYN0, YY0, YYN0, ZD0, ZND0, DYN1, DZ1, DZN1, YD1, YND1, YNZN1, YZ1, YZN1, ZD1, ZND1, ZNYN1, ZY1, ZYN1, DY5, DYN5, YD5, YND5,
-YNZ5, YNZN5, YZ5, YZN5, ZNY5, ZNYN5, ZY5, ZYN5, DD6, DZ6, DZN6, YNY6, YNYN6, YY6, YYN6, ZD6, ZND6, DY7, DYN7, DZ7, DZN7, YD7, YND7, YNZN7, YZ7, YZN7, ZD7, ZND7,
-ZNYN7, ZY7, ZYN7, DY11, DYN11, YD11, YND11, YNZ11, YNZN11, YZ11, YZN11, ZNY11, ZNYN11, ZY11, ZYN11, DY1, Y0, YN0, D0, ZNY1, ZNY7, DDN0, DND0, DNYN1, DNYN11,
-YNDN1, YNDN11, TTN11
-```
-
-### Breaker, Disconnector, Fuse, Jumper, LoadBreakSwitch, Recloser
-
-```
     "properties": {
-        "class": "Breaker | Disconnector | Fuse | Jumper | LoadBreakSwitch | Recloser",
-        "inService": null | bool (default true),
-        "normallyInService": null | bool (default true),
-        "equipmentContainerIds": [ "string", /* ... */ ],
-        "usagePointIds": [ "string", /* ... */ ],
-        "operationalRestrictionIds": [ "string", /* ... */ ],
-        "currentFeederIds": [ "string", /* ... */ ],
-        "nominalVoltage": null | int,
-        "assetInfoId": null | "string",
-        "normallyOpen": null | bool (default false),
-        "open": null | bool (default false),
+        "class": "AcLineSegment",
+        "mainAddress": {
+            "name": "123 Smith Street",
+            "postalCode": 1234,
+            "stateOrProvince": "ACT"
+        }
     }
+}
+
 ```
 
+## Examples
 
-## How things are mapped
+### Network Hierarchy
 
-### BaseVoltage
+A simple network hierarchy defining a GeographicalRegion, SubGeographicalRegion, a Circuit and a Loop, and Substations and their Feeders.
 
-Any nominalVoltage property on a given ConductingEquipment class will cause a BaseVoltage with an id of the form "{voltage}-bv" to be created and added to the
-NetworkService, and the ConductingEquipment will have its corresponding baseVoltage assigned to the created BaseVoltage.
+```json
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "id": "FDR001",
+            "properties": {
+                "class": "Feeder",
+                "normalHeadEquipmentId": "BREAKER001",
+                "normalEnergizingSubstationId": "SUB001"
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "SUB001",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        32.432321,
+                        12.434541
+                    ],
+                    [
+                        32.432325,
+                        12.435423
+                    ],
+                    [
+                        32.432325,
+                        12.435428
+                    ],
+                    [
+                        32.432321,
+                        12.434541
+                    ]
+                ]
+            }
+            "properties": {
+                "class": "Substation",
+                "subGeographicalRegionId": "SGR001",
+                "normalEnergizedFeederIds": ["FDR001"],
+                "loopIds": ["LP001"],
+                "normalEnergizedLoopIds": ["LP001"],
+                "circuitIds": ["CRC001"]
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "SGR001",
+            "properties": {
+                "class": "SubGeographicalRegion",
+                "geographicalRegionId": "DNSP001",
+                "substationIds": ["SUB001"]
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "DNSP001",
+            "properties": {
+                "class": "GeographicalRegion",
+                "subGeographicalRegionIds": ["SGR001"]
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "CRC001",
+            "properties": {
+                "class": "Circuit",
+                "loopId": "LP001",
+                "endEquipmentIds": [ /* ... */ ],
+                "endSubstationIds": ["SUB001", /* ... */ ]
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "LP001",
+            "properties": {
+                "class": "Loop",
+                "circuitId": "CRC001",
+                "substationIds": ["SUB001", /* ... */],
+                "normalEnergizingSubstationIds": ["SUB001", /* ... */]
+            }
+        }
+    ]
+}
+```
+
+### Connectivity
+
+A basic connectivity model showing PowerTransformerEnds connected to AcLineSegments.
+
+:::note
+Geometry is omitted for brevity
+:::
+
+```json
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "id": "BREAKER001",
+            "properties": {
+                "class": "Breaker",
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "ACLS001",
+            "properties": {
+                "class": "AcLineSegment",
+                "phases": "ABC",
+                "fromId": "BREAKER001",
+                "toId": "PT001-e1"
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "PT001",
+            "properties": {
+                "class": "PowerTransformer",
+                "powerTransformerId": "PT001",
+                "vectorGroup": "DYN11",
+                "transformerUtilisation": 0.8
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "PT001-e1",
+            "properties": {
+                "class": "PowerTransformerEnd",
+                "powerTransformerId": "PT001",
+                "endNumber": 1
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "PT001-e2",
+            "properties": {
+                "class": "PowerTransformerEnd",
+                "powerTransformerId": "PT001",
+                "endNumber": 2
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "ACLS002",
+            "properties": {
+                "class": "AcLineSegment",
+                "phases": "BC",
+                "fromId": "PT001-e2",
+                "toId": "EC001"
+            }
+        },
+        {
+            "type": "Feature",
+            "id": "EC001",
+            "properties": {
+                "class": "EnergyConsumer",
+                "grounded": true
+            }
+        }
+    ]
+}
+```

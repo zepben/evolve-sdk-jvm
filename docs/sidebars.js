@@ -12,6 +12,7 @@ module.exports = {
     "sdk-services", 
     "sdk-tracing", 
     "sdk-persistence", 
-    "sdk-consumer"
+    "sdk-consumer",
+    "geojson-spec"
   ]
 };

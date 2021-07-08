@@ -63,4 +63,4 @@ fun Map<String, JsonElement>.getInt(key: String): Int? = this[key]?.jsonPrimitiv
 
 fun Map<String, JsonElement>.getBoolean(key: String): Boolean? = this[key]?.jsonPrimitive?.booleanOrNull
 
-fun Map<String, JsonElement>.getDouble(key: String): Double = this[key]?.jsonPrimitive?.let { it.doubleOrNull ?: it.intOrNull?.toDouble() ?: UNKNOWN_DOUBLE } ?: 0.0
+fun Map<String, JsonElement>.getDouble(key: String): Double = this[key]?.jsonPrimitive?.let { it.doubleOrNull ?: it.intOrNull?.toDouble() ?: UNKNOWN_DOUBLE } ?: UNKNOWN_DOUBLE

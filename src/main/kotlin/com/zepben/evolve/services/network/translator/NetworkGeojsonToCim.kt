@@ -20,6 +20,8 @@ import com.zepben.evolve.cim.iec61970.base.wires.*
 import com.zepben.evolve.cim.iec61970.infiec61970.feeder.Circuit
 import com.zepben.evolve.cim.iec61970.infiec61970.feeder.Loop
 import com.zepben.evolve.services.common.Resolvers
+import com.zepben.evolve.services.common.UNKNOWN_DOUBLE
+import com.zepben.evolve.services.common.UNKNOWN_INT
 import com.zepben.evolve.services.common.extensions.typeNameAndMRID
 import com.zepben.evolve.services.common.translator.MissingPropertyException
 import com.zepben.evolve.services.common.translator.identifiedObjectToCim
@@ -39,6 +41,27 @@ fun overheadWireInfoToCim(feature: Feature, networkService: NetworkService): Ove
         wireInfoToCim(feature, this, networkService)
     }
 
+fun noLoadTestToCim(feature: Feature, networkService: NetworkService): NoLoadTest =
+    NoLoadTest(feature.id).apply {
+        energisedEndVoltage = feature.getInt("energisedEndVoltage").takeUnless { it == UNKNOWN_INT }
+        excitingCurrent = feature.getDouble("excitingCurrent").takeUnless { it == UNKNOWN_DOUBLE }
+        excitingCurrentZero = feature.getDouble("excitingCurrentZero").takeUnless { it == UNKNOWN_DOUBLE }
+        loss = feature.getInt("loss").takeUnless { it == UNKNOWN_INT }
+        lossZero = feature.getInt("lossZero").takeUnless { it == UNKNOWN_INT }
+        transformerTestToCim(feature, this, networkService)
+    }
+
+fun openCircuitTestToCim(feature: Feature, networkService: NetworkService): OpenCircuitTest =
+    OpenCircuitTest(feature.id).apply {
+        energisedEndStep = feature.getInt("energisedEndStep").takeUnless { it == UNKNOWN_INT }
+        energisedEndVoltage = feature.getInt("energisedEndVoltage").takeUnless { it == UNKNOWN_INT }
+        openEndStep = feature.getInt("openEndStep").takeUnless { it == UNKNOWN_INT }
+        openEndVoltage = feature.getInt("openEndVoltage").takeUnless { it == UNKNOWN_INT }
+        phaseShift = feature.getDouble("phaseShift").takeUnless { it == UNKNOWN_DOUBLE }
+        transformerTestToCim(feature, this, networkService)
+    }
+
+
 fun powerTransformerInfoToCim(feature: Feature, networkService: NetworkService): PowerTransformerInfo =
     PowerTransformerInfo(feature.id).apply {
         feature.getStringList("transformerTankInfoIds")?.forEach {
@@ -47,17 +70,32 @@ fun powerTransformerInfoToCim(feature: Feature, networkService: NetworkService):
         assetInfoToCim(feature, this, networkService)
     }
 
+fun shortCircuitTestToCim(feature: Feature, networkService: NetworkService): ShortCircuitTest =
+    ShortCircuitTest(feature.id).apply {
+        current = feature.getDouble("current").takeUnless { it == UNKNOWN_DOUBLE }
+        energisedEndStep = feature.getInt("energisedEndStep").takeUnless { it == UNKNOWN_INT }
+        groundedEndStep = feature.getInt("groundedEndStep").takeUnless { it == UNKNOWN_INT }
+        leakageImpedance = feature.getDouble("leakageImpedance").takeUnless { it == UNKNOWN_DOUBLE }
+        leakageImpedanceZero = feature.getDouble("leakageImpedanceZero").takeUnless { it == UNKNOWN_DOUBLE }
+        loss = feature.getInt("loss").takeUnless { it == UNKNOWN_INT }
+        lossZero = feature.getInt("lossZero").takeUnless { it == UNKNOWN_INT }
+        power = feature.getInt("power").takeUnless { it == UNKNOWN_INT }
+        voltage = feature.getDouble("voltage").takeUnless { it == UNKNOWN_DOUBLE }
+        voltageOhmicPart = feature.getDouble("voltageOhmicPart").takeUnless { it == UNKNOWN_DOUBLE }
+        transformerTestToCim(feature, this, networkService)
+    }
+
 fun transformerEndInfoToCim(feature: Feature, networkService: NetworkService): TransformerEndInfo =
     TransformerEndInfo(feature.id).apply {
         connectionKind = feature.getString("connectionKind")?.let { WindingConnection.valueOf(it) } ?: WindingConnection.UNKNOWN_WINDING
-        emergencyS = feature.getInt("emergencyS") ?: 0
+        emergencyS = feature.getInt("emergencyS").takeUnless { it == UNKNOWN_INT }
         endNumber = feature.getInt("endNumber") ?: 0
-        insulationU = feature.getInt("insulationU") ?: 0
-        phaseAngleClock = feature.getInt("phaseAngleClock") ?: 0
+        insulationU = feature.getInt("insulationU").takeUnless { it == UNKNOWN_INT }
+        phaseAngleClock = feature.getInt("phaseAngleClock").takeUnless { it == UNKNOWN_INT }
         r = feature.getDouble("r")
-        ratedS = feature.getInt("ratedS") ?: 0
-        ratedU = feature.getInt("ratedU") ?: 0
-        shortTermS = feature.getInt("shortTermS") ?: 0
+        ratedS = feature.getInt("ratedS").takeUnless { it == UNKNOWN_INT }
+        ratedU = feature.getInt("ratedU").takeUnless { it == UNKNOWN_INT }
+        shortTermS = feature.getInt("shortTermS").takeUnless { it == UNKNOWN_INT }
 
         networkService.resolveOrDeferReference(Resolvers.transformerTankInfo(this), feature.getString("transformerTankInfoId"))
         networkService.resolveOrDeferReference(Resolvers.transformerStarImpedance(this), feature.getString("transformerStarImpedanceId"))
@@ -79,9 +117,16 @@ fun transformerTankInfoToCim(feature: Feature, networkService: NetworkService): 
         assetInfoToCim(feature, this, networkService)
     }
 
+fun transformerTestToCim(feature: Feature, cim: TransformerTest, networkService: NetworkService): TransformerTest =
+    cim.apply {
+        basePower = feature.getInt("basePower").takeUnless { it == UNKNOWN_INT }
+        temperature = feature.getDouble("temperature").takeUnless { it == UNKNOWN_DOUBLE }
+        identifiedObjectToCim(feature, this, networkService)
+    }
+
 fun wireInfoToCim(feature: Feature, cim: WireInfo, networkService: NetworkService): WireInfo =
     cim.apply {
-        ratedCurrent = feature.getInt("ratedCurrent") ?: 0
+        ratedCurrent = feature.getInt("ratedCurrent").takeUnless { it == UNKNOWN_INT }
         material = feature.getString("material")?.let { WireMaterialKind.valueOf(it) } ?: WireMaterialKind.UNKNOWN
         assetInfoToCim(feature, this, networkService)
     }

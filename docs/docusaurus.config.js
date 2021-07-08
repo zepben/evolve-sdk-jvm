@@ -68,7 +68,7 @@ module.exports = {
             copyright: `Copyright © ${new Date().getFullYear()} Zeppelin Bend Pty. Ltd.`,
         },
         prism: {
-            additionalLanguages: ['kotlin'],
+            additionalLanguages: ['kotlin', 'json'],
         },
         algolia: {
             ...zepbenDocusaurusPreset.defaultThemeConfig.algolia,
