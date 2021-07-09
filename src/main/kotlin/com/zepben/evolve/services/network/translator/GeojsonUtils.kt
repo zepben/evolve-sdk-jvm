@@ -8,18 +8,31 @@
 
 package com.zepben.evolve.services.network.translator
 
-import com.zepben.evolve.cim.iec61968.common.Location
-import com.zepben.evolve.cim.iec61968.common.PositionPoint
-import com.zepben.evolve.services.common.UNKNOWN_DOUBLE
-import com.zepben.evolve.services.network.NetworkService
 import kotlinx.serialization.json.*
 
 
+fun Map<String, JsonElement>.getIntList(key: String): List<Int>? = this[key]?.let { if (it is JsonArray) it.filterIsInstance(Int::class.java) else null }
 
+fun Map<String, JsonElement>.getStringList(key: String): List<String>? = this[key]?.let {
+    if (it is JsonArray)
+        it.filterIsInstance(JsonPrimitive::class.java).map { json -> json.content }
+    else
+        null
+}
 
-fun Map<String, JsonElement>.getIntList(key: String): List<Int>? = this[key].let { if (it is JsonArray) it.filterIsInstance(Int::class.java) else null }
+fun Map<String, JsonElement>.getList(key: String): MutableList<JsonElement>? = this[key].let {
+    if (it is JsonArray)
+        it.toMutableList()
+    else
+        null
+}
 
-fun Map<String, JsonElement>.getStringList(key: String): List<String>? = this[key].let { if (it is JsonArray) it.filterIsInstance(String::class.java) else null }
+fun Map<String, JsonElement>.getMap(key: String): MutableMap<String, JsonElement>? = this[key].let {
+    if (it is JsonObject)
+        it.toMutableMap()
+    else
+        null
+}
 
 /**
  * Gets a list of Json objects from the map. This should only be used in conjunction with deserialising JsonElements.
@@ -61,6 +74,8 @@ fun Map<String, JsonElement>.getString(key: String): String? = this[key]?.jsonPr
 
 fun Map<String, JsonElement>.getInt(key: String): Int? = this[key]?.jsonPrimitive?.intOrNull
 
+fun Map<String, JsonElement>.getLong(key: String): Long? = this[key]?.jsonPrimitive?.longOrNull
+
 fun Map<String, JsonElement>.getBoolean(key: String): Boolean? = this[key]?.jsonPrimitive?.booleanOrNull
 
-fun Map<String, JsonElement>.getDouble(key: String): Double = this[key]?.jsonPrimitive?.let { it.doubleOrNull ?: it.intOrNull?.toDouble() ?: UNKNOWN_DOUBLE } ?: UNKNOWN_DOUBLE
+fun Map<String, JsonElement>.getDouble(key: String): Double? = this[key]?.jsonPrimitive?.let { it.doubleOrNull ?: it.intOrNull?.toDouble() }

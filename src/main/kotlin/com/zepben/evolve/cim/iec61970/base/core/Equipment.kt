@@ -9,6 +9,7 @@ package com.zepben.evolve.cim.iec61970.base.core
 
 import com.zepben.evolve.cim.iec61968.metering.UsagePoint
 import com.zepben.evolve.cim.iec61968.operations.OperationalRestriction
+import com.zepben.evolve.cim.iec61970.infiec61970.feeder.Circuit
 import com.zepben.evolve.services.common.extensions.asUnmodifiable
 import com.zepben.evolve.services.common.extensions.getByMRID
 import com.zepben.evolve.services.common.extensions.validateReference
@@ -34,6 +35,7 @@ abstract class Equipment(mRID: String = "") : PowerSystemResource(mRID) {
     val sites: List<Site> get() = equipmentContainersOfType()
     val normalFeeders: List<Feeder> get() = equipmentContainersOfType()
     val substations: List<Substation> get() = equipmentContainersOfType()
+    val circuits: List<Circuit> get() = equipmentContainersOfType()
 
     /**
      * The equipment containers this equipment belongs to. The returned collection is read only.

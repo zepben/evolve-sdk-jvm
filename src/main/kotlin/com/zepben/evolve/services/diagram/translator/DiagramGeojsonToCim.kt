@@ -32,19 +32,19 @@ fun diagramObjectToCim(feature: Feature, diagramService: DiagramService): Diagra
     DiagramObject(feature.id).apply {
         diagramService.resolveOrDeferReference(Resolvers.diagram(this), feature.getString("diagramId"))
         diagram?.addDiagramObject(this)
-        rotation = feature.getDouble("rotation")
+        rotation = feature.getDouble("rotation") ?: 0.0
         identifiedObjectMRID = feature.getString("identifiedObjectId").takeIf { it?.isNotBlank() == true }
         style = feature.getString("diagramObjectStyle").takeIf { it?.isNotBlank() == true }
         feature.getMapList("diagramObjectPoints")?.forEach { addPoint(diagramObjectPointToCim(it, mRID)) }
     }
 
 fun diagramObjectPointToCim(dop: Map<String, JsonElement>, diagramObjectId: String): DiagramObjectPoint =
-    dop.getDouble("x").let { x ->
+    dop.getDouble("x")?.let { x ->
         if (x == UNKNOWN_DOUBLE)
             throw MissingPropertyException("DiagramObjectPoint missing x on $diagramObjectId")
-        dop.getDouble("y").let { y ->
+        dop.getDouble("y")?.let { y ->
             if (y == UNKNOWN_DOUBLE)
                 throw MissingPropertyException("DiagramObjectPoint missing y on $diagramObjectId")
             DiagramObjectPoint(x, y)
-        }
-    }
+        } ?: throw MissingPropertyException("DiagramObjectPoint missing x on $diagramObjectId")
+    } ?: throw MissingPropertyException("DiagramObjectPoint missing x on $diagramObjectId")

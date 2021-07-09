@@ -32,10 +32,13 @@ import com.zepben.evolve.cim.iec61970.base.wires.generation.production.PowerElec
 import com.zepben.evolve.cim.iec61970.infiec61970.feeder.Circuit
 import com.zepben.evolve.cim.iec61970.infiec61970.feeder.Loop
 import com.zepben.evolve.services.common.testdata.fillFieldsCommon
+import com.zepben.evolve.services.common.translator.organisationToCim
+import com.zepben.evolve.services.common.translator.organisationToGeojson
 import com.zepben.evolve.services.common.translator.toPb
 import com.zepben.evolve.services.network.NetworkService
 import com.zepben.evolve.services.network.NetworkServiceComparator
 import com.zepben.evolve.services.network.testdata.fillFields
+import com.zepben.evolve.services.network.testdata.fillFieldsGeojson
 import com.zepben.testutils.junit.SystemLogExtension
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.*

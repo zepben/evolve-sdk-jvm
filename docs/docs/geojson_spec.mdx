@@ -5,7 +5,7 @@ title: GeoJSON Specification
 
 Our GeoJSON specification is based on our CIM profile with some caveats described below in [exceptions](#exceptions).
 
-Most CIM classes can be represented as a GeoJson `Feature`, with the class, attributes and associations defined in the `properties` object of the Feature.
+Most CIM classes can be represented as a GeoJSON `Feature`, with the class, attributes and associations defined in the `properties` object of the Feature.
 All `properties` objects must at minimum have a `class` property which should correspond to the desired CIM class. It can then have any CIM field possible
 for that particular class according to our [CIM profile](https://zepben.github.io/evolve/docs/cim/evolve/).
 
@@ -49,13 +49,13 @@ There are exceptions to the above rule. Notably Terminals, ConnectivityNodes, an
 
 ## Datetimes
 
-Fields with a datetime type must be passed as an int representing seconds since the epoch (1970-01-01) unless otherwise specified.
+Fields with a Datetime/Instant type must be passed as an ISO DateTime string with a UTC offset (`YYYY-MM-ddTHH:mm:ss+00:00`), for example: `2021-04-30T20:30:30`
 
 ## Geometry
 
 We currently support Point, LineString, and Polygon geometry types, where Polygon is only used to define an area for a `Substation`. For consistency all
 coordinates are represented as an array of arrays, with a Point being an array with a single array inside it containing a double longitude and latitude.
-As per the GeoJson spec, a LineString and a Polygon must have more than one set of coordinates and thus must always be an array containing more than one
+As per the GeoJSON spec, a LineString and a Polygon must have more than one set of coordinates and thus must always be an array containing more than one
 array of doubles. Additionally for a Polygon, the first set of coordinates must be _exactly_ the same as the last set.
 
 :::warning
@@ -148,7 +148,7 @@ to associate it with the corresponding `Circuit` or `Substation`. For example:
 
 Terminals and ConnectivityNodes are not present in the specification, and instead created from special properties on AcLineSegments.
 An AcLineSegment has two properties, `fromId` and `toId` which indicate the connectivity between `ConductingEquipment`. A `fromId` or `toId` is a
-string id that points to any other feature defined in the GeoJson that is a ConductingEquipment, or a PowerTransformerEnd.
+string id that points to any other feature defined in the GeoJSON that is a ConductingEquipment, or a PowerTransformerEnd.
 
 Terminals and ConnectivityNodes will be created between each AcLineSegment and the equipment referenced by its `fromId` and `toId`.
 
@@ -237,12 +237,33 @@ reference the individual PowerTransformerEnd it's connected to, rather than the 
 
 ### Location
 
-Locations are not defined as part of the spec, and instead can only be sent alongside an existing feature. A locations PositionPoints are inferred
-from each features geometry. However `mainAddress` is an optional property that can be present on any class that has an associated Location.
-A `mainAddress` is an object made up of the fields in [StreetAddress](https://zepben.github.io/evolve/docs/cim/evolve/IEC61968/Common/StreetAddress) and [TownDetail](https://zepben.github.io/evolve/docs/cim/evolve/IEC61968/Common/TownDetail).
+Locations are not defined as a class, and instead can only be sent alongside an existing feature.
+A Location will always be inferred from the Features geometry if present, however additional Location fields can be specified in the `properties` of a
+GeoJSON object for classes that support Locations. These location properties are represented by an object mapped to the name of the corresponding Location
+field on the class. A single Feature can support multiple locations with different names. See the table below for examples:
 
-For example, the below will generate a Location associated with ACLS001 with 2 PositionPoints, associated with a StreetAddress with a postalCode of 1234, and
-a townDetail with a name of "123 Smith Street" and a stateOrProvince of "ACT".
+| Class | Associatian name |
+| ----- | ---------------- |
+| Anything extending PowerSystemResource | location |
+| UsagePoint | usagePointLocation |
+| Meter | serviceLocation, location |
+| Pole | location |
+| Streetlight | location |
+
+A `Location`s PositionPoints are inferred from the features geometry, unless they are indicated via the `positionPoints` field inside the corresponding location
+property. The optional `"positionPoints"` accepts the same format data as the geometry. A Feature can have a null geometry (no coordinates) yet still receive
+PositionPoints off the location property, however the preferred method is via the Geometry and the `positionPoints` field should only be used when there are
+multiple different Locations for a given Feature.
+
+[StreetAddress](https://zepben.github.io/evolve/docs/cim/evolve/IEC61968/Common/StreetAddress) and [TownDetail](https://zepben.github.io/evolve/docs/cim/evolve/IEC61968/Common/TownDetail)
+fields for a `Location` should be specified directly inside the relevant location property using their field names. Nesting of StreetAddress or TownDetail
+objects is not necessary (see examples).
+
+A Location object can also optionally have an ``"id"` field specified, which will be used as the resulting Locations mRID. If an ID is not present, one will
+be generated for you.
+
+For example, the below will generate a Location with mRID `ACLS001-loc` associated with ACLS001 with 2 PositionPoints, associated with a StreetAddress with a
+postalCode of 1234, and a townDetail with a name of "123 Smith Street" and a stateOrProvince of "ACT".
 
 ```json
 {
@@ -254,19 +275,48 @@ a townDetail with a name of "123 Smith Street" and a stateOrProvince of "ACT".
             [ 149.098897, -35.285061 ],
             [ 149.098897, -35.285061 ]
         ]
-    }
+    },
     "properties": {
         "class": "AcLineSegment",
-        "mainAddress": {
+        "location": {
+            "id": "ACLS001-loc",
             "name": "123 Smith Street",
             "postalCode": 1234,
             "stateOrProvince": "ACT"
         }
     }
 }
-
 ```
 
+Below is a Meter with both serviceLocation and location set, with different positionPoints for the serviceLocation:
+
+```json
+{
+    "type": "Feature",
+    "id": "MTR001",
+    "geometry": {
+        "type": "Point",
+        "coordinates": [
+            [ 149.098866, -35.284061 ],
+        ]
+    },
+    "properties": {
+        "class": "Meter",
+        "location": {
+            "name": "Telstra Tower",
+            "postalCode": 2000,
+            "stateOrProvince": "ACT"  // The resulting Meter's location field will receive the PositionPoint from the geometry
+        },
+
+        "serviceLocation": {
+            "name": "Black Mountain",
+            "postalCode": 2000,
+            "stateOrProvince": "ACT",
+            "positionPoints": [ 149.098813, -35.284023 ]  // the Meter's serviceLocation will receive this PositionPoint
+        }
+    }
+}
+```
 ## Examples
 
 ### Network Hierarchy
