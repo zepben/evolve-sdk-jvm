@@ -692,6 +692,7 @@ fun powerTransformerToGeojson(cim: PowerTransformer): Feature =
 
 fun powerTransformerEndToGeojson(cim: PowerTransformerEnd): Feature =
     Feature(cim.mRID, geometry = NULL_GEOMETRY).apply {
+        cim.powerTransformer?.let { put("powerTransformerId", it.mRID) }
         cim.ratedS?.let { put("ratedS", it) }
         cim.ratedU?.let { put("ratedU", it) }
         cim.r?.let { put("r", it) }
@@ -765,7 +766,6 @@ fun tapChangerToGeojson(feature: Feature, cim: TapChanger): Feature =
 
 fun transformerEndToGeojson(feature: Feature, cim: TransformerEnd): Feature =
     feature.apply {
-        cim.terminal?.let { put("terminalId", it.mRID) }
         cim.baseVoltage?.let { put("baseVoltageId", it.mRID) }
         cim.ratioTapChanger?.let { put("ratioTapChangerId", it.mRID) }
         cim.starImpedance?.let { put("starImpedanceId", it.mRID) }

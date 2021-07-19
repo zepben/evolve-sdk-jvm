@@ -609,8 +609,8 @@ fun conductorToCim(feature: Feature, cim: Conductor, networkService: NetworkServ
         feature.getString("fromId")?.let { from ->
             feature.getString("toId")?.let { to ->
                 connectivity.add(Connectivity(this, from, to, feature.getString("phases")?.let { PhaseCode.valueOf(it) } ?: PhaseCode.ABC))
-            } ?: throw MissingPropertyException("toConductingEquipment")
-        } ?: throw MissingPropertyException("fromConductingEquipment")
+            } ?: throw MissingPropertyException("toId")
+        } ?: throw MissingPropertyException("fromId")
 
         conductingEquipmentToCim(feature, cim, networkService)
     }
@@ -774,6 +774,7 @@ fun powerTransformerToCim(feature: Feature, networkService: NetworkService): Pow
 
 fun powerTransformerEndToCim(feature: Feature, networkService: NetworkService): PowerTransformerEnd =
     PowerTransformerEnd(feature.id).apply {
+        networkService.resolveOrDeferReference(Resolvers.powerTransformer(this), feature.getString("powerTransformerId"))
         ratedS = feature.getInt("ratedS")
         ratedU = feature.getInt("ratedU")
         r = feature.getDouble("r")
@@ -842,7 +843,8 @@ fun tapChangerToCim(feature: Feature, cim: TapChanger, networkService: NetworkSe
 
 fun transformerEndToCim(feature: Feature, cim: TransformerEnd, networkService: NetworkService): TransformerEnd =
     cim.apply {
-        networkService.resolveOrDeferReference(Resolvers.terminal(this), feature.getString("terminalId"))
+        // TODO In GeoJSON transformer ends are ConductingEquipment - not PowerTransformers. Terminal must be populated in ConnectivityNode
+//        networkService.resolveOrDeferReference(Resolvers.terminal(this), feature.getString("terminalId"))
         networkService.resolveOrDeferReference(Resolvers.baseVoltage(this), feature.getString("baseVoltageId"))
         networkService.resolveOrDeferReference(Resolvers.ratioTapChanger(this), feature.getString("ratioTapChangerId"))
         networkService.resolveOrDeferReference(Resolvers.starImpedance(this), feature.getString("starImpedanceId"))
@@ -890,7 +892,7 @@ fun loopToCim(feature: Feature, networkService: NetworkService): Loop =
             networkService.resolveOrDeferReference(Resolvers.substations(this), substationMRID)
         }
 
-        feature.getStringList("normalEnergizingSubstationIds")?.forEach { normalEnergizingSubstationMRID ->
+        feature.getStringList("energizingSubstationIds")?.forEach { normalEnergizingSubstationMRID ->
             networkService.resolveOrDeferReference(Resolvers.normalEnergizingSubstations(this), normalEnergizingSubstationMRID)
         }
 
@@ -921,7 +923,9 @@ internal fun connect(networkService: NetworkService, t1: Terminal, t2: Terminal)
     }
 }
 
+// TODO: this needs a java interface, and maybe renaming/relocating - i haven't thought about it much.
 fun convertGeojsonToCim(featureCollection: FeatureCollection, networkService: NetworkService) {
+    // TODO remove and make reliant on ordering - requires some changes to the effected ToCim functions.
     val connectivity = mutableListOf<Connectivity>()
     val headEquipment = mutableMapOf<String, String>()
     val endEquipment = mutableMapOf<String, MutableList<String>>()
@@ -1024,99 +1028,11 @@ fun convertGeojsonToCim(featureCollection: FeatureCollection, networkService: Ne
         classMap["RemoteSource"]?.forEach { feature -> tryAddOrNull(remoteSourceToCim(feature, this)) }
 
 
+        // TODO remove
         createAndConnectTerminals(this, connectivity)
         connectFeederTerminals(this, headEquipment)
         connectCircuitTerminals(this, endEquipment)
     }
-
-
-//        networkService.apply {
-//            when (clazz) {
-//                // IEC61968 ASSET INFO
-//                "CableInfo" -> tryAddOrNull(cableInfoToCim(feature, this))
-//                "NoLoadTest" -> tryAddOrNull(noLoadTestToCim(feature, this))
-//                "OpenCircuitTest" -> tryAddOrNull(openCircuitTestToCim(feature, this))
-//                "OverheadWireInfo" -> tryAddOrNull(overheadWireInfoToCim(feature, this))
-//                "PowerTransformerInfo" -> tryAddOrNull(powerTransformerInfoToCim(feature, this))
-//                "ShortCircuitTest" -> tryAddOrNull(shortCircuitTestToCim(feature, this))
-//                "TransformerEndInfo" -> tryAddOrNull(transformerEndInfoToCim(feature, this))
-//                "TransformerTankInfo" -> tryAddOrNull(transformerTankInfoToCim(feature, this))
-//
-//                // IEC61968 ASSETS
-//                "AssetOwner" -> tryAddOrNull(assetOwnerToCim(feature, this))
-//                "Pole" -> tryAddOrNull(poleToCim(feature, this))
-//                "Streetlight" -> tryAddOrNull(streetlightToCim(feature, this))
-//
-//                // IEC61968 COMMON
-//                "Organisation" -> tryAddOrNull(organisationToCim(feature, this))
-//
-//                // IEC61968 METERING
-//                "Meter" -> tryAddOrNull(meterToCim(feature, this))
-//                "UsagePoint" -> tryAddOrNull(usagePointToCim(feature, this))
-//
-//                // IEC61968 OPERATIONS
-//                "OperationalRestriction" -> tryAddOrNull(operationalRestrictionToCim(feature, this))
-//
-//                // IEC61970 BASE AUXILIARY EQUIPMENT
-//                "FaultIndicator" -> tryAddOrNull(faultIndicatorToCim(feature, this))
-//
-//                // IEC61970 BASE CORE
-//                "BaseVoltage" -> tryAddOrNull(baseVoltageToCim(feature, this))
-//                "Feeder" -> tryAddOrNull(feederToCim(feature, this, headEquipment))
-//                "GeographicalRegion" -> tryAddOrNull(geographicalRegionToCim(feature, this))
-//                "NameType" -> nameTypeToCim(feature, this) // special case
-//                "Site" -> tryAddOrNull(siteToCim(feature, this))
-//                "SubGeographicalRegion" -> tryAddOrNull(subGeographicalRegionToCim(feature, this))
-//                "Substation" -> tryAddOrNull(substationToCim(feature, this))
-//
-//                // IEC61970 BASE BASE EQUIVALENTS
-//                "EquivalentBranch" -> tryAddOrNull(equivalentBranchToCim(feature, this))
-//
-//                // IEC61970 BASE MEAS
-//                "Analog" -> tryAddOrNull(analogToCim(feature, this))
-//                "Accumulator" -> tryAddOrNull(accumulatorToCim(feature, this))
-//                "Control" -> tryAddOrNull(controlToCim(feature, this))
-//                "Discrete" -> tryAddOrNull(discreteToCim(feature, this))
-//
-//                // IEC61970 BASE SCADA
-//                "RemoteControl" -> tryAddOrNull(remoteControlToCim(feature, this))
-//                "RemoteSource" -> tryAddOrNull(remoteSourceToCim(feature, this))
-//
-//                // IEC61970 BASE WIRES GENERATION PRODUCTION
-//                "BatteryUnit" -> tryAddOrNull(batteryUnitToCim(feature, this))
-//                "PhotoVoltaicUnit" -> tryAddOrNull(photoVoltaicUnitToCim(feature, this))
-//                "PowerElectronicsWindUnit" -> tryAddOrNull(powerElectronicsWindUnitToCim(feature, this))
-//
-//                // IEC61970 BASE WIRES
-//                "AcLineSegment" -> tryAddOrNull(acLineSegmentToCim(feature, this, connectivity))
-//                "Breaker" -> tryAddOrNull(breakerToCim(feature, this))
-//                "BusbarSection" -> tryAddOrNull(busbarSectionToCim(feature, this))
-//                "Disconnector" -> tryAddOrNull(disconnectorToCim(feature, this))
-//                "EnergyConsumer" -> tryAddOrNull(energyConsumerToCim(feature, this))
-//                "EnergyConsumerPhase" -> tryAddOrNull(energyConsumerPhaseToCim(feature, this))
-//                "EnergySource" -> tryAddOrNull(energySourceToCim(feature, this))
-//                "EnergySourcePhase" -> tryAddOrNull(energySourcePhaseToCim(feature, this))
-//                "Fuse" -> tryAddOrNull(fuseToCim(feature, this))
-//                "Jumper" -> tryAddOrNull(jumperToCim(feature, this))
-//                "Junction" -> tryAddOrNull(junctionToCim(feature, this))
-//                "LinearShuntCompensator" -> tryAddOrNull(linearShuntCompensatorToCim(feature, this))
-//                "LoadBreakSwitch" -> tryAddOrNull(loadBreakSwitchToCim(feature, this))
-//                "PerLengthSequenceImpedance" -> tryAddOrNull(perLengthSequenceImpedanceToCim(feature, this))
-//                "PowerElectronicsConnection" -> tryAddOrNull(powerElectronicsConnectionToCim(feature, this))
-//                "PowerElectronicsConnectionPhase" -> tryAddOrNull(powerElectronicsConnectionPhaseToCim(feature, this))
-//                "PowerTransformer" -> tryAddOrNull(powerTransformerToCim(feature, this))
-//                "PowerTransformerEnd" -> tryAddOrNull(powerTransformerEndToCim(feature, this))
-//                "RatioTapChanger" -> tryAddOrNull(ratioTapChangerToCim(feature, this))
-//                "Recloser" -> tryAddOrNull(recloserToCim(feature, this))
-//                "TransformerStarImpedance" -> tryAddOrNull(transformerStarImpedanceToCim(feature, this))
-//
-//                // IEC61970 InfIEC61970 Feeder
-//                "Circuit" -> tryAddOrNull(circuitToCim(feature, this, endEquipment))
-//                "Loop" -> tryAddOrNull(loopToCim(feature, this))
-//
-//                else -> throw IllegalArgumentException("Serialiasing class $clazz from feature is not currently supported")
-//            }
-//        }
 
 }
 
