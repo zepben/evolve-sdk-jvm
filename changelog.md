@@ -22,15 +22,16 @@
 * Added API calls for getting loops.
 * Added `RunStreaming` examples to the tests, which can be used to talk to a real server.
 * Added the following CIM classes:
-  * EquivalentBranch
-  * EquivalentEquipment
-  * NoLoadTest
-  * OpenCircuitTest
-  * ShortCircuitTest
-  * TransformerTest
+  * `EquivalentBranch`
+  * `EquivalentEquipment`
+  * `NoLoadTest`
+  * `OpenCircuitTest`
+  * `ShortCircuitTest`
+  * `TransformerTest`
 * Objects that belong to a parent object will now be automatically assigned if the parent is null when added. e.g. a `Terminal`
   with no `ConductingEquipment` will be automatically associated to any `ConductingEquipment` to which it is added.
 * Added a helper function to `Breaker` to identify if it is the head of a `Feeder`.
+* Added `isVirtual` and `connectionCategory` to `UsagePoint`
 
 ##### Enhancements
 

@@ -221,11 +221,9 @@ class NetworkServiceComparator @JvmOverloads constructor(var options: NetworkSer
             compareIdentifiedObject()
 
             compareIdReferences(UsagePoint::usagePointLocation)
+            compareValues(UsagePoint::isVirtual, UsagePoint::connectionCategory)
             if (options.compareLvSimplification)
-                compareIdReferenceCollections(UsagePoint::equipment)
-
-            if (options.compareLvSimplification)
-                compareIdReferenceCollections(UsagePoint::endDevices)
+                compareIdReferenceCollections(UsagePoint::equipment, UsagePoint::endDevices)
         }
 
     /************ IEC61968 OPERATIONS ************/

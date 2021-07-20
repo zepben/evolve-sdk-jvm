@@ -328,6 +328,8 @@ fun toCim(pb: PBMeter, networkService: NetworkService): Meter =
 fun toCim(pb: PBUsagePoint, networkService: NetworkService): UsagePoint =
     UsagePoint(pb.mRID()).apply {
         networkService.resolveOrDeferReference(Resolvers.usagePointLocation(this), pb.usagePointLocationMRID)
+        isVirtual = pb.isVirtual
+        connectionCategory = pb.connectionCategory.takeIf { it.isNotBlank() }
 
         pb.equipmentMRIDsList.forEach { equipmentMRID ->
             networkService.resolveOrDeferReference(Resolvers.equipment(this), equipmentMRID)

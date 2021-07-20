@@ -334,6 +334,8 @@ class NetworkCIMWriter(databaseTables: DatabaseTables) : BaseCIMWriter(databaseT
         val insert = databaseTables.getInsert(TableUsagePoints::class.java)
 
         insert.setNullableString(table.LOCATION_MRID.queryIndex, usagePoint.usagePointLocation?.mRID)
+        insert.setBoolean(table.IS_VIRTUAL.queryIndex, usagePoint.isVirtual)
+        insert.setNullableString(table.CONNECTION_CATEGORY.queryIndex, usagePoint.connectionCategory)
 
         var status = true
         usagePoint.equipment.forEach { status = status and saveAssociation(it, usagePoint) }

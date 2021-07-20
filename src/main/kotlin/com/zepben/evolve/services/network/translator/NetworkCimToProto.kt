@@ -336,6 +336,8 @@ fun toPb(cim: Meter, pb: PBMeter.Builder): PBMeter.Builder =
 fun toPb(cim: UsagePoint, pb: PBUsagePoint.Builder): PBUsagePoint.Builder =
     pb.apply {
         cim.usagePointLocation?.let { usagePointLocationMRID = it.mRID } ?: clearUsagePointLocationMRID()
+        isVirtual = cim.isVirtual
+        cim.connectionCategory?.let { connectionCategory = it } ?: clearConnectionCategory()
         clearEquipmentMRIDs()
         cim.equipment.forEach { addEquipmentMRIDs(it.mRID) }
         clearEndDeviceMRIDs()

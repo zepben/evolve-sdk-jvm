@@ -314,8 +314,9 @@ class NetworkCIMReader(private val networkService: NetworkService) : BaseCIMRead
 
     fun load(table: TableUsagePoints, resultSet: ResultSet, setLastMRID: (String) -> String): Boolean {
         val usagePoint = UsagePoint(setLastMRID(resultSet.getString(table.MRID.queryIndex))).apply {
-            usagePointLocation =
-                networkService.ensureGet(resultSet.getNullableString(table.LOCATION_MRID.queryIndex), typeNameAndMRID())
+            usagePointLocation = networkService.ensureGet(resultSet.getNullableString(table.LOCATION_MRID.queryIndex), typeNameAndMRID())
+            isVirtual = resultSet.getBoolean(table.IS_VIRTUAL.queryIndex)
+            connectionCategory = resultSet.getNullableString(table.CONNECTION_CATEGORY.queryIndex)
         }
 
         return loadIdentifiedObject(usagePoint, table, resultSet) && networkService.addOrThrow(usagePoint)

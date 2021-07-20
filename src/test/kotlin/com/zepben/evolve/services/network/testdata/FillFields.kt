@@ -268,6 +268,8 @@ fun UsagePoint.fillFields(service: NetworkService, includeRuntime: Boolean = tru
     (this as IdentifiedObject).fillFieldsCommon(service, includeRuntime)
 
     usagePointLocation = Location().also { service.add(it) }
+    isVirtual = true
+    connectionCategory = "connectionCategory"
 
     for (i in 0..1) {
         addEquipment(Junction().also {
