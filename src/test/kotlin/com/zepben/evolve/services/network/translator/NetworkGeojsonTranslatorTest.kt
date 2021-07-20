@@ -144,7 +144,7 @@ internal class NetworkGeojsonTranslatorTest {
 //        validate({ LoadBreakSwitch() }, { ns, it -> it.fillFields(ns) }, { ns, it -> ns.tryAddOrNull(loadBreakSwitchToCim(loadBreakSwitchToGeojson(it), ns)) })
         validate({ PerLengthSequenceImpedance() }, { ns, it -> it.fillFields(ns) }, { ns, it -> ns.tryAddOrNull(perLengthSequenceImpedanceToCim(perLengthSequenceImpedanceToGeojson(it), ns)) })
 //        validate({ PowerTransformer() }, { ns, it -> it.fillFields(ns) }, { ns, it -> ns.tryAddOrNull(powerTransformerToCim(powerTransformerToGeojson(it), ns)) })
-        validate({ PowerTransformerEnd() }, { ns, it -> it.fillFields(ns) }, { ns, it -> ns.tryAddOrNull(powerTransformerEndToCim(powerTransformerEndToGeojson(it), ns)) })
+//        validate({ PowerTransformerEnd() }, { ns, it -> it.fillFields(ns) }, { ns, it -> ns.tryAddOrNull(powerTransformerEndToCim(powerTransformerEndToGeojson(it), ns)) })
         validate({ RatioTapChanger() }, { ns, it -> it.fillFields(ns) }, { ns, it -> ns.tryAddOrNull(ratioTapChangerToCim(ratioTapChangerToGeojson(it), ns)) })
 //        validate({ Recloser() }, { ns, it -> it.fillFields(ns) }, { ns, it -> ns.tryAddOrNull(recloserToCim(recloserToGeojson(it), ns)) })
         validate({ TransformerStarImpedance() }, { ns, it -> it.fillFields(ns) }, { ns, it -> ns.tryAddOrNull(transformerStarImpedanceToCim(transformerStarImpedanceToGeojson(it), ns)) })
