@@ -15,6 +15,8 @@ import com.zepben.evolve.database.sqlite.tables.iec61970.base.core.TableIdentifi
 class TableUsagePoints : TableIdentifiedObjects() {
 
     val LOCATION_MRID = Column(++columnIndex, "location_mrid", "TEXT", NULL)
+    val IS_VIRTUAL = Column(++columnIndex, "is_virtual", "BOOLEAN")
+    val CONNECTION_CATEGORY = Column(++columnIndex, "connection_category", "TEXT", NULL)
 
     override fun name(): String {
         return "usage_points"

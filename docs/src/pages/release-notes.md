@@ -47,20 +47,20 @@ NOTE: This library is not yet stable, and breaking changes should be expected un
 
 * New class `SwitchStateClient` that allows you to set the current state of switches via a gRPC service.
 
-* BaseService has two new functions which allow retrieving the UnresolvedReferences for an mRID by either `toMrid` or `from.mRID`: 
+* BaseService has two new functions which allow retrieving the UnresolvedReferences for an mRID by either `toMrid` or `from.mRID`:
   - getUnresolvedReferencesTo(mRID: String): Sequence<UnresolvedReference<*,*>>
   - getUnresolvedReferencesFrom(mRID: String): Sequence<UnresolvedReference<*,*>>
 
 * Added the following classes:
-    * LoadBreakSwitch
-    * TransformerEndInfo
-    * TransformerTankInfo
-    * TransformerStarImpedance
-    * Name
-    * NameType
-    
-* New class `JwtCredentials` added to support managing OAuth2 refresh tokens from Auth0. To be using with the gRPC Consumer and Producer clients which now
-also accept `JwtCredentials` or other `CallCredentials` at initialisation to apply to the stub.
+  * `LoadBreakSwitch`
+  * `TransformerEndInfo`
+  * `TransformerTankInfo`
+  * `TransformerStarImpedance`
+  * `Name`
+  * `NameType`
+
+* New class `JwtCredentials` added to support managing OAuth2 refresh tokens from Auth0. To be using with the gRPC Consumer and Producer clients which now also
+  accept `JwtCredentials` or other `CallCredentials` at initialisation to apply to the stub.
 
 ##### Enhancements
 * Added some better testing mechanism for database upgrades.
@@ -84,13 +84,14 @@ also accept `JwtCredentials` or other `CallCredentials` at initialisation to app
  None.
 
 ##### New Features
+
 * Added the following classes:
-  * BatteryUnit
-  * BusbarSection
-  * PhotoVoltaicUnit
-  * PowerElectronicsConnection
-  * PowerElectronicsConnectionPhase
-  * PowerElectronicsWindUnit
+  * `BatteryUnit`
+  * `BusbarSection`
+  * `PhotoVoltaicUnit`
+  * `PowerElectronicsConnection`
+  * `PowerElectronicsConnectionPhase`
+  * `PowerElectronicsWindUnit`
 
 ##### Enhancements
 * None.

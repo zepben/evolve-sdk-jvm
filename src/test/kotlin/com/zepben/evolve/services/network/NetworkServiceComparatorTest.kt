@@ -254,6 +254,8 @@ internal class NetworkServiceComparatorTest : BaseServiceComparatorTest() {
         compareIdentifiedObject { UsagePoint(it) }
 
         comparatorValidator.validateProperty(UsagePoint::usagePointLocation, { UsagePoint(it) }, { Location("l1") }, { Location("l2") })
+        comparatorValidator.validateProperty(UsagePoint::isVirtual, { UsagePoint(it) }, { false }, { true })
+        comparatorValidator.validateProperty(UsagePoint::connectionCategory, { UsagePoint(it) }, { "first" }, { "second" })
         comparatorValidator.validateCollection(
             UsagePoint::endDevices,
             UsagePoint::addEndDevice,

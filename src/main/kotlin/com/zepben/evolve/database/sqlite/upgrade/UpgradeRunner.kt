@@ -46,6 +46,7 @@ class UpgradeRunner constructor(
             changeSet32(),
             changeSet33(),
             changeSet34(),
+            changeSet35(),
         ).asUnmodifiable()
 ) {
 

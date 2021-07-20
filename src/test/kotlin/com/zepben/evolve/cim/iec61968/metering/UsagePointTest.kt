@@ -7,8 +7,9 @@
  */
 package com.zepben.evolve.cim.iec61968.metering
 
-import com.zepben.evolve.cim.iec61968.common.Location
 import com.zepben.evolve.cim.iec61970.base.core.Equipment
+import com.zepben.evolve.services.network.NetworkService
+import com.zepben.evolve.services.network.testdata.fillFields
 import com.zepben.evolve.utils.PrivateCollectionValidator
 import com.zepben.testutils.junit.SystemLogExtension
 import org.hamcrest.MatcherAssert.assertThat
@@ -31,13 +32,16 @@ internal class UsagePointTest {
     @Test
     internal fun accessorCoverage() {
         val usagePoint = UsagePoint()
-        val location = Location()
 
         assertThat(usagePoint.usagePointLocation, nullValue())
+        assertThat(usagePoint.isVirtual, equalTo(false))
+        assertThat(usagePoint.connectionCategory, nullValue())
 
-        usagePoint.usagePointLocation = location
+        usagePoint.fillFields(NetworkService(), true)
 
-        assertThat(usagePoint.usagePointLocation, equalTo(location))
+        assertThat(usagePoint.usagePointLocation, notNullValue())
+        assertThat(usagePoint.isVirtual, equalTo(true))
+        assertThat(usagePoint.connectionCategory, equalTo("connectionCategory"))
     }
 
     @Test
