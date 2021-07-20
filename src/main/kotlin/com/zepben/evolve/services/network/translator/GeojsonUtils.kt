@@ -11,23 +11,23 @@ package com.zepben.evolve.services.network.translator
 import kotlinx.serialization.json.*
 
 
-fun Map<String, JsonElement>.getIntList(key: String): List<Int>? = this[key]?.let { if (it is JsonArray) it.filterIsInstance(Int::class.java) else null }
+internal fun Map<String, JsonElement>.getIntList(key: String): List<Int>? = this[key]?.let { if (it is JsonArray) it.filterIsInstance(Int::class.java) else null }
 
-fun Map<String, JsonElement>.getStringList(key: String): List<String>? = this[key]?.let {
+internal fun Map<String, JsonElement>.getStringList(key: String): List<String>? = this[key]?.let {
     if (it is JsonArray)
         it.filterIsInstance(JsonPrimitive::class.java).map { json -> json.content }
     else
         null
 }
 
-fun Map<String, JsonElement>.getList(key: String): MutableList<JsonElement>? = this[key].let {
+internal fun Map<String, JsonElement>.getList(key: String): MutableList<JsonElement>? = this[key].let {
     if (it is JsonArray)
         it.toMutableList()
     else
         null
 }
 
-fun Map<String, JsonElement>.getMap(key: String): MutableMap<String, JsonElement>? = this[key].let {
+internal fun Map<String, JsonElement>.getMap(key: String): MutableMap<String, JsonElement>? = this[key].let {
     if (it is JsonObject)
         it.toMutableMap()
     else
@@ -41,7 +41,7 @@ fun Map<String, JsonElement>.getMap(key: String): MutableMap<String, JsonElement
  *
  * Warning: This does not support lists of maps where the keys are not Strings and will throw a ClassCastException if you use keys other than Strings in your json.
  */
-fun Map<String, JsonElement>.getMapList(key: String): MutableList<MutableMap<String, JsonElement>>? = this[key].let {
+internal fun Map<String, JsonElement>.getMapList(key: String): MutableList<MutableMap<String, JsonElement>>? = this[key].let {
     if (it is JsonArray)
         it.filterIsInstance(JsonObject::class.java).map { map ->
             map.toMutableMap()
@@ -50,32 +50,32 @@ fun Map<String, JsonElement>.getMapList(key: String): MutableList<MutableMap<Str
         null
 }
 
-fun MutableMap<String, JsonElement>.put(key: String, value: String) {
+internal fun MutableMap<String, JsonElement>.put(key: String, value: String) {
     this[key] = JsonPrimitive(value)
 }
 
-fun MutableMap<String, JsonElement>.put(key: String, value: Number) {
+internal fun MutableMap<String, JsonElement>.put(key: String, value: Number) {
     this[key] = JsonPrimitive(value)
 }
 
-fun MutableMap<String, JsonElement>.put(key: String, value: Boolean) {
+internal fun MutableMap<String, JsonElement>.put(key: String, value: Boolean) {
     this[key] = JsonPrimitive(value)
 }
 
-fun MutableMap<String, JsonElement>.put(key: String, value: List<JsonElement>) {
+internal fun MutableMap<String, JsonElement>.put(key: String, value: List<JsonElement>) {
     this[key] = JsonArray(value)
 }
 
-fun MutableMap<String, JsonElement>.put(key: String, value: Map<String, JsonElement>) {
+internal fun MutableMap<String, JsonElement>.put(key: String, value: Map<String, JsonElement>) {
     this[key] = JsonObject(value)
 }
 
-fun Map<String, JsonElement>.getString(key: String): String? = this[key]?.jsonPrimitive?.contentOrNull
+internal fun Map<String, JsonElement>.getString(key: String): String? = this[key]?.jsonPrimitive?.contentOrNull
 
-fun Map<String, JsonElement>.getInt(key: String): Int? = this[key]?.jsonPrimitive?.intOrNull
+internal fun Map<String, JsonElement>.getInt(key: String): Int? = this[key]?.jsonPrimitive?.intOrNull
 
-fun Map<String, JsonElement>.getLong(key: String): Long? = this[key]?.jsonPrimitive?.longOrNull
+internal fun Map<String, JsonElement>.getLong(key: String): Long? = this[key]?.jsonPrimitive?.longOrNull
 
-fun Map<String, JsonElement>.getBoolean(key: String): Boolean? = this[key]?.jsonPrimitive?.booleanOrNull
+internal fun Map<String, JsonElement>.getBoolean(key: String): Boolean? = this[key]?.jsonPrimitive?.booleanOrNull
 
-fun Map<String, JsonElement>.getDouble(key: String): Double? = this[key]?.jsonPrimitive?.let { it.doubleOrNull ?: it.intOrNull?.toDouble() }
+internal fun Map<String, JsonElement>.getDouble(key: String): Double? = this[key]?.jsonPrimitive?.let { it.doubleOrNull ?: it.intOrNull?.toDouble() }
