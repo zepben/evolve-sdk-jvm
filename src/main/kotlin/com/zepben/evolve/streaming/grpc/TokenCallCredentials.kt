@@ -8,6 +8,7 @@
 
 package com.zepben.evolve.streaming.grpc
 
+import com.zepben.auth.common.AuthException
 import io.grpc.CallCredentials
 import io.grpc.Metadata
 import io.grpc.Metadata.ASCII_STRING_MARSHALLER
@@ -32,7 +33,22 @@ class TokenCallCredentials(private val getToken: () -> String) : CallCredentials
             headers.put(AUTHORIZATION_METADATA_KEY, getToken())
             applier.apply(headers)
         } catch (e: Exception) {
-            applier.fail(Status.fromThrowable(e))
+            when (e) {
+                //UNAVAILABLE used here to match python sdk behaviour that we don't control
+                is AuthException -> {
+                    val grpcStatusCode = when (e.statusCode) {
+                        401 -> Status.UNAVAILABLE //Unauthorized / wrong client ID
+                        403 -> Status.UNAVAILABLE //invalid_grant / wrong email or password
+                        429 -> Status.UNAVAILABLE //user blocked / too many requests
+                        else -> Status.UNAUTHENTICATED
+                    }
+                    return applier.fail(
+                        grpcStatusCode.withDescription("Getting authorization data from token fetcher failed with error: $e").withCause(e)
+                    )
+                }
+                else -> applier.fail(Status.fromThrowable(e.cause ?: e))
+            }
+
         }
     }
 
