@@ -12,32 +12,48 @@ import com.zepben.evolve.cim.iec61970.base.core.PhaseCode
 import com.zepben.evolve.services.network.tracing.connectivity.ConnectivityResult
 import com.zepben.evolve.services.network.tracing.connectivity.TerminalConnectivityConnected
 import com.zepben.evolve.services.network.tracing.networktrace.NetworkTraceStep
+import com.zepben.evolve.services.network.tracing.networktrace.TerminalToTerminalTraceStep
 import com.zepben.evolve.services.network.tracing.traversalV2.QueueConditionWithContextData
 import com.zepben.evolve.services.network.tracing.traversalV2.StepContext
-import java.util.IdentityHashMap
 
 internal class PhaseCondition<T>(
     val phases: PhaseCode
 ) : QueueConditionWithContextData<NetworkTraceStep<T>, ConnectivityResult> {
 
     private val terminalConnectivity = TerminalConnectivityConnected()
-    private val precalculatedResults = IdentityHashMap<NetworkTraceStep<T>, ConnectivityResult>()
+    private var precalculatedResult: ConnectivityResult? = null
 
     override fun shouldQueue(nextItem: NetworkTraceStep<T>, currentContext: StepContext): Boolean {
         val connectivity = currentContext.terminalConnectivity()
-        TODO("Fix !! in the code below")
-        return terminalConnectivity.terminalConnectivity(nextItem.fromTerminal!!, nextItem.toTerminal!!, connectivity.toNominalPhases.toSet())
-            .also { precalculatedResults[nextItem] = it }
-            .nominalPhasePaths.isNotEmpty()
+        return when (nextItem) {
+            is TerminalToTerminalTraceStep -> {
+                val cr = terminalConnectivity.terminalConnectivity(nextItem.fromTerminal, nextItem.toTerminal, connectivity.toNominalPhases.toSet())
+                if (cr.nominalPhasePaths.isNotEmpty()) {
+                    precalculatedResult = cr
+                    true
+                } else {
+                    precalculatedResult = null
+                    false
+                }
+            }
+        }
     }
 
     override fun computeInitialValue(nextItem: NetworkTraceStep<T>): ConnectivityResult {
-        TODO("Fix !! in the code below")
-        return terminalConnectivity.terminalConnectivity(nextItem.toTerminal!!, nextItem.toTerminal!!, phases.singlePhases.toSet())
+        return when (nextItem) {
+            is TerminalToTerminalTraceStep -> {
+                terminalConnectivity.terminalConnectivity(nextItem.toTerminal, nextItem.toTerminal, phases.singlePhases.toSet())
+            }
+        }
     }
 
     override fun computeNextValue(nextItem: NetworkTraceStep<T>, value: ConnectivityResult): ConnectivityResult {
-        return precalculatedResults.remove(nextItem) ?: error("INTERNAL ERROR: value should have been stored as part of queuing")
+        val result = precalculatedResult ?: error("INTERNAL ERROR: value should have been stored as part of queuing")
+        // Clear the result as this function should only ever be called once by the traversal for each call to shouldQueue.
+        // If that ever changes the assumption made by this class means this class needs to change and by making this null
+        // it should be easier to detect a problem rather than returning a stale result and causing weird things to happen.
+        precalculatedResult = null
+        return result
     }
 
     override val key: String
@@ -48,6 +64,7 @@ internal class PhaseCondition<T>(
     }
 }
 
+// TODO: Is this a suitable function name?
 fun StepContext.terminalConnectivity(): ConnectivityResult {
     return this.getData(PhaseCondition.contextKey) ?: error("Your trace needs to have PhaseCondition added to access this")
 }
