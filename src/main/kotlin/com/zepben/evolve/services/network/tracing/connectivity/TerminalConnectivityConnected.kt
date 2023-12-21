@@ -39,7 +39,7 @@ class TerminalConnectivityConnected @JvmOverloads constructor(
         return results
     }
 
-    private fun terminalConnectivity(
+    fun terminalConnectivity(
         terminal: Terminal,
         connectedTerminal: Terminal,
         includePhases: Set<SPK>

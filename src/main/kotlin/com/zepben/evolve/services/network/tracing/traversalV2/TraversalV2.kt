@@ -1,15 +1,15 @@
 /*
- * Copyright 2020 Zeppelin Bend Pty Ltd
+ * Copyright 2023 Zeppelin Bend Pty Ltd
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-package com.zepben.evolve.services.network.tracing.traversals
+package com.zepben.evolve.services.network.tracing.traversalV2
 
-import com.zepben.evolve.services.network.tracing.networktrace.StepContext
+import com.zepben.evolve.services.network.tracing.traversals.Tracker
+import com.zepben.evolve.services.network.tracing.traversals.TraversalQueue
 import java.util.*
-import java.util.function.Consumer
 
 /**
  *
@@ -29,24 +29,15 @@ abstract class TraversalV2<T, D : TraversalV2<T, D>>(
     private val queue: TraversalQueue<T>,
     val tracker: Tracker<T>
 ) {
-    fun interface ComputeContext<T> {
-        fun compute(item: T, key: String, context: StepContext): Any?
-    }
-
     /**
      * Represents a consumer that takes the current item of the traversal, and the traversal instance so items can be queued.
      *
      * @param T The type of object being traversed.
      */
     fun interface QueueNext<T, D : TraversalV2<T, D>> {
-        fun accept(item: T, context: StepContext, traversal: D)
+        fun accept(item: T, context: StepContext, queueItem: (T) -> Boolean, traversal: D)
     }
 
-    fun interface StepAction<T> {
-
-        fun apply(item: T, context: StepContext)
-
-    }
 
     /**
      * The item the traversal will start at, or `null` if it has not been set.
@@ -58,12 +49,12 @@ abstract class TraversalV2<T, D : TraversalV2<T, D>>(
 
     @Volatile
     private var hasRun = false
-    private val stopConditions = mutableListOf<(T, StepContext) -> Boolean>()
-    private val queueConditions = mutableListOf<(T, StepContext) -> Boolean>()
+    private val stopConditions = mutableListOf<StopCondition<T>>()
+    private val queueConditions = mutableListOf<QueueCondition<T>>()
     private val stepActions = mutableListOf<StepAction<T>>()
 
-    private val computeNextContextFuns: MutableMap<String, ComputeContext<T>> = mutableMapOf()
-    protected val contexts: IdentityHashMap<T, StepContext> = IdentityHashMap()
+    private val computeNextContextFuns: MutableMap<String, ContextDataComputer<T>> = mutableMapOf()
+    private val contexts: IdentityHashMap<T, StepContext> = IdentityHashMap()
 
     protected abstract fun getDerivedThis(): D
 
@@ -78,16 +69,21 @@ abstract class TraversalV2<T, D : TraversalV2<T, D>>(
      * @param condition A predicate that if returns true will cause the traversal to stop traversing the branch.
      * @return this traversal instance.
      */
-    fun addStopCondition(condition: (T, StepContext) -> Boolean): D {
+    fun addStopCondition(condition: StopCondition<T>): D {
         stopConditions.add(condition)
+        if (condition is StopConditionWithContextData<T, *>) {
+            computeNextContextFuns[condition.key] = condition
+        }
         return getDerivedThis()
     }
+
 
     /**
      * Clears all of the stop conditions registered on this traversal.
      */
     fun clearStopConditions(): D {
         stopConditions.clear()
+        computeNextContextFuns.entries.removeIf { it.value is StopCondition<*> }
         return getDerivedThis()
     }
 
@@ -99,6 +95,7 @@ abstract class TraversalV2<T, D : TraversalV2<T, D>>(
      */
     fun copyStopConditions(other: TraversalV2<T, D>): D {
         stopConditions.addAll(other.stopConditions)
+        computeNextContextFuns.putAll(other.computeNextContextFuns.filter { it.value is StopCondition<*> })
         return getDerivedThis()
     }
 
@@ -111,25 +108,30 @@ abstract class TraversalV2<T, D : TraversalV2<T, D>>(
      * @return true if any of the stop conditions return true.
      */
     fun matchesAnyStopCondition(item: T, context: StepContext): Boolean =
-        stopConditions.fold(false) { stop, condition -> stop or condition(item, context) }
+        stopConditions.fold(false) { stop, condition -> stop or condition.shouldStop(item, context) }
 
 
-    fun addQueueCondition(condition: (T, StepContext) -> Boolean): D {
+    fun addQueueCondition(condition: QueueCondition<T>): D {
         queueConditions.add(condition)
+        if (condition is QueueConditionWithContextData<T, *>) {
+            computeNextContextFuns[condition.key] = condition
+        }
         return getDerivedThis()
     }
 
     fun clearQueueConditions(): D {
         queueConditions.clear()
+        computeNextContextFuns.entries.removeIf { it is QueueCondition<*> }
         return getDerivedThis()
     }
 
     fun copyQueueConditions(other: TraversalV2<T, D>): D {
         queueConditions.addAll(other.queueConditions)
+        computeNextContextFuns.putAll(other.computeNextContextFuns.filter { it is QueueCondition<*> })
         return getDerivedThis()
     }
 
-    fun matchesAllQueueConditions(item: T, context: StepContext): Boolean = queueConditions.all { it(item, context) }
+    private fun matchesAllQueueConditions(item: T, context: StepContext): Boolean = queueConditions.all { it.shouldQueue(item, context) }
 
 
     /**
@@ -140,28 +142,9 @@ abstract class TraversalV2<T, D : TraversalV2<T, D>>(
      */
     fun addStepAction(action: StepAction<T>): D {
         stepActions.add(action)
-        return getDerivedThis()
-    }
-
-    /**
-     * Add a callback which is called for every item in the traversal (including the starting item).
-     *
-     * @param action Action to be called on each item in the traversal, without passing if the trace will stop on this step.
-     * @return this traversal instance.
-     */
-    fun addStepAction(action: Consumer<T>): D {
-        stepActions.add { it, _ -> action.accept(it) }
-        return getDerivedThis()
-    }
-
-    /**
-     * Add a callback which is called for every item in the traversal (including the starting item).
-     *
-     * @param action Action to be called on each item in the traversal, without passing if the trace will stop on this step.
-     * @return this traversal instance.
-     */
-    fun addStepAction(action: (item: T) -> Unit): D {
-        stepActions.add { it, _ -> action(it) }
+        if (action is StepActionWithContextData<T, *>) {
+            computeNextContextFuns[action.key] = action
+        }
         return getDerivedThis()
     }
 
@@ -171,8 +154,8 @@ abstract class TraversalV2<T, D : TraversalV2<T, D>>(
      * @param action Action to be called on each item in the traversal that is not being stopped on.
      * @return this traversal instance.
      */
-    fun ifNotStopping(action: (item: T, context: StepContext) -> Unit): D {
-        stepActions.add { it, context -> if (!context.isStopping) action(it, context) }
+    fun ifNotStopping(action: StepAction<T>): D {
+        stepActions.add { it, context -> if (!context.isStopping) action.apply(it, context) }
         return getDerivedThis()
     }
 
@@ -182,8 +165,8 @@ abstract class TraversalV2<T, D : TraversalV2<T, D>>(
      * @param action Action to be called on each item in the traversal that is being stopped on.
      * @return this traversal instance.
      */
-    fun ifStopping(action: (item: T, context: StepContext) -> Unit): D {
-        stepActions.add { it, context -> if (context.isStopping) action(it, context) }
+    fun ifStopping(action: StepAction<T>): D {
+        stepActions.add { it, context -> if (context.isStopping) action.apply(it, context) }
         return getDerivedThis()
     }
 
@@ -192,6 +175,7 @@ abstract class TraversalV2<T, D : TraversalV2<T, D>>(
      */
     fun clearStepActions(): D {
         stepActions.clear()
+        computeNextContextFuns.entries.removeIf { it is StepAction<*> }
         return getDerivedThis()
     }
 
@@ -203,6 +187,7 @@ abstract class TraversalV2<T, D : TraversalV2<T, D>>(
      */
     fun copyStepActions(other: TraversalV2<T, D>): D {
         stepActions.addAll(other.stepActions)
+        computeNextContextFuns.putAll(other.computeNextContextFuns.filter { it is StepAction<*> })
         return getDerivedThis()
     }
 
@@ -217,24 +202,38 @@ abstract class TraversalV2<T, D : TraversalV2<T, D>>(
         return getDerivedThis()
     }
 
-    fun addComputeNextContext(key: String, compute: ComputeContext<T>?): D {
-        if (compute == null)
-            computeNextContextFuns.remove(key)
+    fun setContextDataComputer(key: String, computer: ContextDataComputer<T>?): D {
+        if (computer != null)
+            computeNextContextFuns[key] = computer
         else
-            computeNextContextFuns[key] = compute
+            computeNextContextFuns.remove(key)
 
         return getDerivedThis()
     }
 
-    private fun computeNextContext(nextStep: T, context: StepContext): StepContext {
+    fun clearContextDataComputers(): D {
+        computeNextContextFuns.entries.removeIf { it.value.isStandaloneComputer() }
+        return getDerivedThis()
+    }
+
+    fun copyContextDataComputers(other: TraversalV2<T, D>): D {
+        computeNextContextFuns.putAll(other.computeNextContextFuns.filter { it.value.isStandaloneComputer() })
+        return getDerivedThis()
+    }
+
+    private fun computeNextContext(nextStep: T, context: StepContext?): StepContext {
         var newContextData: MutableMap<String, Any?>? = null
 
         for ((key, computer) in computeNextContextFuns) {
             newContextData = newContextData ?: mutableMapOf()
-            newContextData[key] = computer.compute(nextStep, key, context)
+            if (context == null)
+                newContextData[key] = computer.computeInitialValue(nextStep)
+            else
+                newContextData[key] = computer.computeNextValue(nextStep, context.getData(key))
         }
 
-        return StepContext(context.stepNumber + 1, newContextData)
+        val nextStepNum = if (context == null) 0 else context.stepNumber + 1
+        return StepContext(context == null, nextStepNum, newContextData)
     }
 
     /**
@@ -299,7 +298,7 @@ abstract class TraversalV2<T, D : TraversalV2<T, D>>(
         startItem?.let {
             queue.add(it)
             canStop = canStopOnStartItem
-            contexts[it] = computeNextContext(it, StepContext())
+            contexts[it] = computeNextContext(it, null)
         }
 
         while (queue.hasNext()) {
@@ -310,8 +309,17 @@ abstract class TraversalV2<T, D : TraversalV2<T, D>>(
 
                     applyStepActions(current, context)
 
-                    if (!context.isStopping)
-                        queueNext.accept(current, context, getDerivedThis())
+                    if (!context.isStopping) {
+                        val queueNextItem = { nextItem: T ->
+                            val queued = queueItem(nextItem, context)
+                            if (queued) {
+                                contexts[nextItem] = computeNextContext(nextItem, context)
+                            }
+                            queued
+                        }
+
+                        queueNext.accept(current, context, queueNextItem, getDerivedThis())
+                    }
 
                     canStop = true
                 }
@@ -319,17 +327,14 @@ abstract class TraversalV2<T, D : TraversalV2<T, D>>(
         }
     }
 
-    fun queueItem(nextItem: T, currentContext: StepContext): Boolean {
-        val queued = if (matchesAllQueueConditions(nextItem, currentContext))
+    private fun queueItem(nextItem: T, currentContext: StepContext): Boolean {
+        return if (matchesAllQueueConditions(nextItem, currentContext))
             queue.add(nextItem)
         else
             false
-
-        if (queued) {
-            contexts[nextItem] = computeNextContext(nextItem, currentContext)
-        }
-
-        return queued
     }
+
+    private fun ContextDataComputer<*>.isStandaloneComputer() =
+        this !is StepAction<*> && this !is StopCondition<*> && this !is QueueCondition<*>
 
 }

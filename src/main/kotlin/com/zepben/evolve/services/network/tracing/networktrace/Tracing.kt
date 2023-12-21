@@ -14,43 +14,53 @@ import com.zepben.evolve.services.network.tracing.traversals.TraversalQueue
 object Tracing {
 
     fun <T> connectedEquipmentTrace(queue: TraversalQueue<NetworkTraceStep<T>> = BasicQueue.depthFirst()): NetworkTrace<T> {
-        val queueNext = NetworkTrace.QueueNext<T> { ts, ctx, t ->
+        val queueNext = NetworkTrace.QueueNext<T> { ts, ctx, queueItem, t ->
             ts.toEquipment.terminals
                 .filter { it != ts.toTerminal }
                 .flatMap { it.connectedTerminals() }
                 .map {
-                    NetworkTraceStep(
-                        ts.toTerminal,
-                        it,
-                        ts.nTerminalSteps + 1,
-                        ts.nEquipmentSteps + 1,
-                        t.computeNextData(ts, it, ctx)
-                    )
+                    when (ts) {
+                        is TerminalToTerminalTraceStep -> {
+                            TerminalToTerminalTraceStep(
+                                ts.toTerminal,
+                                it,
+                                ts.nTerminalSteps + 1,
+                                ts.nEquipmentSteps + 1,
+                                t.computeNextData(ts, it, ctx),
+                            )
+                        }
+                    }
                 }
-                .forEach { t.queueItem(it, ctx) }
+                .forEach { queueItem(it) }
         }
 
         return NetworkTrace(queueNext, queue, NetworkTraceTracker { it.toEquipment })
     }
 
     fun <T> connectedTerminalTrace(): NetworkTrace<T> {
-        val queueNext = NetworkTrace.QueueNext<T> { ts, ctx, t ->
+        val queueNext = NetworkTrace.QueueNext<T> { ts, ctx, queueItem, t ->
             // Check if we last moved between equipment, or across it.
-            val terminals = if (ts.steppedInternally) ts.toTerminal.connectedTerminals() else ts.toTerminal.otherTerminals()
-            terminals.forEach {
-                val nextStep = NetworkTraceStep(
-                    ts.toTerminal,
-                    it,
-                    ts.nTerminalSteps + 1,
-                    if (ts.steppedInternally) ts.nEquipmentSteps else ts.nEquipmentSteps + 1,
-                    t.computeNextData(ts, it, ctx)
-                )
+            // TODO: Should we handle the TerminalToTerminalTraceStep cast here?
+            val terminals = if (ts.steppedInternally) ts.toTerminal?.connectedTerminals() else ts.toTerminal?.otherTerminals()
+            terminals?.forEach {
+                val nextStep = when (ts) {
+                    is TerminalToTerminalTraceStep -> {
+                        TerminalToTerminalTraceStep(
+                            ts.toTerminal,
+                            it,
+                            ts.nTerminalSteps + 1,
+                            if (ts.steppedInternally) ts.nEquipmentSteps else ts.nEquipmentSteps + 1,
+                            t.computeNextData(ts, it, ctx)
+                        )
+                    }
+                }
 
-                t.queueItem(nextStep, ctx)
+                queueItem(nextStep)
             }
         }
 
         return NetworkTrace(queueNext, BasicQueue.depthFirst(), NetworkTraceTracker { it.toTerminal })
     }
+
 }
 

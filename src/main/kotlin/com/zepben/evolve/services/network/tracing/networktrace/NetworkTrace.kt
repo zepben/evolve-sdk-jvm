@@ -9,15 +9,18 @@
 package com.zepben.evolve.services.network.tracing.networktrace
 
 import com.zepben.evolve.cim.iec61970.base.core.ConductingEquipment
+import com.zepben.evolve.cim.iec61970.base.core.PhaseCode
 import com.zepben.evolve.cim.iec61970.base.core.Terminal
 import com.zepben.evolve.cim.iec61970.base.wires.SinglePhaseKind
 import com.zepben.evolve.services.network.tracing.OpenTest
 import com.zepben.evolve.services.network.tracing.feeder.FeederDirection
+import com.zepben.evolve.services.network.tracing.networktrace.conditions.*
 import com.zepben.evolve.services.network.tracing.networktrace.conditions.DirectionCondition
-import com.zepben.evolve.services.network.tracing.networktrace.conditions.EquipmentStepLimitCondition
-import com.zepben.evolve.services.network.tracing.networktrace.conditions.NetworkTraceCondition
 import com.zepben.evolve.services.network.tracing.networktrace.conditions.OpenCondition
-import com.zepben.evolve.services.network.tracing.traversals.*
+import com.zepben.evolve.services.network.tracing.traversalV2.StepContext
+import com.zepben.evolve.services.network.tracing.traversalV2.TraversalV2
+import com.zepben.evolve.services.network.tracing.traversals.Tracker
+import com.zepben.evolve.services.network.tracing.traversals.TraversalQueue
 
 class NetworkTrace<T>(
     queueNext: QueueNext<T>,
@@ -43,58 +46,59 @@ class NetworkTrace<T>(
         computeData?.invoke(step, nextTerminal, context)
 
     fun run(start: Terminal, canStopOnStartItem: Boolean = true, context: T? = null) {
-        setStart(NetworkTraceStep(start, start, 0, 0, context))
+        setStart(TerminalToTerminalTraceStep(start, start, 0, 0, context))
         run(canStopOnStartItem)
     }
 
     fun run(start: ConductingEquipment, canStopOnStartItem: Boolean = true) {
         // TODO: How to support multiple start items?
-        start.terminals.forEach { queueItem(NetworkTraceStep(it, it, 0, 0, null), StepContext()) }
-        run(canStopOnStartItem)
+//        start.terminals.forEach { queueItem(NetworkTraceStep(it, it, 0, 0, null), StepContext()) }
+//        run(canStopOnStartItem)
     }
 
     fun normallyUpstream(): NetworkTrace<T> {
-        addCondition(DirectionCondition(FeederDirection.UPSTREAM, Terminal::normalFeederDirection))
+        addQueueCondition(DirectionCondition(FeederDirection.UPSTREAM, Terminal::normalFeederDirection))
         return this
     }
 
     fun currentlyUpstream(): NetworkTrace<T> {
-        addCondition(DirectionCondition(FeederDirection.UPSTREAM, Terminal::currentFeederDirection))
+        addQueueCondition(DirectionCondition(FeederDirection.UPSTREAM, Terminal::currentFeederDirection))
         return this
     }
 
     fun normallyDownstream(): NetworkTrace<T> {
-        addCondition(DirectionCondition(FeederDirection.DOWNSTREAM, Terminal::normalFeederDirection))
+        addQueueCondition(DirectionCondition(FeederDirection.DOWNSTREAM, Terminal::normalFeederDirection))
         return this
     }
 
     fun currentlyDownstream(): NetworkTrace<T> {
-        addCondition(DirectionCondition(FeederDirection.DOWNSTREAM, Terminal::currentFeederDirection))
+        addQueueCondition(DirectionCondition(FeederDirection.DOWNSTREAM, Terminal::currentFeederDirection))
         return this
     }
 
     fun stopAtNormallyOpen(phase: SinglePhaseKind? = null): NetworkTrace<T> {
-        addCondition(OpenCondition(OpenTest.NORMALLY_OPEN, phase))
+        addQueueCondition(OpenCondition(OpenTest.NORMALLY_OPEN, phase))
         return this
     }
 
     fun stopAtCurrentlyOpen(phase: SinglePhaseKind? = null): NetworkTrace<T> {
-        addCondition(OpenCondition(OpenTest.CURRENTLY_OPEN, phase))
+        addQueueCondition(OpenCondition(OpenTest.CURRENTLY_OPEN, phase))
         return this
     }
 
-    fun limitSteps(limit: Int, equipmentType: Class<out ConductingEquipment>? = null): NetworkTrace<T> {
-        addCondition(EquipmentStepLimitCondition(limit, equipmentType))
+    fun limitEquipmentSteps(limit: Int): NetworkTrace<T> {
+        addStopCondition(EquipmentStepLimitCondition(limit))
         return this
     }
 
-    private fun addCondition(condition: NetworkTraceCondition<T>) {
-        addStopCondition(condition::stopCondition)
-        addQueueCondition(condition::queueCondition)
+    fun limitEquipmentSteps(limit: Int, equipmentType: Class<out ConductingEquipment>): NetworkTrace<T> {
+        addStopCondition(EquipmentTypeStepLimitCondition(limit, equipmentType))
+        return this
+    }
 
-        if (condition.usesContextData) {
-            addComputeNextContext(condition.contextDataKey, condition::computeNextContextData)
-        }
+    fun withPhases(phases: PhaseCode): NetworkTrace<T> {
+        addQueueCondition(PhaseCondition(phases))
+        return this
     }
 
     override fun getDerivedThis(): NetworkTrace<T> = this

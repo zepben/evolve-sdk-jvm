@@ -11,22 +11,43 @@ package com.zepben.evolve.services.network.tracing.networktrace
 import com.zepben.evolve.cim.iec61970.base.core.ConductingEquipment
 import com.zepben.evolve.cim.iec61970.base.core.Terminal
 
-class NetworkTraceStep<T>(
-    val fromTerminal: Terminal,
-    val toTerminal: Terminal,
-    val nTerminalSteps: Int,
-    val nEquipmentSteps: Int,
-    val data: T?
-) {
+// TODO: Decent doco about why this is private and why we have other constructors. That is future proofing for Clamps.
+sealed interface NetworkTraceStep<T> {
+    val fromTerminal: Terminal?
     val fromEquipment: ConductingEquipment
-        get() = requireNotNull(fromTerminal.conductingEquipment) {
-            "Network trace does not support terminals that do not have conducting equipment"
-        }
-
+    val toTerminal: Terminal?
     val toEquipment: ConductingEquipment
-        get() = requireNotNull(toTerminal.conductingEquipment) {
-            "Network trace does not support terminals that do not have conducting equipment"
-        }
-
-    val steppedInternally get() = fromTerminal.conductingEquipment == toTerminal.conductingEquipment
+    val nTerminalSteps: Int
+    val nEquipmentSteps: Int
+    val data: T?
+    val steppedInternally: Boolean
+        get() = fromTerminal != null && toTerminal != null && fromEquipment == toEquipment
 }
+
+class TerminalToTerminalTraceStep<T>(
+    override val fromTerminal: Terminal,
+    override val toTerminal: Terminal,
+    override val nTerminalSteps: Int,
+    override val nEquipmentSteps: Int,
+    override val data: T?
+) : NetworkTraceStep<T> {
+    override val fromEquipment: ConductingEquipment =
+        fromTerminal.conductingEquipment ?: error("Network trace does not support terminals that do not have conducting equipment")
+    override val toEquipment: ConductingEquipment =
+        toTerminal.conductingEquipment ?: error("Network trace does not support terminals that do not have conducting equipment")
+}
+
+/**
+ * Here for future clamp support. Clamps will always connect equipment to equipment without terminals with AcLineSegment.
+ * It needs a better name before it is introduced though!
+ */
+//class NoTerminalTraceStep<T>(
+//    override val fromEquipment: ConductingEquipment,
+//    override val toEquipment: ConductingEquipment,
+//    override val nTerminalSteps: Int,
+//    override val nEquipmentSteps: Int,
+//    override val data: T?
+//) : NetworkTraceStep<T> {
+//    override val fromTerminal: Terminal? = null
+//    override val toTerminal: Terminal? = null
+//}

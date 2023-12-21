@@ -6,9 +6,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.zepben.evolve.services.network.tracing.networktrace
+package com.zepben.evolve.services.network.tracing.traversalV2
 
-class StepContext(
+open class StepContext(
+    val isStartItem: Boolean,
     val stepNumber: Int = 0,
     private var customData: MutableMap<String, Any?>? = null
 ) {

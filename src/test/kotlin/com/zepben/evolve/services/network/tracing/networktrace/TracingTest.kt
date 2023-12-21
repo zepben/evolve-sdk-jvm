@@ -1,17 +1,10 @@
 package com.zepben.evolve.services.network.tracing.networktrace
 
-import com.zepben.evolve.cim.iec61970.base.core.ConductingEquipment
-import com.zepben.evolve.cim.iec61970.base.core.IdentifiedObject
-import com.zepben.evolve.services.network.tracing.FindWithUsagePoints
-import com.zepben.evolve.services.network.tracing.OpenTest
+import com.zepben.evolve.cim.iec61970.base.core.PhaseCode
 import com.zepben.evolve.services.network.tracing.connectivity.*
 import com.zepben.evolve.services.network.tracing.feeder.*
 import com.zepben.evolve.services.network.tracing.phases.*
 import com.zepben.evolve.services.network.tracing.traversals.BasicQueue
-import com.zepben.evolve.services.network.tracing.traversals.BasicTracker
-import com.zepben.evolve.services.network.tracing.traversals.BasicTraversal
-import com.zepben.evolve.services.network.tracing.traversals.TraversalQueue
-import com.zepben.evolve.services.network.tracing.tree.DownstreamTree
 import com.zepben.evolve.cim.iec61970.base.wires.Switch
 import org.junit.jupiter.api.Test
 
@@ -39,6 +32,7 @@ class TracingTest {
 
 //        fun normalConnectedEquipmentTrace(): ConnectedEquipmentTraversal = ConnectedEquipmentTrace.newNormalConnectedEquipmentTrace()
         Tracing.connectedEquipmentTrace<Unit>()
+            .normallyUpstream()
             .stopAtNormallyOpen()
 
 //        fun currentConnectedEquipmentTrace(): ConnectedEquipmentTraversal = ConnectedEquipmentTrace.newCurrentConnectedEquipmentTrace()
@@ -52,12 +46,13 @@ class TracingTest {
 //        fun normalLimitedConnectedEquipmentTrace(): LimitedConnectedEquipmentTrace = ConnectedEquipmentTrace.newNormalLimitedConnectedEquipmentTrace()
         Tracing.connectedEquipmentTrace<Unit>()
             .stopAtNormallyOpen()
-            .limitSteps(10)
+            .limitEquipmentSteps(10)
+
 
 //        fun currentLimitedConnectedEquipmentTrace(): LimitedConnectedEquipmentTrace = ConnectedEquipmentTrace.newCurrentLimitedConnectedEquipmentTrace()
         Tracing.connectedEquipmentTrace<Unit>()
             .stopAtCurrentlyOpen()
-            .limitSteps(10, Switch::class.java) // If you want to limit to 10 switches
+            .limitEquipmentSteps(10, Switch::class.java) // If you want to limit to 10 switches
 
 //        fun normalDownstreamEquipmentTrace(queue: TraversalQueue<ConductingEquipment> = BasicQueue.depthFirst()): BasicTraversal<ConductingEquipment> =
 //            ConnectedEquipmentTrace.newNormalDownstreamEquipmentTrace(queue)
