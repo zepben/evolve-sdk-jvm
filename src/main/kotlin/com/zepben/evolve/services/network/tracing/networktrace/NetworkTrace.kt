@@ -30,9 +30,9 @@ class NetworkTrace<T>(
 
     fun interface QueueNext<T> : TraversalV2.QueueNext<NetworkTraceStep<T>, NetworkTrace<T>>
 
-    private var computeData: ((NetworkTraceStep<T>, Terminal, context: StepContext) -> T)? = null
+    private var computeData: ((NetworkTraceStep<T>, context: StepContext, StepPath) -> T)? = null
 
-    fun setComputeData(computeContext: ((NetworkTraceStep<T>, Terminal, context: StepContext) -> T)?): NetworkTrace<T> {
+    fun setComputeData(computeContext: ((NetworkTraceStep<T>, context: StepContext, StepPath) -> T)?): NetworkTrace<T> {
         this.computeData = computeContext
         return this
     }
@@ -42,18 +42,19 @@ class NetworkTrace<T>(
         return this
     }
 
-    fun computeNextData(step: NetworkTraceStep<T>, nextTerminal: Terminal, context: StepContext): T? =
-        computeData?.invoke(step, nextTerminal, context)
+    fun computeNextData(step: NetworkTraceStep<T>, context: StepContext, nextPath: StepPath): T? =
+        computeData?.invoke(step, context, nextPath)
 
     fun run(start: Terminal, canStopOnStartItem: Boolean = true, context: T? = null) {
-        setStart(TerminalToTerminalTraceStep(start, start, 0, 0, context))
+        addStartItem(NetworkTraceStep(TerminalToTerminalPath(start, start, 0, 0), context))
         run(canStopOnStartItem)
     }
 
-    fun run(start: ConductingEquipment, canStopOnStartItem: Boolean = true) {
-        // TODO: How to support multiple start items?
-//        start.terminals.forEach { queueItem(NetworkTraceStep(it, it, 0, 0, null), StepContext()) }
-//        run(canStopOnStartItem)
+    fun run(start: ConductingEquipment, canStopOnStartItem: Boolean = true, context: T? = null) {
+        start.terminals.forEach {
+            addStartItem(NetworkTraceStep(TerminalToTerminalPath(it, it, 0, 0), context))
+        }
+        run(canStopOnStartItem)
     }
 
     fun normallyUpstream(): NetworkTrace<T> {

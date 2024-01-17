@@ -8,7 +8,7 @@
 
 package com.zepben.evolve.services.network.tracing.traversalV2
 
-open class StepContext(
+class StepContext(
     val isStartItem: Boolean,
     val stepNumber: Int = 0,
     private var customData: MutableMap<String, Any?>? = null

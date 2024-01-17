@@ -19,8 +19,8 @@ internal class OpenCondition<T>(
     private val phase: SinglePhaseKind? = null
 ) : QueueCondition<NetworkTraceStep<T>> {
     override fun shouldQueue(nextItem: NetworkTraceStep<T>, currentContext: StepContext): Boolean =
-        if (nextItem.steppedInternally) {
-            !openTest.isOpen(nextItem.toEquipment, phase)
+        if (nextItem.path.tracedInternally) {
+            !openTest.isOpen(nextItem.path.toEquipment, phase)
         } else {
             true
         }

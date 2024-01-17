@@ -15,51 +15,54 @@ object Tracing {
 
     fun <T> connectedEquipmentTrace(queue: TraversalQueue<NetworkTraceStep<T>> = BasicQueue.depthFirst()): NetworkTrace<T> {
         val queueNext = NetworkTrace.QueueNext<T> { ts, ctx, queueItem, t ->
-            ts.toEquipment.terminals
-                .filter { it != ts.toTerminal }
+            val path = ts.path
+            path.toEquipment.terminals
+                .filter { it != path.toTerminal }
                 .flatMap { it.connectedTerminals() }
                 .map {
-                    when (ts) {
-                        is TerminalToTerminalTraceStep -> {
-                            TerminalToTerminalTraceStep(
-                                ts.toTerminal,
+                    val nextPath = when (path) {
+                        is TerminalToTerminalPath -> {
+                            TerminalToTerminalPath(
+                                path.toTerminal,
                                 it,
-                                ts.nTerminalSteps + 1,
-                                ts.nEquipmentSteps + 1,
-                                t.computeNextData(ts, it, ctx),
+                                path.numTerminalSteps + 1,
+                                path.numEquipmentSteps + 1,
                             )
                         }
                     }
+
+                    NetworkTraceStep(nextPath, t.computeNextData(ts, ctx, nextPath))
                 }
                 .forEach { queueItem(it) }
         }
 
-        return NetworkTrace(queueNext, queue, NetworkTraceTracker { it.toEquipment })
+        return NetworkTrace(queueNext, queue, NetworkTraceTracker { it.path.toEquipment })
     }
 
     fun <T> connectedTerminalTrace(): NetworkTrace<T> {
         val queueNext = NetworkTrace.QueueNext<T> { ts, ctx, queueItem, t ->
             // Check if we last moved between equipment, or across it.
             // TODO: Should we handle the TerminalToTerminalTraceStep cast here?
-            val terminals = if (ts.steppedInternally) ts.toTerminal?.connectedTerminals() else ts.toTerminal?.otherTerminals()
+            val path = ts.path
+            val terminals = if (path.tracedInternally) path.toTerminal?.connectedTerminals() else path.toTerminal?.otherTerminals()
             terminals?.forEach {
-                val nextStep = when (ts) {
-                    is TerminalToTerminalTraceStep -> {
-                        TerminalToTerminalTraceStep(
-                            ts.toTerminal,
+                val nextPath = when (path) {
+                    is TerminalToTerminalPath -> {
+                        TerminalToTerminalPath(
+                            path.toTerminal,
                             it,
-                            ts.nTerminalSteps + 1,
-                            if (ts.steppedInternally) ts.nEquipmentSteps else ts.nEquipmentSteps + 1,
-                            t.computeNextData(ts, it, ctx)
+                            path.numTerminalSteps + 1,
+                            if (path.tracedInternally) path.numEquipmentSteps else path.numEquipmentSteps + 1,
                         )
                     }
                 }
 
+                val nextStep = NetworkTraceStep(nextPath, t.computeNextData(ts, ctx, nextPath))
                 queueItem(nextStep)
             }
         }
 
-        return NetworkTrace(queueNext, BasicQueue.depthFirst(), NetworkTraceTracker { it.toTerminal })
+        return NetworkTrace(queueNext, BasicQueue.depthFirst(), NetworkTraceTracker { it.path.toTerminal })
     }
 
 }

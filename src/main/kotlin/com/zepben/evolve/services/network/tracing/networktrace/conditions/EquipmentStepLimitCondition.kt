@@ -16,6 +16,6 @@ class EquipmentStepLimitCondition<T>(
     private val limit: Int
 ) : StopCondition<NetworkTraceStep<T>> {
     override fun shouldStop(item: NetworkTraceStep<T>, context: StepContext): Boolean {
-        return item.nEquipmentSteps >= limit
+        return item.path.numEquipmentSteps >= limit
     }
 }

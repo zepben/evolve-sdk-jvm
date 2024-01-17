@@ -12,7 +12,7 @@ import com.zepben.evolve.cim.iec61970.base.core.PhaseCode
 import com.zepben.evolve.services.network.tracing.connectivity.ConnectivityResult
 import com.zepben.evolve.services.network.tracing.connectivity.TerminalConnectivityConnected
 import com.zepben.evolve.services.network.tracing.networktrace.NetworkTraceStep
-import com.zepben.evolve.services.network.tracing.networktrace.TerminalToTerminalTraceStep
+import com.zepben.evolve.services.network.tracing.networktrace.TerminalToTerminalPath
 import com.zepben.evolve.services.network.tracing.traversalV2.QueueConditionWithContextData
 import com.zepben.evolve.services.network.tracing.traversalV2.StepContext
 
@@ -25,9 +25,9 @@ internal class PhaseCondition<T>(
 
     override fun shouldQueue(nextItem: NetworkTraceStep<T>, currentContext: StepContext): Boolean {
         val connectivity = currentContext.terminalConnectivity()
-        return when (nextItem) {
-            is TerminalToTerminalTraceStep -> {
-                val cr = terminalConnectivity.terminalConnectivity(nextItem.fromTerminal, nextItem.toTerminal, connectivity.toNominalPhases.toSet())
+        return when (val path = nextItem.path) {
+            is TerminalToTerminalPath -> {
+                val cr = terminalConnectivity.terminalConnectivity(path.fromTerminal, path.toTerminal, connectivity.toNominalPhases.toSet())
                 if (cr.nominalPhasePaths.isNotEmpty()) {
                     precalculatedResult = cr
                     true
@@ -40,9 +40,9 @@ internal class PhaseCondition<T>(
     }
 
     override fun computeInitialValue(nextItem: NetworkTraceStep<T>): ConnectivityResult {
-        return when (nextItem) {
-            is TerminalToTerminalTraceStep -> {
-                terminalConnectivity.terminalConnectivity(nextItem.toTerminal, nextItem.toTerminal, phases.singlePhases.toSet())
+        return when (val path = nextItem.path) {
+            is TerminalToTerminalPath -> {
+                terminalConnectivity.terminalConnectivity(path.toTerminal, path.toTerminal, phases.singlePhases.toSet())
             }
         }
     }

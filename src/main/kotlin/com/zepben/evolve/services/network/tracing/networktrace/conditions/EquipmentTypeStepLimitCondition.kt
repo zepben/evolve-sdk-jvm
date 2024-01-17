@@ -27,8 +27,8 @@ class EquipmentTypeStepLimitCondition<T>(
 
     override fun computeNextValue(nextItem: NetworkTraceStep<T>, value: Int): Int {
         return when {
-            nextItem.steppedInternally -> value
-            nextItem.toEquipment::class.java.isAssignableFrom(equipmentType) -> (value) + 1
+            nextItem.path.tracedInternally -> value
+            nextItem.path.toEquipment::class.java.isAssignableFrom(equipmentType) -> (value) + 1
             else -> value
         }
     }
