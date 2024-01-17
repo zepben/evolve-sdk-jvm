@@ -6,6 +6,7 @@ import com.zepben.evolve.services.network.tracing.feeder.*
 import com.zepben.evolve.services.network.tracing.phases.*
 import com.zepben.evolve.services.network.tracing.traversals.BasicQueue
 import com.zepben.evolve.cim.iec61970.base.wires.Switch
+import com.zepben.evolve.services.network.tracing.networktrace.conditions.terminalConnectivity
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
@@ -74,18 +75,55 @@ class TracingTest {
         Tracing.connectedEquipmentTrace<Unit>()
             .currentlyUpstream()
 
-        // TODO("Haven't worked out phases yet")
+        // NOTE: The new phase tracing doesn't map 1 to 1 to what was previously there. When we reviewed the
+        //       difference between 'connectivity trace' and 'phase trace' and their use cases we felt they
+        //       were not needed and just made things confusing.
+        //       We are hoping the new phase tracing covers existing use cases as it is easier to understand.
+
 //        fun connectivityTrace(): BasicTraversal<ConnectivityResult> = ConnectivityTrace.newConnectivityTrace()
-//        fun connectivityBreadthTrace(): BasicTraversal<ConnectivityResult> = ConnectivityTrace.newConnectivityBreadthTrace()
-//        fun normalConnectivityTrace(): BasicTraversal<ConnectivityResult> = ConnectivityTrace.newNormalConnectivityTrace()
-//        fun currentConnectivityTrace(): BasicTraversal<ConnectivityResult> = ConnectivityTrace.newCurrentConnectivityTrace()
 //        fun phaseTrace(): BasicTraversal<PhaseStep> = PhaseTrace.newTrace()
+        Tracing.connectedEquipmentTrace<Unit>()
+            .withPhases(PhaseCode.ABCN)
+            .addStepAction { step, ctx ->
+                // This is the ConnectivityResult you used to get at the step item in the ConnectivityTrace
+                val connectivityResult = ctx.terminalConnectivity()
+            }
+
+//        fun connectivityBreadthTrace(): BasicTraversal<ConnectivityResult> = ConnectivityTrace.newConnectivityBreadthTrace()
+        Tracing.connectedEquipmentTrace<Unit>(BasicQueue.breadthFirst())
+            .withPhases(PhaseCode.ABCN)
+
+//        fun normalConnectivityTrace(): BasicTraversal<ConnectivityResult> = ConnectivityTrace.newNormalConnectivityTrace()
 //        fun normalPhaseTrace(): BasicTraversal<PhaseStep> = PhaseTrace.newNormalTrace()
+        Tracing.connectedEquipmentTrace<Unit>()
+            .stopAtNormallyOpen()
+            .withPhases(PhaseCode.ABCN)
+
+//        fun currentConnectivityTrace(): BasicTraversal<ConnectivityResult> = ConnectivityTrace.newCurrentConnectivityTrace()
 //        fun currentPhaseTrace(): BasicTraversal<PhaseStep> = PhaseTrace.newCurrentTrace()
+        Tracing.connectedEquipmentTrace<Unit>()
+            .stopAtCurrentlyOpen()
+            .withPhases(PhaseCode.ABCN)
+
 //        fun normalDownstreamTrace(): BasicTraversal<PhaseStep> = PhaseTrace.newNormalDownstreamTrace()
+        Tracing.connectedEquipmentTrace<Unit>()
+            .withPhases(PhaseCode.ABCN)
+            .normallyDownstream()
+
 //        fun currentDownstreamTrace(): BasicTraversal<PhaseStep> = PhaseTrace.newCurrentDownstreamTrace()
+        Tracing.connectedEquipmentTrace<Unit>()
+            .withPhases(PhaseCode.ABCN)
+            .currentlyDownstream()
+
 //        fun normalUpstreamTrace(): BasicTraversal<PhaseStep> = PhaseTrace.newNormalUpstreamTrace()
+        Tracing.connectedEquipmentTrace<Unit>()
+            .withPhases(PhaseCode.ABCN)
+            .normallyUpstream()
+
 //        fun currentUpstreamTrace(): BasicTraversal<PhaseStep> = PhaseTrace.newCurrentUpstreamTrace()
+        Tracing.connectedEquipmentTrace<Unit>()
+            .withPhases(PhaseCode.ABCN)
+            .currentlyUpstream()
 
         /**
          * Need to look at the rest of these.
