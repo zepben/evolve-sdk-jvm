@@ -42,7 +42,7 @@ abstract class TraversalV2<T, D : TraversalV2<T, D>>(
     /**
      * The item the traversal will start at, or `null` if it has not been set.
      */
-    var startItem: T? = null
+    private val startItems: MutableList<T> = mutableListOf()
 
     @Volatile
     private var running = false
@@ -236,27 +236,19 @@ abstract class TraversalV2<T, D : TraversalV2<T, D>>(
         return StepContext(context == null, nextStepNum, newContextData)
     }
 
-    /**
-     * Sets the item the traversal will start at.
-     *
-     * @param item The item to start at.
-     * @return this traversal instance.
-     */
-    fun setStart(item: T): D {
-        startItem = item
+    fun addStartItem(item: T): D {
+        startItems.add(item)
         return getDerivedThis()
     }
 
-    /**
-     * Starts the traversal calling [setStart] on the [start] parameter before running.
-     *
-     * @param start              The item to start at.
-     * @param canStopOnStartItem Indicates if the traversal will check the start item for stop conditions.
-     */
-    @JvmOverloads
-    fun run(start: T, canStopOnStartItem: Boolean = true) {
-        setStart(start)
-        run(canStopOnStartItem)
+    fun addStartItems(vararg items: T): D {
+        startItems.addAll(items)
+        return getDerivedThis()
+    }
+
+    fun addStartItems(items: Iterable<T>): D {
+        startItems.addAll(items)
+        return getDerivedThis()
     }
 
     /**
@@ -278,13 +270,9 @@ abstract class TraversalV2<T, D : TraversalV2<T, D>>(
         running = false
     }
 
-    private fun resetRunFlag() {
+    fun reset(): D {
         check(!running) { "Traversal is currently running." }
         hasRun = false
-    }
-
-    fun reset(): D {
-        resetRunFlag()
 
         queue.clear()
         tracker.clear()
@@ -293,35 +281,33 @@ abstract class TraversalV2<T, D : TraversalV2<T, D>>(
     }
 
     private fun doRun(canStopOnStartItem: Boolean) {
-        var canStop = true
+        for (startItem in startItems) {
+            queue.add(startItem)
+            var canStop = canStopOnStartItem
+            contexts[startItem] = computeNextContext(startItem, null)
 
-        startItem?.let {
-            queue.add(it)
-            canStop = canStopOnStartItem
-            contexts[it] = computeNextContext(it, null)
-        }
+            while (queue.hasNext()) {
+                queue.next()?.let { current ->
+                    if (tracker.visit(current)) {
+                        val context = contexts[current] ?: error { "INTERNAL ERROR: Traversal item should always have a context" }
+                        context.isStopping = canStop && matchesAnyStopCondition(current, context)
 
-        while (queue.hasNext()) {
-            queue.next()?.let { current ->
-                if (tracker.visit(current)) {
-                    val context = contexts[current] ?: error { "INTERNAL ERROR: Traversal item should always have a context" }
-                    context.isStopping = canStop && matchesAnyStopCondition(current, context)
+                        applyStepActions(current, context)
 
-                    applyStepActions(current, context)
-
-                    if (!context.isStopping) {
-                        val queueNextItem = { nextItem: T ->
-                            val queued = queueItem(nextItem, context)
-                            if (queued) {
-                                contexts[nextItem] = computeNextContext(nextItem, context)
+                        if (!context.isStopping) {
+                            val queueNextItem = { nextItem: T ->
+                                val queued = queueItem(nextItem, context)
+                                if (queued) {
+                                    contexts[nextItem] = computeNextContext(nextItem, context)
+                                }
+                                queued
                             }
-                            queued
+
+                            queueNext.accept(current, context, queueNextItem, getDerivedThis())
                         }
 
-                        queueNext.accept(current, context, queueNextItem, getDerivedThis())
+                        canStop = true
                     }
-
-                    canStop = true
                 }
             }
         }
