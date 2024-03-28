@@ -3,6 +3,7 @@
 ## [0.18.0] - UNRELEASED
 ### Breaking Changes
 * Updated to super-pom version 0.34.x.
+* Hosting capacity LoadShape protobuf now supports reactive power values.
 * `IdentifiedObject.addName` has been refactored to take in a `NameType` and a `String`. This is doing the same thing under the hood as previous `addName()` function,
   but simplifies the input by lowering the amount of objects that needed to be created prior to adding names.
   Example usage change: 
