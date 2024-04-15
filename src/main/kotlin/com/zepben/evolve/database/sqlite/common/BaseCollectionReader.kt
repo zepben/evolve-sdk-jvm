@@ -9,7 +9,7 @@
 package com.zepben.evolve.database.sqlite.common
 
 import com.zepben.evolve.database.sqlite.extensions.executeConfiguredQuery
-import com.zepben.evolve.database.sqlite.tables.SqliteTable
+import com.zepben.evolve.database.sqlite.cim.tables.SqliteTable
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.sql.Connection

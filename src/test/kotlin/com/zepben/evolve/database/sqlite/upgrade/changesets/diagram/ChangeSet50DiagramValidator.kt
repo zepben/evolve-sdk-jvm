@@ -8,7 +8,7 @@
 
 package com.zepben.evolve.database.sqlite.upgrade.changesets.diagram
 
-import com.zepben.evolve.database.sqlite.upgrade.EwbDatabaseType
+import com.zepben.evolve.database.sqlite.cim.upgrade.EwbDatabaseType
 import com.zepben.evolve.database.sqlite.upgrade.changesets.ChangeSet50Helpers
 import com.zepben.evolve.database.sqlite.upgrade.changesets.ChangeSetValidator
 import java.sql.Statement

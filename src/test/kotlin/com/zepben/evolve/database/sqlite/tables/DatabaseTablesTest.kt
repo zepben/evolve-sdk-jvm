@@ -9,10 +9,10 @@
 package com.zepben.evolve.database.sqlite.tables
 
 import com.google.common.reflect.ClassPath
-import com.zepben.evolve.database.sqlite.common.cim.CimDatabaseTables
-import com.zepben.evolve.database.sqlite.customer.CustomerDatabaseTables
-import com.zepben.evolve.database.sqlite.diagram.DiagramDatabaseTables
-import com.zepben.evolve.database.sqlite.network.NetworkDatabaseTables
+import com.zepben.evolve.database.sqlite.cim.CimDatabaseTables
+import com.zepben.evolve.database.sqlite.cim.customer.CustomerDatabaseTables
+import com.zepben.evolve.database.sqlite.cim.diagram.DiagramDatabaseTables
+import com.zepben.evolve.database.sqlite.cim.network.NetworkDatabaseTables
 import com.zepben.testutils.exception.ExpectException.Companion.expect
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo

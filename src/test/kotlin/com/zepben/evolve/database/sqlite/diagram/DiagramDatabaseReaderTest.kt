@@ -8,8 +8,10 @@
 
 package com.zepben.evolve.database.sqlite.diagram
 
-import com.zepben.evolve.database.sqlite.common.metadata.MetadataCollectionReader
-import com.zepben.evolve.database.sqlite.tables.TableVersion
+import com.zepben.evolve.database.sqlite.cim.diagram.DiagramDatabaseReader
+import com.zepben.evolve.database.sqlite.cim.diagram.DiagramServiceReader
+import com.zepben.evolve.database.sqlite.cim.metadata.MetadataCollectionReader
+import com.zepben.evolve.database.sqlite.cim.tables.TableVersion
 import com.zepben.evolve.services.diagram.DiagramService
 import com.zepben.testutils.junit.SystemLogExtension
 import io.mockk.every

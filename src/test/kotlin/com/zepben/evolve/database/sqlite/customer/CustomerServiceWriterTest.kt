@@ -9,6 +9,8 @@
 package com.zepben.evolve.database.sqlite.customer
 
 import com.zepben.evolve.cim.iec61968.customers.Customer
+import com.zepben.evolve.database.sqlite.cim.customer.CustomerCimWriter
+import com.zepben.evolve.database.sqlite.cim.customer.CustomerServiceWriter
 import com.zepben.evolve.services.customer.CustomerService
 import com.zepben.testutils.junit.SystemLogExtension
 import io.mockk.every
