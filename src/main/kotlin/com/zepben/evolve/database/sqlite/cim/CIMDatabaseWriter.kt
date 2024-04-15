@@ -8,11 +8,11 @@
 
 package com.zepben.evolve.database.sqlite.cim
 
-import com.zepben.evolve.database.sqlite.common.BaseServiceWriter
 import com.zepben.evolve.database.sqlite.cim.metadata.MetadataCollectionWriter
-import com.zepben.evolve.database.sqlite.extensions.configureBatch
 import com.zepben.evolve.database.sqlite.cim.tables.MissingTableConfigException
-import com.zepben.evolve.database.sqlite.cim.tables.TableVersion
+import com.zepben.evolve.database.sqlite.cim.tables.TableCimVersion
+import com.zepben.evolve.database.sqlite.common.BaseServiceWriter
+import com.zepben.evolve.database.sqlite.extensions.configureBatch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -111,8 +111,8 @@ abstract class CimDatabaseWriter(
 
     private fun create(): Boolean =
         try {
-            val versionTable = databaseTables.getTable<TableVersion>()
-            logger.info("Creating database schema v${versionTable.SUPPORTED_VERSION}...")
+            val cimVersionTable = databaseTables.getTable<TableCimVersion>()
+            logger.info("Creating database schema v${cimVersionTable.supportedVersion}...")
 
             saveConnection.createStatement().use { statement ->
                 statement.queryTimeout = 2
@@ -122,8 +122,8 @@ abstract class CimDatabaseWriter(
                 }
 
                 // Add the version number to the database.
-                saveConnection.prepareStatement(versionTable.preparedInsertSql).use { insert ->
-                    insert.setInt(versionTable.VERSION.queryIndex, versionTable.SUPPORTED_VERSION)
+                saveConnection.prepareStatement(cimVersionTable.preparedInsertSql).use { insert ->
+                    insert.setInt(cimVersionTable.VERSION.queryIndex, cimVersionTable.supportedVersion)
                     insert.executeUpdate()
                 }
 
