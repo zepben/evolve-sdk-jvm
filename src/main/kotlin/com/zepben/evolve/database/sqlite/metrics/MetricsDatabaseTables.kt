@@ -10,7 +10,10 @@ package com.zepben.evolve.database.sqlite.metrics
 
 import com.zepben.evolve.database.sqlite.common.BaseDatabaseTables
 import com.zepben.evolve.database.sqlite.tables.SqliteTable
+import com.zepben.evolve.database.sqlite.tables.metrics.TableJobSources
+import com.zepben.evolve.database.sqlite.tables.metrics.TableJobs
 import com.zepben.evolve.database.sqlite.tables.metrics.TableMetricsVersion
+import com.zepben.evolve.database.sqlite.tables.metrics.TableNetworkContainerMetrics
 
 /**
  * The collection of tables for our metrics databases.
@@ -19,7 +22,10 @@ class MetricsDatabaseTables : BaseDatabaseTables() {
 
     override val includedTables: Sequence<SqliteTable> =
         super.includedTables + sequenceOf(
-            TableMetricsVersion()
+            TableJobs(),
+            TableJobSources(),
+            TableMetricsVersion(),
+            TableNetworkContainerMetrics()
         )
 
 }
