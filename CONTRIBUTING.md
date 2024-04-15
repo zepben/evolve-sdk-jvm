@@ -52,11 +52,11 @@ Our main style requirements are:
        * `com.zepben.evolve.database.sqlite.diagram.DiagramServiceReader`
        * `com.zepben.evolve.database.sqlite.network.NetworkServiceReader`
    7. DB version updated. - `com.zepben.evolve.database.sqlite.tables.TableVersion`
-    8. Migration written. - `com.zepben.evolve.database.sqlite.upgrade`
-        1. ChangeSet written. - `com.zepben.evolve.database.sqlite.upgrade.changesets.ChangeSet*`
-        2. ChangeSet added to UpgradeRunner. - `com.zepben.evolve.database.sqlite.upgrade.UpgradeRunner`
-        3. ChangeSetValidator written for ChangeSet. - `com.zepben.evolve.database.sqlite.upgrade.changesets.ChangeSet*Validator`
-        4. ChangeSetValidator added to changeSetValidators. - `com.zepben.evolve.database.sqlite.upgrade.ChangeSetTest`
+    8. Migration written. - `com.zepben.evolve.database.sqlite.cim.upgrade`
+        1. ChangeSet written. - `com.zepben.evolve.database.sqlite.cim.upgrade.changesets.ChangeSet*`
+        2. ChangeSet added to UpgradeRunner. - `com.zepben.evolve.database.sqlite.cim.upgrade.UpgradeRunner`
+        3. ChangeSetValidator written for ChangeSet. - `com.zepben.evolve.database.sqlite.cim.upgrade.changesets.ChangeSet*Validator`
+        4. ChangeSetValidator added to changeSetValidators. - `com.zepben.evolve.database.sqlite.cim.upgrade.ChangeSetTest`
    9. Add schema tests:
        * `com.zepben.evolve.database.sqlite.customer.CustomerDatabaseSchemaTest`
        * `com.zepben.evolve.database.sqlite.diagram.DiagramDatabaseSchemaTest`

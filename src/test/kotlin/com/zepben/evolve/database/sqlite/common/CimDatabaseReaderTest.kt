@@ -11,7 +11,6 @@ package com.zepben.evolve.database.sqlite.common
 import com.zepben.evolve.database.sqlite.cim.CimDatabaseReader
 import com.zepben.evolve.database.sqlite.cim.metadata.MetadataCollectionReader
 import com.zepben.evolve.database.sqlite.cim.tables.MissingTableConfigException
-import com.zepben.evolve.database.sqlite.cim.tables.TableVersion
 import com.zepben.testutils.junit.SystemLogExtension
 import io.mockk.*
 import org.hamcrest.MatcherAssert.assertThat
@@ -39,7 +38,7 @@ internal class CimDatabaseReaderTest {
 
     private val tableVersion = mockk<TableVersion> {
         every { getVersion(any()) } returns 1
-        every { SUPPORTED_VERSION } returns 1
+        every { this@mockk.supportedVersion } returns 1
     }
 
     private var postLoadResult = true
@@ -164,7 +163,7 @@ internal class CimDatabaseReaderTest {
 
     private fun verifyReadersCalled() {
         verifySequence {
-            tableVersion.SUPPORTED_VERSION
+            tableVersion.supportedVersion
             connection.createStatement()
             tableVersion.getVersion(statement)
             statement.close()
@@ -176,7 +175,7 @@ internal class CimDatabaseReaderTest {
 
     private fun verifyInvalidVersionCalls() {
         verifySequence {
-            tableVersion.SUPPORTED_VERSION
+            tableVersion.supportedVersion
             connection.createStatement()
             tableVersion.getVersion(statement)
             statement.close()

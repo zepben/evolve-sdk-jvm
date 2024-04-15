@@ -10,7 +10,7 @@ package com.zepben.evolve.database.sqlite.cim
 
 import com.zepben.evolve.database.sqlite.common.BaseServiceReader
 import com.zepben.evolve.database.sqlite.cim.metadata.MetadataCollectionReader
-import com.zepben.evolve.database.sqlite.cim.tables.TableVersion
+import com.zepben.evolve.database.sqlite.common.TableVersion
 import com.zepben.evolve.services.common.BaseService
 import com.zepben.evolve.services.common.extensions.typeNameAndMRID
 import com.zepben.evolve.services.common.meta.MetadataCollection
@@ -43,7 +43,7 @@ abstract class CimDatabaseReader(
 
     private var hasBeenUsed: Boolean = false
 
-    private val supportedVersion = tableVersion.SUPPORTED_VERSION
+    private val supportedVersion = tableVersion.supportedVersion
 
     /**
      * Customisable function for performing actions after the database has been loaded.

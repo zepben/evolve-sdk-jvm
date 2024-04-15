@@ -10,14 +10,13 @@ package com.zepben.evolve.database.sqlite.cim.upgrade
 
 import com.zepben.evolve.database.paths.DatabaseType
 import com.zepben.evolve.database.sqlite.extensions.configureBatch
-import com.zepben.evolve.database.sqlite.cim.tables.TableVersion
+import com.zepben.evolve.database.sqlite.common.TableVersion
 import com.zepben.evolve.database.sqlite.cim.upgrade.changesets.*
 import com.zepben.evolve.database.sqlite.cim.upgrade.changesets.changeSet46
 import com.zepben.evolve.database.sqlite.cim.upgrade.changesets.changeSet47
 import com.zepben.evolve.database.sqlite.cim.upgrade.changesets.changeSet49
 import com.zepben.evolve.database.sqlite.cim.upgrade.changesets.changeSet50
 import com.zepben.evolve.database.sqlite.cim.upgrade.changesets.changeSet51
-import com.zepben.evolve.database.sqlite.upgrade.changesets.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -44,11 +43,11 @@ class UpgradeRunner @JvmOverloads constructor(
         changeSet51(),
         changeSet52()
     ),
-    private val tableVersion: TableVersion = TableVersion()
+    private val tableVersion: TableVersion = TableCimVersion
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
-    private val minimumSupportedVersion = preSplitChangeSets.firstOrNull()?.let { it.number - 1 } ?: tableVersion.SUPPORTED_VERSION
+    private val minimumSupportedVersion = preSplitChangeSets.firstOrNull()?.let { it.number - 1 } ?: tableVersion.supportedVersion
 
     // Remove this variable next time we set a new minimum version of the database. Also remove the note in NetworkDatabaseReader.
     private val splitVersion = 49
@@ -81,7 +80,7 @@ class UpgradeRunner @JvmOverloads constructor(
 
             connection.vacuumDatabase(postSplitStatus == UpgradeState.UPGRADED_TO_TARGET_VERSION)
 
-            ConnectionResult(connection, tableVersion.SUPPORTED_VERSION)
+            ConnectionResult(connection, tableVersion.supportedVersion)
         } catch (e: Exception) {
             //
             // NOTE: Closing the connection will roll back any active transactions (see https://www.sqlite.org/lang_transaction.html).
@@ -122,7 +121,7 @@ class UpgradeRunner @JvmOverloads constructor(
         when {
             databaseVersion == targetVersion -> UpgradeState.ALREADY_AT_TARGET_VERSION
             databaseVersion == null -> throwMissingVersionException()
-            databaseVersion > tableVersion.SUPPORTED_VERSION -> throwFuturisticDatabaseException(databaseVersion)
+            databaseVersion > tableVersion.supportedVersion -> throwFuturisticDatabaseException(databaseVersion)
             databaseVersion < minimumSupportedVersion -> throwUnsupportedUpgradeException(databaseVersion)
             databaseVersion > targetVersion -> UpgradeState.AHEAD_OF_TARGET_VERSION
             else -> upgradeBlock(databaseVersion).let { UpgradeState.UPGRADED_TO_TARGET_VERSION }
@@ -204,7 +203,7 @@ class UpgradeRunner @JvmOverloads constructor(
 
     private fun throwFuturisticDatabaseException(databaseVersion: Int): Nothing =
         throw UpgradeException(
-            "Selected database is a newer version [v$databaseVersion] than the supported version [v${tableVersion.SUPPORTED_VERSION}]. Either update the " +
+            "Selected database is a newer version [v$databaseVersion] than the supported version [v${tableVersion.supportedVersion}]. Either update the " +
                 "version of the server you are using, or downgrade the migrator."
         )
 
