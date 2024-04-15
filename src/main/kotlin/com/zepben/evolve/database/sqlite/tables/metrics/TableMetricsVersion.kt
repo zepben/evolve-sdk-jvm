@@ -21,6 +21,7 @@ import java.sql.Statement
  *
  * @property VERSION Column definition.
  */
+@Suppress("PropertyName")
 class TableMetricsVersion : SqliteTable() {
 
     val SUPPORTED_VERSION: Int = 1
