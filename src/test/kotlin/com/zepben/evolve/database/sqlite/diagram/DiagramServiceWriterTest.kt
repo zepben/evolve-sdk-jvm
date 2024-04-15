@@ -9,6 +9,8 @@
 package com.zepben.evolve.database.sqlite.diagram
 
 import com.zepben.evolve.cim.iec61970.base.diagramlayout.Diagram
+import com.zepben.evolve.database.sqlite.cim.diagram.DiagramCimWriter
+import com.zepben.evolve.database.sqlite.cim.diagram.DiagramServiceWriter
 import com.zepben.evolve.services.diagram.DiagramService
 import com.zepben.testutils.junit.SystemLogExtension
 import io.mockk.every

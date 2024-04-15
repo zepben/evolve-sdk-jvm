@@ -8,7 +8,8 @@
 
 package com.zepben.evolve.database.sqlite.customer
 
-import com.zepben.evolve.database.sqlite.common.cim.CimDatabaseTables
+import com.zepben.evolve.database.sqlite.cim.CimDatabaseTables
+import com.zepben.evolve.database.sqlite.cim.customer.CustomerDatabaseTables
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
 

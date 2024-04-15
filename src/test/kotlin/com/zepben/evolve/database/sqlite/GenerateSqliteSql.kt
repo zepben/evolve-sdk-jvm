@@ -8,10 +8,10 @@
 
 package com.zepben.evolve.database.sqlite
 
-import com.zepben.evolve.database.sqlite.customer.CustomerDatabaseTables
-import com.zepben.evolve.database.sqlite.diagram.DiagramDatabaseTables
-import com.zepben.evolve.database.sqlite.network.NetworkDatabaseTables
-import com.zepben.evolve.database.sqlite.tables.SqliteTable
+import com.zepben.evolve.database.sqlite.cim.customer.CustomerDatabaseTables
+import com.zepben.evolve.database.sqlite.cim.diagram.DiagramDatabaseTables
+import com.zepben.evolve.database.sqlite.cim.network.NetworkDatabaseTables
+import com.zepben.evolve.database.sqlite.cim.tables.SqliteTable
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 

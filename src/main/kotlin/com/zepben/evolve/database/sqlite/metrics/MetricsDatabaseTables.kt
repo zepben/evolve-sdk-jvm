@@ -9,11 +9,11 @@
 package com.zepben.evolve.database.sqlite.metrics
 
 import com.zepben.evolve.database.sqlite.common.BaseDatabaseTables
-import com.zepben.evolve.database.sqlite.tables.SqliteTable
-import com.zepben.evolve.database.sqlite.tables.metrics.TableJobSources
-import com.zepben.evolve.database.sqlite.tables.metrics.TableJobs
-import com.zepben.evolve.database.sqlite.tables.metrics.TableMetricsVersion
-import com.zepben.evolve.database.sqlite.tables.metrics.TableNetworkContainerMetrics
+import com.zepben.evolve.database.sqlite.cim.tables.SqliteTable
+import com.zepben.evolve.database.sqlite.metrics.tables.TableJobSources
+import com.zepben.evolve.database.sqlite.metrics.tables.TableJobs
+import com.zepben.evolve.database.sqlite.metrics.tables.TableMetricsVersion
+import com.zepben.evolve.database.sqlite.metrics.tables.TableNetworkContainerMetrics
 
 /**
  * The collection of tables for our metrics databases.

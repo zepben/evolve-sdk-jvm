@@ -10,7 +10,9 @@ package com.zepben.evolve.database.sqlite.diagram
 
 import com.zepben.evolve.cim.iec61970.base.diagramlayout.Diagram
 import com.zepben.evolve.cim.iec61970.base.diagramlayout.DiagramObject
-import com.zepben.evolve.database.sqlite.tables.TableVersion
+import com.zepben.evolve.database.sqlite.cim.diagram.DiagramDatabaseReader
+import com.zepben.evolve.database.sqlite.cim.diagram.DiagramDatabaseWriter
+import com.zepben.evolve.database.sqlite.cim.tables.TableVersion
 import com.zepben.evolve.services.common.BaseService
 import com.zepben.evolve.services.common.BaseServiceComparator
 import com.zepben.evolve.services.common.Resolvers

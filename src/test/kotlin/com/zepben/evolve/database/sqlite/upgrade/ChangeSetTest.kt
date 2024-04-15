@@ -9,7 +9,7 @@
 package com.zepben.evolve.database.sqlite.upgrade
 
 import com.zepben.evolve.database.paths.DatabaseType
-import com.zepben.evolve.database.sqlite.tables.TableVersion
+import com.zepben.evolve.database.sqlite.cim.tables.TableVersion
 import com.zepben.evolve.database.sqlite.upgrade.changesets.ChangeSetValidator
 import com.zepben.evolve.database.sqlite.upgrade.changesets.combined.*
 import com.zepben.evolve.database.sqlite.upgrade.changesets.customer.ChangeSet50CustomerValidator

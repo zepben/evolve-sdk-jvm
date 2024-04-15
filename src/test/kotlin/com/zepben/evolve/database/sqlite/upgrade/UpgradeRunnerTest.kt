@@ -10,8 +10,12 @@ package com.zepben.evolve.database.sqlite.upgrade
 
 import com.zepben.evolve.database.paths.DatabaseType
 import com.zepben.evolve.database.sqlite.extensions.configureBatch
-import com.zepben.evolve.database.sqlite.tables.Column
-import com.zepben.evolve.database.sqlite.tables.TableVersion
+import com.zepben.evolve.database.sqlite.cim.tables.Column
+import com.zepben.evolve.database.sqlite.cim.tables.TableVersion
+import com.zepben.evolve.database.sqlite.cim.upgrade.Change
+import com.zepben.evolve.database.sqlite.cim.upgrade.ChangeSet
+import com.zepben.evolve.database.sqlite.cim.upgrade.EwbDatabaseType
+import com.zepben.evolve.database.sqlite.cim.upgrade.UpgradeRunner
 import com.zepben.testutils.exception.ExpectException.Companion.expect
 import com.zepben.testutils.junit.SystemLogExtension
 import io.mockk.*
