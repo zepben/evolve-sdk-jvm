@@ -6,8 +6,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.zepben.evolve.database.sqlite.common
+package com.zepben.evolve.database.sqlite.common.metadata
 
+import com.zepben.evolve.database.sqlite.common.BaseEntryWriter
+import com.zepben.evolve.database.sqlite.common.cim.CimDatabaseTables
 import com.zepben.evolve.database.sqlite.extensions.logFailure
 import com.zepben.evolve.database.sqlite.extensions.setInstant
 import com.zepben.evolve.database.sqlite.extensions.tryExecuteSingleUpdate
@@ -23,7 +25,7 @@ import org.slf4j.LoggerFactory
  * @param databaseTables The tables that are available in the database.
  */
 class MetadataEntryWriter(
-    val databaseTables: BaseDatabaseTables
+    val databaseTables: CimDatabaseTables
 ) : BaseEntryWriter() {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)

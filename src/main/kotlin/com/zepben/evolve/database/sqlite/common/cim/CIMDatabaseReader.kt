@@ -6,8 +6,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.zepben.evolve.database.sqlite.common
+package com.zepben.evolve.database.sqlite.common.cim
 
+import com.zepben.evolve.database.sqlite.common.BaseServiceReader
+import com.zepben.evolve.database.sqlite.common.metadata.MetadataCollectionReader
 import com.zepben.evolve.database.sqlite.tables.TableVersion
 import com.zepben.evolve.services.common.BaseService
 import com.zepben.evolve.services.common.extensions.typeNameAndMRID
@@ -17,7 +19,7 @@ import org.slf4j.LoggerFactory
 import java.sql.Connection
 
 /**
- * A base class for reading objects from one of our databases.
+ * A base class for reading objects from one of our CIM databases.
  *
  * @property connection The connection to the database.
  * @property metadataReader The reader for the [MetadataCollection] included in the database.
@@ -28,7 +30,7 @@ import java.sql.Connection
  *
  * @property logger The [Logger] to use for this reader.
  */
-abstract class BaseDatabaseReader(
+abstract class CimDatabaseReader(
     private val connection: Connection,
     private val metadataReader: MetadataCollectionReader,
     private val serviceReader: BaseServiceReader,

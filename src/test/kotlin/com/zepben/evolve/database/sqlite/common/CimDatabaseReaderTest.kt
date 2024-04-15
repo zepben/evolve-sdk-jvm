@@ -8,6 +8,8 @@
 
 package com.zepben.evolve.database.sqlite.common
 
+import com.zepben.evolve.database.sqlite.common.cim.CimDatabaseReader
+import com.zepben.evolve.database.sqlite.common.metadata.MetadataCollectionReader
 import com.zepben.evolve.database.sqlite.tables.MissingTableConfigException
 import com.zepben.evolve.database.sqlite.tables.TableVersion
 import com.zepben.testutils.junit.SystemLogExtension
@@ -19,7 +21,7 @@ import org.junit.jupiter.api.extension.RegisterExtension
 import java.sql.Connection
 import java.sql.Statement
 
-internal class BaseDatabaseReaderTest {
+internal class CimDatabaseReaderTest {
 
     @JvmField
     @RegisterExtension
@@ -43,7 +45,7 @@ internal class BaseDatabaseReaderTest {
     private var postLoadResult = true
     private var postLoadCalled = false
 
-    private val reader = object : BaseDatabaseReader(
+    private val reader = object : CimDatabaseReader(
         connection,
         metadataReader,
         serviceReader,

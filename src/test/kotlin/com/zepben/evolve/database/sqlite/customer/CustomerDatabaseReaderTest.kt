@@ -8,7 +8,7 @@
 
 package com.zepben.evolve.database.sqlite.customer
 
-import com.zepben.evolve.database.sqlite.common.MetadataCollectionReader
+import com.zepben.evolve.database.sqlite.common.metadata.MetadataCollectionReader
 import com.zepben.evolve.database.sqlite.tables.TableVersion
 import com.zepben.evolve.services.customer.CustomerService
 import com.zepben.testutils.junit.SystemLogExtension

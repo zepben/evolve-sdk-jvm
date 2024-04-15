@@ -8,7 +8,7 @@
 
 package com.zepben.evolve.database.sqlite.network
 
-import com.zepben.evolve.database.sqlite.common.BaseCimReader
+import com.zepben.evolve.database.sqlite.common.cim.CimReader
 import com.zepben.evolve.database.sqlite.common.BaseServiceReader
 import com.zepben.evolve.database.sqlite.tables.associations.*
 import com.zepben.evolve.database.sqlite.tables.iec61968.assetinfo.*
@@ -56,7 +56,7 @@ import java.sql.Connection
  * @param databaseTables The tables available in the database.
  * @param connection A connection to the database.
  *
- * @property reader The [BaseCimReader] used to load the objects from the database.
+ * @property reader The [CimReader] used to load the objects from the database.
  */
 class NetworkServiceReader @JvmOverloads constructor(
     service: NetworkService,

@@ -8,7 +8,7 @@
 
 package com.zepben.evolve.database.sqlite.network
 
-import com.zepben.evolve.database.sqlite.common.BaseDatabaseTables
+import com.zepben.evolve.database.sqlite.common.cim.CimDatabaseTables
 import com.zepben.evolve.database.sqlite.tables.SqliteTable
 import com.zepben.evolve.database.sqlite.tables.associations.*
 import com.zepben.evolve.database.sqlite.tables.iec61968.assetinfo.*
@@ -50,7 +50,7 @@ import com.zepben.evolve.database.sqlite.tables.iec61970.infiec61970.wires.gener
 /**
  * The collection of tables for our network databases.
  */
-class NetworkDatabaseTables : BaseDatabaseTables() {
+class NetworkDatabaseTables : CimDatabaseTables() {
 
     override val includedTables: Sequence<SqliteTable> =
         super.includedTables + sequenceOf(

@@ -9,7 +9,7 @@
 package com.zepben.evolve.database.sqlite.diagram
 
 import com.zepben.evolve.cim.iec61970.base.diagramlayout.*
-import com.zepben.evolve.database.sqlite.common.BaseCimReader
+import com.zepben.evolve.database.sqlite.common.cim.CimReader
 import com.zepben.evolve.database.sqlite.extensions.getNullableString
 import com.zepben.evolve.database.sqlite.tables.iec61970.base.diagramlayout.TableDiagramObjectPoints
 import com.zepben.evolve.database.sqlite.tables.iec61970.base.diagramlayout.TableDiagramObjects
@@ -28,7 +28,7 @@ import java.sql.SQLException
  */
 class DiagramCimReader(
     override val service: DiagramService
-) : BaseCimReader(service) {
+) : CimReader(service) {
 
     // ###########################
     // # IEC61970 Diagram Layout #

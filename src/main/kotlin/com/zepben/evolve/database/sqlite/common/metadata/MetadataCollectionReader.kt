@@ -6,8 +6,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.zepben.evolve.database.sqlite.common
+package com.zepben.evolve.database.sqlite.common.metadata
 
+import com.zepben.evolve.database.sqlite.common.BaseCollectionReader
+import com.zepben.evolve.database.sqlite.common.BaseDatabaseTables
 import com.zepben.evolve.database.sqlite.tables.TableMetadataDataSources
 import com.zepben.evolve.services.common.meta.MetadataCollection
 import java.sql.Connection

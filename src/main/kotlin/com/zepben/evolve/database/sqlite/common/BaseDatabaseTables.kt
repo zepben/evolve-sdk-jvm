@@ -10,8 +10,6 @@ package com.zepben.evolve.database.sqlite.common
 
 import com.zepben.evolve.database.sqlite.tables.MissingTableConfigException
 import com.zepben.evolve.database.sqlite.tables.SqliteTable
-import com.zepben.evolve.database.sqlite.tables.TableMetadataDataSources
-import com.zepben.evolve.database.sqlite.tables.TableVersion
 import com.zepben.evolve.database.sqlite.tables.associations.*
 import com.zepben.evolve.database.sqlite.tables.iec61968.assetinfo.*
 import com.zepben.evolve.database.sqlite.tables.iec61970.base.core.*
@@ -34,12 +32,7 @@ open class BaseDatabaseTables : AutoCloseable {
     var insertStatements: Map<KClass<out SqliteTable>, PreparedStatement> = mapOf()
         private set
 
-    protected open val includedTables: Sequence<SqliteTable> = sequenceOf(
-        TableMetadataDataSources(),
-        TableVersion(),
-        TableNameTypes(),
-        TableNames()
-    )
+    protected open val includedTables: Sequence<SqliteTable> = sequenceOf()
 
     /**
      * Helper function for getting the table of the specified type.

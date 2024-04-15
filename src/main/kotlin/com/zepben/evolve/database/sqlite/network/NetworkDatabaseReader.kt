@@ -11,8 +11,8 @@ package com.zepben.evolve.database.sqlite.network
 import com.zepben.evolve.cim.iec61970.base.core.Equipment
 import com.zepben.evolve.cim.iec61970.base.core.Feeder
 import com.zepben.evolve.cim.iec61970.base.wires.EnergySource
-import com.zepben.evolve.database.sqlite.common.BaseDatabaseReader
-import com.zepben.evolve.database.sqlite.common.MetadataCollectionReader
+import com.zepben.evolve.database.sqlite.common.cim.CimDatabaseReader
+import com.zepben.evolve.database.sqlite.common.metadata.MetadataCollectionReader
 import com.zepben.evolve.database.sqlite.tables.TableVersion
 import com.zepben.evolve.database.sqlite.upgrade.UpgradeRunner
 import com.zepben.evolve.services.common.extensions.nameAndMRID
@@ -53,7 +53,7 @@ class NetworkDatabaseReader @JvmOverloads constructor(
     private val phaseInferrer: PhaseInferrer = PhaseInferrer(),
     private val assignToFeeders: AssignToFeeders = AssignToFeeders(),
     private val assignToLvFeeders: AssignToLvFeeders = AssignToLvFeeders()
-) : BaseDatabaseReader(connection, metadataReader, serviceReader, service, databaseDescription, tableVersion) {
+) : CimDatabaseReader(connection, metadataReader, serviceReader, service, databaseDescription, tableVersion) {
 
     override fun postLoad(): Boolean =
         super.postLoad().also {

@@ -6,8 +6,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.zepben.evolve.database.sqlite.common
+package com.zepben.evolve.database.sqlite.common.metadata
 
+import com.zepben.evolve.database.sqlite.common.BaseCollectionWriter
+import com.zepben.evolve.database.sqlite.common.cim.CimDatabaseTables
 import com.zepben.evolve.services.common.meta.MetadataCollection
 
 /**
@@ -18,7 +20,7 @@ import com.zepben.evolve.services.common.meta.MetadataCollection
  */
 class MetadataCollectionWriter @JvmOverloads constructor(
     private val metadata: MetadataCollection,
-    databaseTables: BaseDatabaseTables,
+    databaseTables: CimDatabaseTables,
     private val writer: MetadataEntryWriter = MetadataEntryWriter(databaseTables)
 ) : BaseCollectionWriter() {
 

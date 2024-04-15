@@ -11,6 +11,7 @@ package com.zepben.evolve.database.sqlite.common
 import com.zepben.evolve.cim.iec61970.base.core.IdentifiedObject
 import com.zepben.evolve.cim.iec61970.base.core.Name
 import com.zepben.evolve.cim.iec61970.base.core.NameType
+import com.zepben.evolve.database.sqlite.common.cim.CimWriter
 import com.zepben.evolve.services.common.BaseService
 import com.zepben.evolve.services.common.extensions.typeNameAndMRID
 
@@ -22,7 +23,7 @@ import com.zepben.evolve.services.common.extensions.typeNameAndMRID
  */
 abstract class BaseServiceWriter(
     protected open val service: BaseService,
-    protected open val writer: BaseCimWriter
+    protected open val writer: CimWriter
 ) : BaseCollectionWriter() {
 
     final override fun save(): Boolean =

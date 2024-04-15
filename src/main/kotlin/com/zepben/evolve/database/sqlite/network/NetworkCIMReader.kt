@@ -34,7 +34,7 @@ import com.zepben.evolve.cim.iec61970.infiec61970.feeder.LvFeeder
 import com.zepben.evolve.cim.iec61970.infiec61970.protection.PowerDirectionKind
 import com.zepben.evolve.cim.iec61970.infiec61970.protection.ProtectionKind
 import com.zepben.evolve.cim.iec61970.infiec61970.wires.generation.production.EvChargingUnit
-import com.zepben.evolve.database.sqlite.common.BaseCimReader
+import com.zepben.evolve.database.sqlite.common.cim.CimReader
 import com.zepben.evolve.database.sqlite.extensions.*
 import com.zepben.evolve.database.sqlite.tables.associations.*
 import com.zepben.evolve.database.sqlite.tables.iec61968.assetinfo.*
@@ -76,7 +76,7 @@ import java.sql.SQLException
  */
 class NetworkCimReader(
     override val service: NetworkService
-) : BaseCimReader(service) {
+) : CimReader(service) {
 
     // #######################
     // # IEC61968 Asset Info #
