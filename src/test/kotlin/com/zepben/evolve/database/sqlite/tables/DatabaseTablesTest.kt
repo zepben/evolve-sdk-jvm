@@ -9,7 +9,7 @@
 package com.zepben.evolve.database.sqlite.tables
 
 import com.google.common.reflect.ClassPath
-import com.zepben.evolve.database.sqlite.common.BaseDatabaseTables
+import com.zepben.evolve.database.sqlite.common.cim.CimDatabaseTables
 import com.zepben.evolve.database.sqlite.customer.CustomerDatabaseTables
 import com.zepben.evolve.database.sqlite.diagram.DiagramDatabaseTables
 import com.zepben.evolve.database.sqlite.network.NetworkDatabaseTables
@@ -21,7 +21,7 @@ import java.lang.reflect.Modifier
 
 internal class DatabaseTablesTest {
 
-    private val tables = BaseDatabaseTables()
+    private val tables = CimDatabaseTables()
 
     @Test
     internal fun `all tables are used by at least one database`() {

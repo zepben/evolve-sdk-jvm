@@ -8,8 +8,8 @@
 
 package com.zepben.evolve.database.sqlite.network
 
-import com.zepben.evolve.database.sqlite.common.BaseDatabaseWriter
-import com.zepben.evolve.database.sqlite.common.MetadataCollectionWriter
+import com.zepben.evolve.database.sqlite.common.cim.CimDatabaseWriter
+import com.zepben.evolve.database.sqlite.common.metadata.MetadataCollectionWriter
 import com.zepben.evolve.services.common.meta.MetadataCollection
 import com.zepben.evolve.services.network.NetworkService
 import java.sql.Connection
@@ -30,7 +30,7 @@ class NetworkDatabaseWriter @JvmOverloads constructor(
     createMetadataWriter: (Connection) -> MetadataCollectionWriter = { MetadataCollectionWriter(metadata, databaseTables) },
     createServiceWriter: (Connection) -> NetworkServiceWriter = { NetworkServiceWriter(service, databaseTables) },
     getConnection: (String) -> Connection = DriverManager::getConnection
-) : BaseDatabaseWriter(
+) : CimDatabaseWriter(
     databaseFile,
     databaseTables,
     createMetadataWriter,

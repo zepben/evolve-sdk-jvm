@@ -6,8 +6,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.zepben.evolve.database.sqlite.common
+package com.zepben.evolve.database.sqlite.common.cim
 
+import com.zepben.evolve.database.sqlite.common.BaseServiceWriter
+import com.zepben.evolve.database.sqlite.common.metadata.MetadataCollectionWriter
 import com.zepben.evolve.database.sqlite.extensions.configureBatch
 import com.zepben.evolve.database.sqlite.tables.MissingTableConfigException
 import com.zepben.evolve.database.sqlite.tables.TableVersion
@@ -30,9 +32,9 @@ import java.sql.SQLException
  *
  * @property logger The logger to use for this database writer.
  */
-abstract class BaseDatabaseWriter(
+abstract class CimDatabaseWriter(
     private val databaseFile: String,
-    private val databaseTables: BaseDatabaseTables,
+    private val databaseTables: CimDatabaseTables,
     private val createMetadataWriter: (Connection) -> MetadataCollectionWriter,
     private val createServiceWriter: (Connection) -> BaseServiceWriter,
     private val getConnection: (String) -> Connection

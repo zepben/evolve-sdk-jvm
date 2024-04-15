@@ -6,7 +6,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.zepben.evolve.database.sqlite.common
+package com.zepben.evolve.database.sqlite.common.cim
 
 import com.zepben.evolve.cim.iec61968.common.Document
 import com.zepben.evolve.cim.iec61968.common.Organisation
@@ -14,6 +14,8 @@ import com.zepben.evolve.cim.iec61968.common.OrganisationRole
 import com.zepben.evolve.cim.iec61970.base.core.IdentifiedObject
 import com.zepben.evolve.cim.iec61970.base.core.Name
 import com.zepben.evolve.cim.iec61970.base.core.NameType
+import com.zepben.evolve.database.sqlite.common.DuplicateMRIDException
+import com.zepben.evolve.database.sqlite.common.DuplicateNameTypeException
 import com.zepben.evolve.database.sqlite.extensions.getInstant
 import com.zepben.evolve.database.sqlite.extensions.getNullableString
 import com.zepben.evolve.database.sqlite.tables.iec61968.common.TableDocuments
@@ -36,7 +38,7 @@ import java.sql.SQLException
  * @param service The [BaseService] used to store any items read from the database.
  * @property logger The [Logger] to use for this reader.
  */
-abstract class BaseCimReader(
+abstract class CimReader(
     protected open val service: BaseService
 ) {
 

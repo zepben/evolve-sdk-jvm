@@ -8,7 +8,7 @@
 
 package com.zepben.evolve.database.sqlite.customer
 
-import com.zepben.evolve.database.sqlite.common.BaseDatabaseTables
+import com.zepben.evolve.database.sqlite.common.cim.CimDatabaseTables
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
 
@@ -17,7 +17,7 @@ internal class CustomerDatabaseTablesTest {
     @Test
     fun `contains base tables`() {
         val tables = CustomerDatabaseTables().tables.keys
-        val baseTables = (object : BaseDatabaseTables() {}).tables.keys
+        val baseTables = (object : CimDatabaseTables() {}).tables.keys
 
         assertThat("should contain all base tables", tables.containsAll(baseTables))
     }

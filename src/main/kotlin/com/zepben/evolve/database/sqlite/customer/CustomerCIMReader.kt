@@ -10,7 +10,7 @@ package com.zepben.evolve.database.sqlite.customer
 
 import com.zepben.evolve.cim.iec61968.common.Agreement
 import com.zepben.evolve.cim.iec61968.customers.*
-import com.zepben.evolve.database.sqlite.common.BaseCimReader
+import com.zepben.evolve.database.sqlite.common.cim.CimReader
 import com.zepben.evolve.database.sqlite.extensions.getNullableInt
 import com.zepben.evolve.database.sqlite.tables.associations.TableCustomerAgreementsPricingStructures
 import com.zepben.evolve.database.sqlite.tables.associations.TablePricingStructuresTariffs
@@ -32,7 +32,7 @@ import java.sql.SQLException
  */
 class CustomerCimReader(
     override val service: CustomerService
-) : BaseCimReader(service) {
+) : CimReader(service) {
 
     // ###################
     // # IEC61968 Common #

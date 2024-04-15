@@ -36,7 +36,7 @@ import com.zepben.evolve.cim.iec61970.infiec61970.feeder.Circuit
 import com.zepben.evolve.cim.iec61970.infiec61970.feeder.Loop
 import com.zepben.evolve.cim.iec61970.infiec61970.feeder.LvFeeder
 import com.zepben.evolve.cim.iec61970.infiec61970.wires.generation.production.EvChargingUnit
-import com.zepben.evolve.database.sqlite.common.BaseCimWriter
+import com.zepben.evolve.database.sqlite.common.cim.CimWriter
 import com.zepben.evolve.database.sqlite.extensions.*
 import com.zepben.evolve.database.sqlite.tables.associations.*
 import com.zepben.evolve.database.sqlite.tables.iec61968.assetinfo.*
@@ -77,7 +77,7 @@ import java.sql.SQLException
 @Suppress("SameParameterValue")
 class NetworkCimWriter(
     override val databaseTables: NetworkDatabaseTables
-) : BaseCimWriter(databaseTables) {
+) : CimWriter(databaseTables) {
 
     // #######################
     // # IEC61968 Asset Info #

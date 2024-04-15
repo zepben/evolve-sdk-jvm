@@ -8,7 +8,7 @@
 
 package com.zepben.evolve.database.sqlite.customer
 
-import com.zepben.evolve.database.sqlite.common.BaseDatabaseTables
+import com.zepben.evolve.database.sqlite.common.cim.CimDatabaseTables
 import com.zepben.evolve.database.sqlite.tables.SqliteTable
 import com.zepben.evolve.database.sqlite.tables.associations.TableCustomerAgreementsPricingStructures
 import com.zepben.evolve.database.sqlite.tables.associations.TablePricingStructuresTariffs
@@ -21,7 +21,7 @@ import com.zepben.evolve.database.sqlite.tables.iec61968.customers.TableTariffs
 /**
  * The collection of tables for our customer databases.
  */
-class CustomerDatabaseTables : BaseDatabaseTables() {
+class CustomerDatabaseTables : CimDatabaseTables() {
 
     override val includedTables: Sequence<SqliteTable> =
         super.includedTables + sequenceOf(

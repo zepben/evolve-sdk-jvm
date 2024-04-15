@@ -13,7 +13,7 @@ import com.zepben.evolve.cim.iec61968.customers.Customer
 import com.zepben.evolve.cim.iec61968.customers.CustomerAgreement
 import com.zepben.evolve.cim.iec61968.customers.PricingStructure
 import com.zepben.evolve.cim.iec61968.customers.Tariff
-import com.zepben.evolve.database.sqlite.common.BaseCimWriter
+import com.zepben.evolve.database.sqlite.common.cim.CimWriter
 import com.zepben.evolve.database.sqlite.extensions.setNullableInt
 import com.zepben.evolve.database.sqlite.extensions.setNullableString
 import com.zepben.evolve.database.sqlite.tables.associations.TableCustomerAgreementsPricingStructures
@@ -34,7 +34,7 @@ import java.sql.SQLException
  */
 class CustomerCimWriter(
     override val databaseTables: CustomerDatabaseTables
-) : BaseCimWriter(databaseTables) {
+) : CimWriter(databaseTables) {
 
     // ###################
     // # IEC61968 Common #

@@ -6,7 +6,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.zepben.evolve.database.sqlite.common
+package com.zepben.evolve.database.sqlite.common.cim
 
 import com.zepben.evolve.cim.iec61968.common.Document
 import com.zepben.evolve.cim.iec61968.common.Organisation
@@ -14,6 +14,7 @@ import com.zepben.evolve.cim.iec61968.common.OrganisationRole
 import com.zepben.evolve.cim.iec61970.base.core.IdentifiedObject
 import com.zepben.evolve.cim.iec61970.base.core.Name
 import com.zepben.evolve.cim.iec61970.base.core.NameType
+import com.zepben.evolve.database.sqlite.common.BaseEntryWriter
 import com.zepben.evolve.database.sqlite.extensions.setInstant
 import com.zepben.evolve.database.sqlite.extensions.setNullableString
 import com.zepben.evolve.database.sqlite.tables.iec61968.common.TableDocuments
@@ -30,8 +31,8 @@ import java.sql.SQLException
  *
  * @property databaseTables The tables that are available in the database.
  */
-abstract class BaseCimWriter(
-    protected open val databaseTables: BaseDatabaseTables
+abstract class CimWriter(
+    protected open val databaseTables: CimDatabaseTables
 ) : BaseEntryWriter() {
 
     // ###################

@@ -8,7 +8,7 @@
 
 package com.zepben.evolve.database.sqlite.diagram
 
-import com.zepben.evolve.database.sqlite.common.BaseDatabaseTables
+import com.zepben.evolve.database.sqlite.common.cim.CimDatabaseTables
 import com.zepben.evolve.database.sqlite.tables.SqliteTable
 import com.zepben.evolve.database.sqlite.tables.iec61970.base.diagramlayout.TableDiagramObjectPoints
 import com.zepben.evolve.database.sqlite.tables.iec61970.base.diagramlayout.TableDiagramObjects
@@ -17,7 +17,7 @@ import com.zepben.evolve.database.sqlite.tables.iec61970.base.diagramlayout.Tabl
 /**
  * The collection of tables for our diagram databases.
  */
-class DiagramDatabaseTables : BaseDatabaseTables() {
+class DiagramDatabaseTables : CimDatabaseTables() {
 
     override val includedTables: Sequence<SqliteTable> =
         super.includedTables + sequenceOf(
