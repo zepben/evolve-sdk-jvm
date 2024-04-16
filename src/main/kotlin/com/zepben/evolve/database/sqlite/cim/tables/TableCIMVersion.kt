@@ -13,8 +13,4 @@ import com.zepben.evolve.database.sqlite.common.TableVersion
 /**
  * The `version` table in the CIM databases.
  */
-object TableCimVersion : TableVersion() {
-
-    override val supportedVersion: Int = 52
-
-}
+val tableCimVersion: TableVersion = TableVersion(52)

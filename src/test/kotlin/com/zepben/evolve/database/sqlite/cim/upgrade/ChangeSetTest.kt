@@ -104,7 +104,7 @@ internal class ChangeSetTest {
         type: DatabaseType
     ) {
         val runner = UpgradeRunner()
-        val tableVersion = TableCimVersion
+        val tableVersion = tableCimVersion
 
         conn.createStatement().use { stmt ->
             conn.prepareStatement(tableVersion.preparedUpdateSql).use { versionUpdateStatement ->

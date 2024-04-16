@@ -6,11 +6,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.zepben.evolve.database.sqlite.metrics.tables
+package com.zepben.evolve.metrics
 
-import com.zepben.evolve.database.sqlite.common.TableVersion
-
-/**
- * The `version` table in the metrics database.
- */
-val tableMetricsVersion: TableVersion = TableVersion(1)
+data class NetworkContainerMetrics (
+    var numTx: Int = 0
+)

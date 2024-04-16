@@ -40,8 +40,7 @@ import com.zepben.evolve.cim.iec61970.infiec61970.feeder.Circuit
 import com.zepben.evolve.cim.iec61970.infiec61970.feeder.Loop
 import com.zepben.evolve.cim.iec61970.infiec61970.feeder.LvFeeder
 import com.zepben.evolve.cim.iec61970.infiec61970.wires.generation.production.EvChargingUnit
-import com.zepben.evolve.database.sqlite.cim.tables.TableCimVersion
-import com.zepben.evolve.database.sqlite.common.TableVersion
+import com.zepben.evolve.database.sqlite.cim.tables.tableCimVersion
 import com.zepben.evolve.services.common.BaseService
 import com.zepben.evolve.services.common.BaseServiceComparator
 import com.zepben.evolve.services.common.Resolvers
@@ -294,7 +293,7 @@ class NetworkDatabaseSchemaTest {
 
         assertThat("Database should have been saved", NetworkDatabaseWriter(schemaTestFile, expectedMetadata, expectedService).save())
 
-        assertThat(systemErr.log, containsString("Creating database schema v${TableCimVersion.supportedVersion}"))
+        assertThat(systemErr.log, containsString("Creating database schema v${tableCimVersion.supportedVersion}"))
         assertThat("Database should now exist", Files.exists(Paths.get(schemaTestFile)))
 
         val networkService = NetworkService()

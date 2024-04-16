@@ -8,6 +8,7 @@
 
 package com.zepben.evolve.database.sqlite.common
 
+import com.zepben.evolve.database.sqlite.cim.BaseServiceReader
 import com.zepben.evolve.database.sqlite.cim.CimDatabaseReader
 import com.zepben.evolve.database.sqlite.cim.metadata.MetadataCollectionReader
 import com.zepben.evolve.database.sqlite.cim.tables.MissingTableConfigException

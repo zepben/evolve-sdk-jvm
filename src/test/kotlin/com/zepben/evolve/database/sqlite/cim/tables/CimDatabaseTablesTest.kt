@@ -13,13 +13,14 @@ import com.zepben.evolve.database.sqlite.cim.CimDatabaseTables
 import com.zepben.evolve.database.sqlite.cim.customer.CustomerDatabaseTables
 import com.zepben.evolve.database.sqlite.cim.diagram.DiagramDatabaseTables
 import com.zepben.evolve.database.sqlite.cim.network.NetworkDatabaseTables
+import com.zepben.evolve.database.sqlite.common.TableVersion
 import com.zepben.testutils.exception.ExpectException.Companion.expect
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Test
 import java.lang.reflect.Modifier
 
-internal class DatabaseTablesTest {
+internal class CimDatabaseTablesTest {
 
     private val tables = CimDatabaseTables()
 
@@ -36,6 +37,7 @@ internal class DatabaseTablesTest {
 
         val usedTables = sequenceOf(CustomerDatabaseTables(), DiagramDatabaseTables(), NetworkDatabaseTables())
             .flatMap { it.tables.keys }
+            .filter { it != TableVersion::class }
             .map { it.simpleName!! }
             .toSet()
 

@@ -43,7 +43,7 @@ class UpgradeRunner @JvmOverloads constructor(
         changeSet51(),
         changeSet52()
     ),
-    private val tableVersion: TableVersion = TableCimVersion
+    private val tableVersion: TableVersion = tableCimVersion
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)

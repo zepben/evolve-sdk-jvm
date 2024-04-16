@@ -10,7 +10,7 @@ package com.zepben.evolve.database.sqlite.cim.diagram
 
 import com.zepben.evolve.cim.iec61970.base.diagramlayout.Diagram
 import com.zepben.evolve.cim.iec61970.base.diagramlayout.DiagramObject
-import com.zepben.evolve.database.sqlite.cim.tables.TableCimVersion
+import com.zepben.evolve.database.sqlite.cim.tables.tableCimVersion
 import com.zepben.evolve.services.common.BaseService
 import com.zepben.evolve.services.common.BaseServiceComparator
 import com.zepben.evolve.services.common.Resolvers
@@ -144,7 +144,7 @@ class DiagramDatabaseSchemaTest {
 
         assertThat("Database should have been saved", DiagramDatabaseWriter(schemaTestFile, expectedMetadata, expectedService).save())
 
-        assertThat(systemErr.log, containsString("Creating database schema v${TableCimVersion.supportedVersion}"))
+        assertThat(systemErr.log, containsString("Creating database schema v${tableCimVersion.supportedVersion}"))
         assertThat("Database should now exist", Files.exists(Paths.get(schemaTestFile)))
 
         val diagramService = DiagramService()

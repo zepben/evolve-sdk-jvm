@@ -6,9 +6,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.zepben.evolve.database.sqlite.cim.tables
+package com.zepben.evolve.database.sqlite.common
 
-import com.zepben.evolve.database.sqlite.common.TableVersion
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
@@ -36,9 +35,7 @@ class TableVersionTest {
         every { it.executeQuery(any()) } returns resultSet
     }
 
-    private val table = object : TableVersion() {
-        override val supportedVersion: Int = 123
-    }
+    private val table = TableVersion(123)
 
     @Test
     internal fun `getVersion helper returns version from query`() {
