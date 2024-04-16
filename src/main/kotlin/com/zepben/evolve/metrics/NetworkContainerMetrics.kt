@@ -9,5 +9,5 @@
 package com.zepben.evolve.metrics
 
 data class NetworkContainerMetrics (
-    var numTx: Int = 0
+    var numDistTx: Int = 0
 )

@@ -12,10 +12,13 @@ import com.zepben.evolve.database.sqlite.common.BaseCollectionWriter
 import com.zepben.evolve.metrics.IngestionMetrics
 
 class MetricsWriter(
-    metrics: IngestionMetrics,
-    tables: MetricsDatabaseTables
+    private val metrics: IngestionMetrics,
+    databaseTables: MetricsDatabaseTables,
+    private val writer: MetricsEntryWriter = MetricsEntryWriter(databaseTables, metrics.jobId)
 ): BaseCollectionWriter() {
-    override fun save(): Boolean {
-        TODO("Not yet implemented")
-    }
+
+    override fun save(): Boolean = writer.save(metrics.metadata)
+        .andSaveEach(metrics.jobSources.entries, writer::save) { jobSource, e -> logger.error("Failed to save job source $jobSource: ${e.message}")}
+        .andSaveEach(metrics.networkMetrics.entries, writer::save) { metric, e -> logger.error("Failed to save metric $metric: ${e.message}") }
+
 }

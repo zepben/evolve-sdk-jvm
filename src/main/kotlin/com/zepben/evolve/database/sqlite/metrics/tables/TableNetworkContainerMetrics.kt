@@ -20,14 +20,15 @@ class TableNetworkContainerMetrics : SqliteTable() {
     val HIERARCHY_ID: Column = Column(++columnIndex, "hierarchy_id", "TEXT", NULL)
     val HIERARCHY_NAME: Column = Column(++columnIndex, "hierarchy_name", "TEXT", NULL)
     val CONTAINER_TYPE: Column = Column(++columnIndex, "container_type", "TEXT", NOT_NULL)
-    val DIST_TX_COUNT: Column = Column(++columnIndex, "dist_tx_count", "NUMBER", NULL) // Example metric, list to be finalized
+    val METRIC_NAME: Column = Column(++columnIndex, "metric_name", "TEXT", NOT_NULL)
+    val METRIC_VALUE: Column = Column(++columnIndex, "metric_value", "NUMBER", NOT_NULL)
 
     override val uniqueIndexColumns: MutableList<List<Column>> = mutableListOf(
-        listOf(JOB_ID, HIERARCHY_ID)
+        listOf(JOB_ID, HIERARCHY_ID, METRIC_NAME)
     )
 
     override val nonUniqueIndexColumns: MutableList<List<Column>> = mutableListOf(
-        listOf(HIERARCHY_ID)
+        listOf(HIERARCHY_ID, METRIC_NAME)
     )
 
     override val name: String = "network_container_metrics"
