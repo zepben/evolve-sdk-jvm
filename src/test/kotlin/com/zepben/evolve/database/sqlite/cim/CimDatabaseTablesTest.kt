@@ -1,18 +1,19 @@
 /*
- * Copyright 2021 Zeppelin Bend Pty Ltd
+ * Copyright 2024 Zeppelin Bend Pty Ltd
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.zepben.evolve.database.sqlite.cim.tables
+package com.zepben.evolve.database.sqlite.cim
 
 import com.google.common.reflect.ClassPath
-import com.zepben.evolve.database.sqlite.cim.CimDatabaseTables
 import com.zepben.evolve.database.sqlite.cim.customer.CustomerDatabaseTables
 import com.zepben.evolve.database.sqlite.cim.diagram.DiagramDatabaseTables
 import com.zepben.evolve.database.sqlite.cim.network.NetworkDatabaseTables
+import com.zepben.evolve.database.sqlite.cim.tables.MissingTableConfigException
+import com.zepben.evolve.database.sqlite.cim.tables.SqliteTable
 import com.zepben.evolve.database.sqlite.common.TableVersion
 import com.zepben.testutils.exception.ExpectException.Companion.expect
 import org.hamcrest.MatcherAssert.assertThat
