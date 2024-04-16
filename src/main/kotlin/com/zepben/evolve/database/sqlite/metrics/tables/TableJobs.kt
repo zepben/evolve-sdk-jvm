@@ -10,12 +10,10 @@ package com.zepben.evolve.database.sqlite.metrics.tables
 
 import com.zepben.evolve.database.sqlite.cim.tables.Column
 import com.zepben.evolve.database.sqlite.cim.tables.Column.Nullable.NOT_NULL
-import com.zepben.evolve.database.sqlite.cim.tables.SqliteTable
 
 @Suppress("PropertyName")
-class TableJobs : SqliteTable() {
+class TableJobs : MultiJobTable() {
 
-    val JOB_ID: Column = Column(++columnIndex, "job_id", "TEXT", NOT_NULL)
     val INGEST_TIME: Column = Column(++columnIndex, "ingest_time", "TEXT", NOT_NULL)
     val SOURCE: Column = Column(++columnIndex, "source", "TEXT", NOT_NULL)
     val APPLICATION: Column = Column(++columnIndex, "application", "TEXT", NOT_NULL)
