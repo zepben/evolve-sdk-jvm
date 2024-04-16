@@ -10,9 +10,11 @@ package com.zepben.evolve.metrics
 
 /**
  * Metadata for a data source used in ingestion.
+ *
+ * @property fileHash SHA-256 of the file. // TODO check if this is the correct type of SHA to use
  */
 data class SourceMetadata(
-    val fileHash: ByteArray? = null
+    var fileHash: ByteArray? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

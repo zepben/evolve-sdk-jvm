@@ -9,5 +9,6 @@
 package com.zepben.evolve.metrics
 
 typealias NetworkMetrics = MutableMap<NetworkContainer, NetworkContainerMetrics>
+typealias NetworkMetric = Map.Entry<NetworkContainer, NetworkContainerMetrics>
 
 fun networkMetricsWithDefault(): NetworkMetrics = mutableMapOf<NetworkContainer, NetworkContainerMetrics>().withDefault { NetworkContainerMetrics() }

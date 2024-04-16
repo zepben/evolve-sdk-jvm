@@ -13,18 +13,14 @@ import java.util.*
 /**
  * Holds metadata about a run of an ingestor and metrics.
  *
- * @property jobId a unique UUID for the run.
- * @property source A string describing the source data for the run (e.g. "ExampleEnergy full HV/LV 2024-01-02 cut").
- * @property application The application used to ingest the source data.
- * @property applicationVersion The version of the ingestion application.
+ * @property jobId A unique UUID for the run.
+ * @property metadata Metadata for the run.
  * @property jobSources A map from strings identifying data sources (e.g. files) to their metadata.
  * @property networkMetrics A map from network containers to their metrics.
  */
 data class IngestionMetrics(
     val jobId: UUID,
-    val source: String,
-    val application: String,
-    val applicationVersion: String,
+    val metadata: IngestionMetadata,
     val jobSources: JobSources = jobSourcesWithDefault(),
     val networkMetrics: NetworkMetrics = networkMetricsWithDefault()
 )
