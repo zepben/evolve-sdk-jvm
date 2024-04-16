@@ -18,7 +18,7 @@ class MetricsWriter(
 ): BaseCollectionWriter() {
 
     override fun save(): Boolean = writer.save(metrics.metadata)
-        .andSaveEach(metrics.jobSources.entries, writer::save) { jobSource, e -> logger.error("Failed to save job source $jobSource: ${e.message}")}
-        .andSaveEach(metrics.networkMetrics.entries, writer::save) { metric, e -> logger.error("Failed to save metric $metric: ${e.message}") }
+        .andSaveEach(metrics.jobSources.entries, writer::saveSource) { jobSource, e -> logger.error("Failed to save job source $jobSource: ${e.message}")}
+        .andSaveEach(metrics.networkMetrics.entries, writer::saveMetric) { metric, e -> logger.error("Failed to save metric $metric: ${e.message}") }
 
 }
