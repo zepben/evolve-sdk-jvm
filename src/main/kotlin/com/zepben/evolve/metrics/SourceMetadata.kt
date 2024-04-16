@@ -16,6 +16,7 @@ package com.zepben.evolve.metrics
 data class SourceMetadata(
     var fileHash: ByteArray? = null
 ) {
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -33,4 +34,5 @@ data class SourceMetadata(
     override fun hashCode(): Int {
         return fileHash?.contentHashCode() ?: 0
     }
+
 }
