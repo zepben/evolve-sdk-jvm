@@ -11,12 +11,10 @@ package com.zepben.evolve.database.sqlite.metrics.tables
 import com.zepben.evolve.database.sqlite.cim.tables.Column
 import com.zepben.evolve.database.sqlite.cim.tables.Column.Nullable.NOT_NULL
 import com.zepben.evolve.database.sqlite.cim.tables.Column.Nullable.NULL
-import com.zepben.evolve.database.sqlite.cim.tables.SqliteTable
 
 @Suppress("PropertyName")
-class TableJobSources : SqliteTable() {
+class TableJobSources : MultiJobTable() {
 
-    val JOB_ID: Column = Column(++columnIndex, "job_id", "TEXT", NOT_NULL)
     val DATA_SOURCE: Column = Column(++columnIndex, "data_source", "TEXT", NOT_NULL)
     val FILE_SHA: Column = Column(++columnIndex, "file_sha", "BLOB", NULL)
 

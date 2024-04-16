@@ -118,7 +118,7 @@ internal class CimDatabaseReaderTest {
         every { tableVersion.getVersion(any()) } returns null
 
         assertThat("Should not have loaded", !reader.load())
-        assertThat(systemErr.log, containsString("Failed to read the version number form the selected database. Are you sure it is a EWB database?"))
+        assertThat(systemErr.log, containsString("Failed to read the version number from the selected database. Are you sure it is a EWB database?"))
 
         verifyInvalidVersionCalls()
     }

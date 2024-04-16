@@ -1845,7 +1845,7 @@ class NetworkCimReader(
      * @throws SQLException For any errors encountered reading from the database.
      */
     @Throws(SQLException::class)
-    fun load(table: com.zepben.evolve.database.sqlite.cim.tables.iec61970.base.wires.TablePerLengthSequenceImpedances, resultSet: ResultSet, setIdentifier: (String) -> String): Boolean {
+    fun load(table: TablePerLengthSequenceImpedances, resultSet: ResultSet, setIdentifier: (String) -> String): Boolean {
         val perLengthSequenceImpedance =
             PerLengthSequenceImpedance(setIdentifier(resultSet.getString(table.MRID.queryIndex))).apply {
                 r = resultSet.getNullableDouble(table.R.queryIndex)
@@ -2611,7 +2611,7 @@ class NetworkCimReader(
      * @throws SQLException For any errors encountered reading from the database.
      */
     @Throws(SQLException::class)
-    fun load(table: com.zepben.evolve.database.sqlite.cim.tables.associations.TableProtectionRelayFunctionsSensors, resultSet: ResultSet, setIdentifier: (String) -> String): Boolean {
+    fun load(table: TableProtectionRelayFunctionsSensors, resultSet: ResultSet, setIdentifier: (String) -> String): Boolean {
         val protectionRelayFunctionMRID = setIdentifier(resultSet.getString(table.PROTECTION_RELAY_FUNCTION_MRID.queryIndex))
         setIdentifier("${protectionRelayFunctionMRID}-to-UNKNOWN")
 

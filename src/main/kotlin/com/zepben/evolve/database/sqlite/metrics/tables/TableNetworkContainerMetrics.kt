@@ -11,12 +11,10 @@ package com.zepben.evolve.database.sqlite.metrics.tables
 import com.zepben.evolve.database.sqlite.cim.tables.Column
 import com.zepben.evolve.database.sqlite.cim.tables.Column.Nullable.NOT_NULL
 import com.zepben.evolve.database.sqlite.cim.tables.Column.Nullable.NULL
-import com.zepben.evolve.database.sqlite.cim.tables.SqliteTable
 
 @Suppress("PropertyName")
-class TableNetworkContainerMetrics : SqliteTable() {
+class TableNetworkContainerMetrics : MultiJobTable() {
 
-    val JOB_ID: Column = Column(++columnIndex, "job_id", "TEXT", NOT_NULL)
     val HIERARCHY_ID: Column = Column(++columnIndex, "hierarchy_id", "TEXT", NULL)
     val HIERARCHY_NAME: Column = Column(++columnIndex, "hierarchy_name", "TEXT", NULL)
     val CONTAINER_TYPE: Column = Column(++columnIndex, "container_type", "TEXT", NOT_NULL)

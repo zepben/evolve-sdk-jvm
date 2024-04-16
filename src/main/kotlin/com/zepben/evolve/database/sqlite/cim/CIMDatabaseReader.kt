@@ -99,7 +99,7 @@ abstract class CimDatabaseReader(
 
     private fun formatVersionError(version: Int?): String =
         when {
-            version == null -> "Failed to read the version number form the selected database. Are you sure it is a EWB database?"
+            version == null -> "Failed to read the version number from the selected database. Are you sure it is a EWB database?"
             version < supportedVersion -> unexpectedVersion(version, "Consider using the UpgradeRunner if you wish to support this database.")
             else -> unexpectedVersion(version, "You need to use a newer version of the SDK to load this database.")
         }

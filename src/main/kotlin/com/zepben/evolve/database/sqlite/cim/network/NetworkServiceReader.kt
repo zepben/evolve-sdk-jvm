@@ -8,8 +8,8 @@
 
 package com.zepben.evolve.database.sqlite.cim.network
 
-import com.zepben.evolve.database.sqlite.cim.CimReader
 import com.zepben.evolve.database.sqlite.cim.BaseServiceReader
+import com.zepben.evolve.database.sqlite.cim.CimReader
 import com.zepben.evolve.database.sqlite.cim.tables.associations.*
 import com.zepben.evolve.database.sqlite.cim.tables.iec61968.assetinfo.*
 import com.zepben.evolve.database.sqlite.cim.tables.iec61968.assets.TableAssetOwners
@@ -94,7 +94,7 @@ class NetworkServiceReader @JvmOverloads constructor(
             .andLoadEach<TableSubGeographicalRegions>(reader::load)
             .andLoadEach<TableSubstations>(reader::load)
             .andLoadEach<TableSites>(reader::load)
-            .andLoadEach<com.zepben.evolve.database.sqlite.cim.tables.iec61970.base.wires.TablePerLengthSequenceImpedances>(reader::load)
+            .andLoadEach<TablePerLengthSequenceImpedances>(reader::load)
             .andLoadEach<TableEquivalentBranches>(reader::load)
             .andLoadEach<TableAcLineSegments>(reader::load)
             .andLoadEach<TableBreakers>(reader::load)
@@ -151,7 +151,7 @@ class NetworkServiceReader @JvmOverloads constructor(
             .andLoadEach<TableCircuitsTerminals>(reader::load)
             .andLoadEach<TableLoopsSubstations>(reader::load)
             .andLoadEach<TableProtectionRelayFunctionsProtectedSwitches>(reader::load)
-            .andLoadEach<com.zepben.evolve.database.sqlite.cim.tables.associations.TableProtectionRelayFunctionsSensors>(reader::load)
+            .andLoadEach<TableProtectionRelayFunctionsSensors>(reader::load)
             .andLoadEach<TableProtectionRelaySchemesProtectionRelayFunctions>(reader::load)
             .andLoadEach<TableControls>(reader::load)
             .andLoadEach<TableRemoteControls>(reader::load)
