@@ -34,7 +34,7 @@ class MetricsEntryWriter(
         return insert.tryExecuteSingleUpdate("job")
     }
 
-    fun save(jobSource: JobSource): Boolean {
+    fun saveSource(jobSource: JobSource): Boolean {
         val table = databaseTables.getTable<TableJobSources>()
         val insert = databaseTables.getInsert<TableJobSources>()
         val (sourceName, sourceMetadata) = jobSource
@@ -46,7 +46,7 @@ class MetricsEntryWriter(
         return insert.tryExecuteSingleUpdate("job source")
     }
 
-    fun save(networkMetric: NetworkMetric): Boolean {
+    fun saveMetric(networkMetric: NetworkMetric): Boolean {
         val table = databaseTables.getTable<TableNetworkContainerMetrics>()
         val insert = databaseTables.getInsert<TableNetworkContainerMetrics>()
         val (container, containerMetric) = networkMetric

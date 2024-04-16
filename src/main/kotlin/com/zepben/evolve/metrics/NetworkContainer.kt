@@ -18,7 +18,7 @@ data object TotalNetworkContainer : NetworkContainer
 
 enum class HierarchyLevel {
     GeographicalRegion,
-    SubgeographicalRegion,
+    SubGeographicalRegion,
     Substation,
     Feeder,
     LvFeeder
@@ -27,7 +27,7 @@ enum class HierarchyLevel {
 fun GeographicalRegion.toNetworkContainer(): PartialNetworkContainer =
     PartialNetworkContainer(HierarchyLevel.GeographicalRegion, mRID, name)
 fun SubGeographicalRegion.toNetworkContainer(): PartialNetworkContainer =
-    PartialNetworkContainer(HierarchyLevel.SubgeographicalRegion, mRID, name)
+    PartialNetworkContainer(HierarchyLevel.SubGeographicalRegion, mRID, name)
 fun Substation.toNetworkContainer(): PartialNetworkContainer =
     PartialNetworkContainer(HierarchyLevel.Substation, mRID, name)
 fun Feeder.toNetworkContainer(): PartialNetworkContainer =
