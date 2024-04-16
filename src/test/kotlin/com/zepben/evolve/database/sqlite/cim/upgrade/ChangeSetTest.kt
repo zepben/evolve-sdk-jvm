@@ -8,7 +8,7 @@
 
 package com.zepben.evolve.database.sqlite.cim.upgrade
 
-import com.zepben.evolve.database.sqlite.cim.tables.TableCimVersion
+import com.zepben.evolve.database.sqlite.cim.tables.tableCimVersion
 import com.zepben.evolve.database.sqlite.cim.upgrade.changesets.ChangeSetValidator
 import com.zepben.evolve.database.sqlite.cim.upgrade.changesets.combined.*
 import com.zepben.evolve.database.sqlite.cim.upgrade.changesets.customer.ChangeSet50CustomerValidator
@@ -103,7 +103,7 @@ internal class ChangeSetTest {
         type: EwbDatabaseType
     ) {
         val runner = UpgradeRunner()
-        val tableVersion = TableCimVersion
+        val tableVersion = tableCimVersion
 
         conn.createStatement().use { stmt ->
             conn.prepareStatement(tableVersion.preparedUpdateSql).use { versionUpdateStatement ->

@@ -10,7 +10,7 @@ package com.zepben.evolve.database.sqlite.cim.diagram
 
 import com.zepben.evolve.database.sqlite.cim.CimDatabaseReader
 import com.zepben.evolve.database.sqlite.cim.metadata.MetadataCollectionReader
-import com.zepben.evolve.database.sqlite.cim.tables.TableCimVersion
+import com.zepben.evolve.database.sqlite.cim.tables.tableCimVersion
 import com.zepben.evolve.database.sqlite.common.TableVersion
 import com.zepben.evolve.services.common.meta.MetadataCollection
 import com.zepben.evolve.services.diagram.DiagramService
@@ -32,5 +32,5 @@ class DiagramDatabaseReader @JvmOverloads constructor(
     tables: DiagramDatabaseTables = DiagramDatabaseTables(),
     metadataReader: MetadataCollectionReader = MetadataCollectionReader(metadata, tables, connection),
     serviceReader: DiagramServiceReader = DiagramServiceReader(service, tables, connection),
-    tableVersion: TableVersion = TableCimVersion
+    tableVersion: TableVersion = tableCimVersion
 ) : CimDatabaseReader(connection, metadataReader, serviceReader, service, databaseDescription, tableVersion)

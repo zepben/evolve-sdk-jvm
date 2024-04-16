@@ -9,7 +9,7 @@
 package com.zepben.evolve.database.sqlite.cim.upgrade
 
 import com.zepben.evolve.database.sqlite.cim.tables.Column
-import com.zepben.evolve.database.sqlite.cim.tables.TableCimVersion
+import com.zepben.evolve.database.sqlite.cim.tables.tableCimVersion
 import com.zepben.evolve.database.sqlite.common.TableVersion
 import com.zepben.evolve.database.sqlite.extensions.configureBatch
 import com.zepben.testutils.exception.ExpectException.Companion.expect
@@ -134,7 +134,7 @@ internal class UpgradeRunnerTest {
 
             // If upgrades are supported, make sure they are all registered in the correct order.
             if (actualChangeSets.isNotEmpty())
-                assertThat(actualChangeSets.map { it.number }, equalTo((actualChangeSets.minOf { it.number }..TableCimVersion.supportedVersion).toList()))
+                assertThat(actualChangeSets.map { it.number }, equalTo((actualChangeSets.minOf { it.number }..tableCimVersion.supportedVersion).toList()))
         }
     }
 

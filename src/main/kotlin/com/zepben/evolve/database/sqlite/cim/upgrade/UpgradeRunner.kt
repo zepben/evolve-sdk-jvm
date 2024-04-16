@@ -8,7 +8,7 @@
 
 package com.zepben.evolve.database.sqlite.cim.upgrade
 
-import com.zepben.evolve.database.sqlite.cim.tables.TableCimVersion
+import com.zepben.evolve.database.sqlite.cim.tables.tableCimVersion
 import com.zepben.evolve.database.sqlite.extensions.configureBatch
 import com.zepben.evolve.database.sqlite.common.TableVersion
 import com.zepben.evolve.database.sqlite.cim.upgrade.changesets.*
@@ -43,7 +43,7 @@ class UpgradeRunner @JvmOverloads constructor(
         changeSet51(),
         changeSet52()
     ),
-    private val tableVersion: TableVersion = TableCimVersion
+    private val tableVersion: TableVersion = tableCimVersion
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)

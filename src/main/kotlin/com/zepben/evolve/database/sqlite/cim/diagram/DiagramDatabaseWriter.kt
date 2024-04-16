@@ -33,7 +33,7 @@ class DiagramDatabaseWriter @JvmOverloads constructor(
 ) : CimDatabaseWriter(
     databaseFile,
     databaseTables,
+    getConnection,
     createMetadataWriter,
-    createServiceWriter,
-    getConnection
+    createServiceWriter
 )

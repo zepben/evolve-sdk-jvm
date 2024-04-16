@@ -13,7 +13,7 @@ import com.zepben.evolve.cim.iec61970.base.core.Feeder
 import com.zepben.evolve.cim.iec61970.base.wires.EnergySource
 import com.zepben.evolve.database.sqlite.cim.CimDatabaseReader
 import com.zepben.evolve.database.sqlite.cim.metadata.MetadataCollectionReader
-import com.zepben.evolve.database.sqlite.cim.tables.TableCimVersion
+import com.zepben.evolve.database.sqlite.cim.tables.tableCimVersion
 import com.zepben.evolve.database.sqlite.cim.upgrade.UpgradeRunner
 import com.zepben.evolve.database.sqlite.common.TableVersion
 import com.zepben.evolve.services.common.extensions.nameAndMRID
@@ -48,7 +48,7 @@ class NetworkDatabaseReader @JvmOverloads constructor(
     tables: NetworkDatabaseTables = NetworkDatabaseTables(),
     metadataReader: MetadataCollectionReader = MetadataCollectionReader(metadata, tables, connection),
     serviceReader: NetworkServiceReader = NetworkServiceReader(service, tables, connection),
-    tableVersion: TableVersion = TableCimVersion,
+    tableVersion: TableVersion = tableCimVersion,
     private val setDirection: SetDirection = SetDirection(),
     private val setPhases: SetPhases = SetPhases(),
     private val phaseInferrer: PhaseInferrer = PhaseInferrer(),

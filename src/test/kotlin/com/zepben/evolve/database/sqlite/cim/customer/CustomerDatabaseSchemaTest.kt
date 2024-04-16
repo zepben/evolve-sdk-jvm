@@ -13,7 +13,7 @@ import com.zepben.evolve.cim.iec61968.customers.Customer
 import com.zepben.evolve.cim.iec61968.customers.CustomerAgreement
 import com.zepben.evolve.cim.iec61968.customers.PricingStructure
 import com.zepben.evolve.cim.iec61968.customers.Tariff
-import com.zepben.evolve.database.sqlite.cim.tables.TableCimVersion
+import com.zepben.evolve.database.sqlite.cim.tables.tableCimVersion
 import com.zepben.evolve.services.common.BaseService
 import com.zepben.evolve.services.common.BaseServiceComparator
 import com.zepben.evolve.services.common.Resolvers
@@ -154,7 +154,7 @@ class CustomerDatabaseSchemaTest {
 
         assertThat("Database should have been saved", CustomerDatabaseWriter(schemaTestFile, expectedMetadata, expectedService).save())
 
-        assertThat(systemErr.log, containsString("Creating database schema v${TableCimVersion.supportedVersion}"))
+        assertThat(systemErr.log, containsString("Creating database schema v${tableCimVersion.supportedVersion}"))
         assertThat("Database should now exist", Files.exists(Paths.get(schemaTestFile)))
 
         val customerService = CustomerService()

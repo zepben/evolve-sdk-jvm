@@ -13,7 +13,7 @@ import com.zepben.evolve.cim.iec61968.customers.Customer
 import com.zepben.evolve.cim.iec61968.customers.CustomerAgreement
 import com.zepben.evolve.cim.iec61968.customers.PricingStructure
 import com.zepben.evolve.cim.iec61968.customers.Tariff
-import com.zepben.evolve.database.sqlite.common.BaseServiceWriter
+import com.zepben.evolve.database.sqlite.cim.BaseServiceWriter
 import com.zepben.evolve.services.customer.CustomerService
 
 /**

@@ -8,7 +8,6 @@
 
 package com.zepben.evolve.database.sqlite.cim
 
-import com.zepben.evolve.database.sqlite.common.BaseServiceReader
 import com.zepben.evolve.database.sqlite.cim.metadata.MetadataCollectionReader
 import com.zepben.evolve.database.sqlite.common.TableVersion
 import com.zepben.evolve.services.common.BaseService

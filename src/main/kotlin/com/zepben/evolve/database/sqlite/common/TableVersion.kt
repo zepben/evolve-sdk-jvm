@@ -23,9 +23,7 @@ import java.sql.Statement
  * @property VERSION Column definition.
  */
 @Suppress("PropertyName")
-abstract class TableVersion : SqliteTable() {
-
-    abstract val supportedVersion: Int
+class TableVersion(val supportedVersion: Int) : SqliteTable() {
 
     val VERSION: Column = Column(++columnIndex, "version", "TEXT", NOT_NULL)
 

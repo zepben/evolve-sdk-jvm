@@ -40,7 +40,7 @@ import com.zepben.evolve.cim.iec61970.infiec61970.feeder.Circuit
 import com.zepben.evolve.cim.iec61970.infiec61970.feeder.Loop
 import com.zepben.evolve.cim.iec61970.infiec61970.feeder.LvFeeder
 import com.zepben.evolve.cim.iec61970.infiec61970.wires.generation.production.EvChargingUnit
-import com.zepben.evolve.database.sqlite.common.BaseServiceWriter
+import com.zepben.evolve.database.sqlite.cim.BaseServiceWriter
 import com.zepben.evolve.services.network.NetworkService
 
 /**
