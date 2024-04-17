@@ -8,16 +8,16 @@
 
 package com.zepben.evolve.database.sqlite.extensions
 
+import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
-import java.sql.Statement
 
 @Throws(SQLException::class)
-fun Statement.executeConfiguredQuery(sql: String): ResultSet {
+fun PreparedStatement.executeConfiguredQuery(): ResultSet {
     this.queryTimeout = 30
     this.fetchSize = 10000
 
-    val results = this.executeQuery(sql)
+    val results = this.executeQuery()
     if (!results.isClosed)
         results.fetchDirection = ResultSet.FETCH_FORWARD
 
