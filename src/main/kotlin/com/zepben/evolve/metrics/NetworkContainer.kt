@@ -9,14 +9,14 @@ import com.zepben.evolve.cim.iec61970.infiec61970.feeder.LvFeeder
 sealed interface NetworkContainer
 
 data class PartialNetworkContainer(
-    val level: HierarchyLevel,
+    val level: NetworkLevel,
     val mRID: String,
     val name: String
 ) : NetworkContainer
 
 data object TotalNetworkContainer : NetworkContainer
 
-enum class HierarchyLevel {
+enum class NetworkLevel {
     GeographicalRegion,
     SubGeographicalRegion,
     Substation,
@@ -25,12 +25,12 @@ enum class HierarchyLevel {
 }
 
 fun GeographicalRegion.toNetworkContainer(): PartialNetworkContainer =
-    PartialNetworkContainer(HierarchyLevel.GeographicalRegion, mRID, name)
+    PartialNetworkContainer(NetworkLevel.GeographicalRegion, mRID, name)
 fun SubGeographicalRegion.toNetworkContainer(): PartialNetworkContainer =
-    PartialNetworkContainer(HierarchyLevel.SubGeographicalRegion, mRID, name)
+    PartialNetworkContainer(NetworkLevel.SubGeographicalRegion, mRID, name)
 fun Substation.toNetworkContainer(): PartialNetworkContainer =
-    PartialNetworkContainer(HierarchyLevel.Substation, mRID, name)
+    PartialNetworkContainer(NetworkLevel.Substation, mRID, name)
 fun Feeder.toNetworkContainer(): PartialNetworkContainer =
-    PartialNetworkContainer(HierarchyLevel.Feeder, mRID, name)
+    PartialNetworkContainer(NetworkLevel.Feeder, mRID, name)
 fun LvFeeder.toNetworkContainer(): PartialNetworkContainer =
-    PartialNetworkContainer(HierarchyLevel.LvFeeder, mRID, name)
+    PartialNetworkContainer(NetworkLevel.LvFeeder, mRID, name)

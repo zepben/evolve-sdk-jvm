@@ -20,7 +20,6 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.sql.Connection
-import java.sql.Statement
 
 internal class CustomerDatabaseReaderTest {
 
@@ -34,9 +33,7 @@ internal class CustomerDatabaseReaderTest {
     private val metadataReader = mockk<MetadataCollectionReader>().also { every { it.load() } returns true }
     private val customerServiceReader = mockk<CustomerServiceReader>().also { every { it.load() } returns true }
 
-    private val statement = mockk<Statement> { justRun { close() } }
     private val connection = mockk<Connection> {
-        every { createStatement() } returns statement
         justRun { close() }
     }
 
@@ -66,9 +63,7 @@ internal class CustomerDatabaseReaderTest {
 
         verifySequence {
             tableVersion.supportedVersion
-            connection.createStatement()
-            tableVersion.getVersion(statement)
-            statement.close()
+            tableVersion.getVersion(connection)
 
             metadataReader.load()
             customerServiceReader.load()

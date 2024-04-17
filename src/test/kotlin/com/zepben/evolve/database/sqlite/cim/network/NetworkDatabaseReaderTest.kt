@@ -26,7 +26,6 @@ import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.sql.Connection
-import java.sql.Statement
 
 internal class NetworkDatabaseReaderTest {
 
@@ -40,9 +39,7 @@ internal class NetworkDatabaseReaderTest {
     private val metadataReader = mockk<MetadataCollectionReader>().also { every { it.load() } returns true }
     private val networkServiceReader = mockk<NetworkServiceReader>().also { every { it.load() } returns true }
 
-    private val statement = mockk<Statement> { justRun { close() } }
     private val connection = mockk<Connection> {
-        every { createStatement() } returns statement
         justRun { close() }
     }
 
@@ -95,9 +92,7 @@ internal class NetworkDatabaseReaderTest {
 
         verifySequence {
             tableVersion.supportedVersion
-            connection.createStatement()
-            tableVersion.getVersion(statement)
-            statement.close()
+            tableVersion.getVersion(connection)
 
             metadataReader.load()
             networkServiceReader.load()

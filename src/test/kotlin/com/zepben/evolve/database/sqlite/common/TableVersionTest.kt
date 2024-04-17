@@ -16,9 +16,10 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.nullValue
 import org.junit.jupiter.api.Test
+import java.sql.Connection
+import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
-import java.sql.Statement
 
 class TableVersionTest {
 
@@ -29,28 +30,37 @@ class TableVersionTest {
         every { getInt(1) } returns 1
         justRun { close() }
     }
-    private val statement = mockk<Statement>().also {
+    private val preparedStatement = mockk<PreparedStatement>().also {
         justRun { it.queryTimeout = any() }
         justRun { it.fetchSize = any() }
-        every { it.executeQuery(any()) } returns resultSet
+        justRun { it.close() }
+        every { it.executeQuery() } returns resultSet
     }
-
     private val table = TableVersion(123)
+    private val connection = mockk<Connection> {
+        every { prepareStatement(table.selectSql) } returns preparedStatement
+    }
 
     @Test
     internal fun `getVersion helper returns version from query`() {
-        assertThat(table.getVersion(statement), equalTo(1))
+        assertThat(table.getVersion(connection), equalTo(1))
 
-        verify { statement.executeQuery(table.selectSql) }
+        verify {
+            preparedStatement.executeQuery()
+            preparedStatement.close()
+        }
     }
 
     @Test
     internal fun `getVersion helper detects failures`() {
-        every { statement.executeQuery(any()) } throws SQLException("test")
+        every { preparedStatement.executeQuery() } throws SQLException("test")
 
-        assertThat(table.getVersion(statement), nullValue())
+        assertThat(table.getVersion(connection), nullValue())
 
-        verify { statement.executeQuery(table.selectSql) }
+        verify {
+            preparedStatement.executeQuery()
+            preparedStatement.close()
+        }
     }
 
 }

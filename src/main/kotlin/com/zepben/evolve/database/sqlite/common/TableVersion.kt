@@ -12,8 +12,8 @@ import com.zepben.evolve.database.sqlite.cim.tables.Column
 import com.zepben.evolve.database.sqlite.cim.tables.Column.Nullable.NOT_NULL
 import com.zepben.evolve.database.sqlite.cim.tables.SqliteTable
 import com.zepben.evolve.database.sqlite.extensions.executeConfiguredQuery
+import java.sql.Connection
 import java.sql.SQLException
-import java.sql.Statement
 
 /**
  * Code representation of the `version` table.
@@ -33,12 +33,15 @@ class TableVersion(val supportedVersion: Int) : SqliteTable() {
      * Helper function to read the version from the database.
      */
     @Throws(SQLException::class)
-    fun getVersion(statement: Statement): Int? =
-        runCatching {
-            statement.executeConfiguredQuery(selectSql).use { results ->
-                results.next()
-                results.getInt(VERSION.queryIndex)
-            }
-        }.getOrNull()
+    fun getVersion(connection: Connection): Int? =
+        connection.prepareStatement(selectSql).use { statement ->
+            runCatching {
+                statement.executeConfiguredQuery().use { results ->
+                    results.next()
+                    results.getInt(VERSION.queryIndex)
+                }
+            }.getOrNull()
+        }
+
 
 }

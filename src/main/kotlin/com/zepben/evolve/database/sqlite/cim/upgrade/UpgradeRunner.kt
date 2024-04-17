@@ -12,11 +12,8 @@ import com.zepben.evolve.database.paths.DatabaseType
 import com.zepben.evolve.database.sqlite.extensions.configureBatch
 import com.zepben.evolve.database.sqlite.common.TableVersion
 import com.zepben.evolve.database.sqlite.cim.upgrade.changesets.*
-import com.zepben.evolve.database.sqlite.cim.upgrade.changesets.changeSet46
-import com.zepben.evolve.database.sqlite.cim.upgrade.changesets.changeSet47
-import com.zepben.evolve.database.sqlite.cim.upgrade.changesets.changeSet49
-import com.zepben.evolve.database.sqlite.cim.upgrade.changesets.changeSet50
-import com.zepben.evolve.database.sqlite.cim.upgrade.changesets.changeSet51
+import com.zepben.evolve.database.sqlite.common.TableVersion
+import com.zepben.evolve.database.sqlite.extensions.configureBatch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -103,7 +100,7 @@ class UpgradeRunner @JvmOverloads constructor(
         backupRequired: Boolean
     ): UpgradeState =
         connection.createStatement().use { statement ->
-            tryRunUpgrade(tableVersion.getVersion(statement), changeSets.last().number) { databaseVersion ->
+            tryRunUpgrade(tableVersion.getVersion(connection), changeSets.last().number) { databaseVersion ->
                 logger.info("Upgrading database '$databaseFile' from v$databaseVersion to v${changeSets.last().number}")
 
                 if (backupRequired)

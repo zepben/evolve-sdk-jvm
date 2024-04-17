@@ -22,7 +22,11 @@ abstract class MultiJobTable : SqliteTable() {
 
     val JOB_ID: Column = Column(++columnIndex, "job_id", "TEXT", NOT_NULL)
 
-    val preparedSelectJobSql: String = "$selectSql WHERE jobId = ?"
+    val preparedSelectJobSql: String by lazy { "$selectSql WHERE jobId = ?" }
+
+    override val uniqueIndexColumns: MutableList<List<Column>> = mutableListOf()
+
+    override val nonUniqueIndexColumns: MutableList<List<Column>> = mutableListOf()
 
 }
 

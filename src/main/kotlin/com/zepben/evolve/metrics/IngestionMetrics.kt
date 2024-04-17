@@ -21,6 +21,6 @@ import java.util.*
 data class IngestionMetrics(
     val jobId: UUID,
     val metadata: IngestionMetadata,
-    val jobSources: JobSources = jobSourcesWithDefault(),
-    val networkMetrics: NetworkMetrics = networkMetricsWithDefault()
+    val jobSources: JobSources = JobSources(),
+    val networkMetrics: NetworkMetrics = NetworkMetrics()
 )

@@ -8,7 +8,14 @@
 
 package com.zepben.evolve.metrics
 
-typealias NetworkMetrics = MutableMap<NetworkContainer, NetworkContainerMetrics>
 typealias NetworkMetric = Map.Entry<NetworkContainer, NetworkContainerMetrics>
 
-fun networkMetricsWithDefault(): NetworkMetrics = mutableMapOf<NetworkContainer, NetworkContainerMetrics>().withDefault { NetworkContainerMetrics() }
+class NetworkMetrics {
+
+    private val containerToMetrics: MutableMap<NetworkContainer, NetworkContainerMetrics> = mutableMapOf()
+
+    val entries: Set<NetworkMetric> get() = containerToMetrics.entries
+
+    operator fun get(container: NetworkContainer) = containerToMetrics.getOrPut(container) { NetworkContainerMetrics() }
+
+}
