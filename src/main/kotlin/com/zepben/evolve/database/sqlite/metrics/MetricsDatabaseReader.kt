@@ -8,7 +8,11 @@
 
 package com.zepben.evolve.database.sqlite.metrics
 
+import com.zepben.evolve.database.sqlite.extensions.getInstant
+import com.zepben.evolve.database.sqlite.metrics.tables.TableJobs
+import com.zepben.evolve.database.sqlite.metrics.tables.prepareSelectJobStatement
 import com.zepben.evolve.database.sqlite.metrics.tables.tableMetricsVersion
+import com.zepben.evolve.metrics.IngestionMetadata
 import com.zepben.evolve.metrics.IngestionMetrics
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -16,7 +20,8 @@ import java.sql.Connection
 import java.util.*
 
 class MetricsDatabaseReader(
-    private val connection: Connection
+    private val connection: Connection,
+    private val tables: MetricsDatabaseTables = MetricsDatabaseTables()
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -33,7 +38,23 @@ class MetricsDatabaseReader(
                 return null
             }
         }
-        return null // TODO
+
+        val jobsTable = tables.getTable<TableJobs>()
+        val ingestionMetadata = connection.prepareSelectJobStatement(jobsTable, jobId).use { statement ->
+            statement.setString(1, jobId.toString())
+            statement.executeQuery().use { rs ->
+                if (rs.next())
+                    IngestionMetadata(
+                        startTime = rs.getInstant(jobsTable.INGEST_TIME.queryIndex) ?: return null,
+                        source = rs.getString(jobsTable.SOURCE.queryIndex),
+                        application = rs.getString(jobsTable.APPLICATION.queryIndex),
+                        applicationVersion = rs.getString(jobsTable.APPLICATION_VERSION.queryIndex)
+                    )
+                else return null
+            }
+        }
+        val metrics = IngestionMetrics(jobId, ingestionMetadata)
+        return metrics.takeIf { MetricsReader(metrics, tables, connection).load() }
     }
 
     private fun formatVersionError(version: Int?): String =

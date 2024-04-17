@@ -11,9 +11,21 @@ package com.zepben.evolve.database.sqlite.metrics.tables
 import com.zepben.evolve.database.sqlite.cim.tables.Column
 import com.zepben.evolve.database.sqlite.cim.tables.Column.Nullable.NOT_NULL
 import com.zepben.evolve.database.sqlite.cim.tables.SqliteTable
+import java.sql.Connection
+import java.util.*
 
+/**
+ * Table that has ingestion job ID as its primary key or part of its composite key.
+ */
+@Suppress("PropertyName")
 abstract class MultiJobTable : SqliteTable() {
 
     val JOB_ID: Column = Column(++columnIndex, "job_id", "TEXT", NOT_NULL)
 
+    val preparedSelectJobSql: String = "$selectSql WHERE jobId = ?"
+
+}
+
+fun Connection.prepareSelectJobStatement(table: MultiJobTable, jobId: UUID) = prepareStatement(table.preparedSelectJobSql).apply {
+    setString(1, jobId.toString())
 }

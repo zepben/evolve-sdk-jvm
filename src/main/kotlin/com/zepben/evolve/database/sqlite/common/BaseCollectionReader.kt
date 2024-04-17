@@ -8,11 +8,12 @@
 
 package com.zepben.evolve.database.sqlite.common
 
-import com.zepben.evolve.database.sqlite.extensions.executeConfiguredQuery
 import com.zepben.evolve.database.sqlite.cim.tables.SqliteTable
+import com.zepben.evolve.database.sqlite.extensions.executeConfiguredQuery
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.sql.Connection
+import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
 
@@ -26,7 +27,7 @@ import java.sql.SQLException
  */
 abstract class BaseCollectionReader(
     val databaseTables: BaseDatabaseTables,
-    private val connection: Connection
+    protected val connection: Connection
 ) {
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -46,9 +47,10 @@ abstract class BaseCollectionReader(
      *   to set the identifier for the row, which returns the same value, so it can be used fluently.
      */
     protected inline fun <reified T : SqliteTable> Boolean.andLoadEach(
-        crossinline processRow: (T, ResultSet, setIdentifier: (String) -> String) -> Boolean
+        crossinline processRow: (T, ResultSet, setIdentifier: (String) -> String) -> Boolean,
+        crossinline prepareSelectStatement: Connection.(T) -> PreparedStatement = { table -> prepareStatement(table.selectSql) }
     ): Boolean =
-        this and loadEach(processRow)
+        this and loadEach(processRow, prepareSelectStatement)
 
     /**
      * Load each row of a table.
@@ -58,9 +60,11 @@ abstract class BaseCollectionReader(
      *   to set the identifier for the row, which returns the same value, so it can be used fluently.
      */
     protected inline fun <reified T : SqliteTable> loadEach(
-        crossinline processRow: (T, ResultSet, setIdentifier: (String) -> String) -> Boolean
+        crossinline processRow: (T, ResultSet, setIdentifier: (String) -> String) -> Boolean,
+        crossinline prepareSelectStatement: Connection.(T) -> PreparedStatement = { table -> prepareStatement(table.selectSql) }
     ): Boolean {
-        return databaseTables.getTable<T>().loadAll { results ->
+        val table = databaseTables.getTable<T>()
+        return table.loadAll(connection.prepareSelectStatement(table)) { results ->
             var lastIdentifier: String? = null
             val setIdentifier = { identifier: String -> lastIdentifier = identifier; identifier }
 
@@ -85,14 +89,12 @@ abstract class BaseCollectionReader(
      *
      * NOTE: This is marked protected rather than private to allow the inline reified functions above to work.
      */
-    protected fun <T : SqliteTable> T.loadAll(processRows: T.(ResultSet) -> Int): Boolean {
+    protected fun <T : SqliteTable> T.loadAll(selectStatement: PreparedStatement, processRows: T.(ResultSet) -> Int): Boolean {
         logger.info("Loading $description...")
 
         val thrown = try {
-            val count = connection.createStatement().use { statement ->
-                statement.executeConfiguredQuery(selectSql).use { results ->
-                    processRows(results)
-                }
+            val count = selectStatement.executeConfiguredQuery().use { results ->
+                processRows(results)
             }
             logger.info("Successfully loaded $count $description.")
             return true
