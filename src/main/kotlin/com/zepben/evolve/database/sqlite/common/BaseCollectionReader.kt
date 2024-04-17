@@ -93,8 +93,10 @@ abstract class BaseCollectionReader(
         logger.info("Loading $description...")
 
         val thrown = try {
-            val count = selectStatement.executeConfiguredQuery().use { results ->
-                processRows(results)
+            val count = selectStatement.use {
+                it.executeConfiguredQuery().use { results ->
+                    processRows(results)
+                }
             }
             logger.info("Successfully loaded $count $description.")
             return true

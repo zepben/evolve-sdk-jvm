@@ -63,12 +63,9 @@ class MetricsEntryWriter(
             }
         }
 
-        val metricEntries = listOf(
-            "NUM_DIST_TX" to containerMetric.numDistTx
-        )
-        metricEntries.forEach { (metricName, metricValue) ->
+        containerMetric.entries.forEach { (metricName, metricValue) ->
             insert.setString(table.METRIC_NAME.queryIndex, metricName)
-            insert.setObject(table.METRIC_VALUE.queryIndex, metricValue)
+            insert.setDouble(table.METRIC_VALUE.queryIndex, metricValue.toDouble())
             insert.addBatch()
         }
 

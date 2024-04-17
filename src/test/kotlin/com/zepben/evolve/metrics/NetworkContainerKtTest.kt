@@ -19,11 +19,11 @@ internal class NetworkContainerTest {
         val fromFeeder = Feeder("FDR").apply { name = "feeder" }.toNetworkContainer()
         val fromLvFeeder = LvFeeder("LVF").apply { name = "lvFeeder" }.toNetworkContainer()
 
-        assertThat(fromGeoRegion, equalTo(PartialNetworkContainer(HierarchyLevel.GeographicalRegion, "GR", "geoRegion")))
-        assertThat(fromSubGeoRegion, equalTo(PartialNetworkContainer(HierarchyLevel.SubGeographicalRegion, "SGR", "subGeoRegion")))
-        assertThat(fromSubstation, equalTo(PartialNetworkContainer(HierarchyLevel.Substation, "SS", "substation")))
-        assertThat(fromFeeder, equalTo(PartialNetworkContainer(HierarchyLevel.Feeder, "FDR", "feeder")))
-        assertThat(fromLvFeeder, equalTo(PartialNetworkContainer(HierarchyLevel.LvFeeder, "LVF", "lvFeeder")))
+        assertThat(fromGeoRegion, equalTo(PartialNetworkContainer(NetworkLevel.GeographicalRegion, "GR", "geoRegion")))
+        assertThat(fromSubGeoRegion, equalTo(PartialNetworkContainer(NetworkLevel.SubGeographicalRegion, "SGR", "subGeoRegion")))
+        assertThat(fromSubstation, equalTo(PartialNetworkContainer(NetworkLevel.Substation, "SS", "substation")))
+        assertThat(fromFeeder, equalTo(PartialNetworkContainer(NetworkLevel.Feeder, "FDR", "feeder")))
+        assertThat(fromLvFeeder, equalTo(PartialNetworkContainer(NetworkLevel.LvFeeder, "LVF", "lvFeeder")))
     }
 
 }

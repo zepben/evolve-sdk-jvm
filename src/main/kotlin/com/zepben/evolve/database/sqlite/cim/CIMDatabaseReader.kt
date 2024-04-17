@@ -78,15 +78,13 @@ abstract class CimDatabaseReader(
 
     private fun preLoad(): Boolean =
         try {
-            connection.createStatement().use { statement ->
-                val version = tableVersion.getVersion(statement)
-                if (version == supportedVersion) {
-                    logger.info("Loading from database version v$version")
-                    true
-                } else {
-                    logger.error(formatVersionError(version))
-                    false
-                }
+            val version = tableVersion.getVersion(connection)
+            if (version == supportedVersion) {
+                logger.info("Loading from database version v$version")
+                true
+            } else {
+                logger.error(formatVersionError(version))
+                false
             }
         } catch (e: Exception) {
             logger.error("Failed to connect to the database for reading: " + e.message, e)

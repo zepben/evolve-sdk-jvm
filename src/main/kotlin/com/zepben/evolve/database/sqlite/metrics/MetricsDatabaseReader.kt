@@ -29,14 +29,12 @@ class MetricsDatabaseReader(
     private val supportedVersion = tableMetricsVersion.supportedVersion
 
     fun load(jobId: UUID): IngestionMetrics? {
-        connection.createStatement().use { statement ->
-            val version = tableMetricsVersion.getVersion(statement)
-            if (version == supportedVersion) {
-                logger.info("Loading from metrics database version v$version")
-            } else {
-                logger.error(formatVersionError(version))
-                return null
-            }
+        val version = tableMetricsVersion.getVersion(connection)
+        if (version == supportedVersion) {
+            logger.info("Loading from metrics database version v$version")
+        } else {
+            logger.error(formatVersionError(version))
+            return null
         }
 
         val jobsTable = tables.getTable<TableJobs>()

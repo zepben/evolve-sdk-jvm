@@ -554,7 +554,7 @@ internal class UpgradeRunnerTest {
         connection.createStatement()
 
         // Check to see if we need to run any pre-split upgrades
-        tableVersion.getVersion(statement)
+        tableVersion.getVersion(connection)
         targetChangeSet.number
 
         // Check the database is not past the maximum upgrade version

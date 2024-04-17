@@ -8,7 +8,14 @@
 
 package com.zepben.evolve.metrics
 
-typealias JobSources = MutableMap<String, SourceMetadata>
 typealias JobSource = Map.Entry<String, SourceMetadata>
 
-fun jobSourcesWithDefault(): MutableMap<String, SourceMetadata> = mutableMapOf<String, SourceMetadata>().withDefault { SourceMetadata() }
+class JobSources {
+
+    private val sourceNameToMetadata: MutableMap<String, SourceMetadata> = mutableMapOf()
+
+    val entries: Set<JobSource> get() = sourceNameToMetadata.entries
+
+    operator fun get(sourceName: String) = sourceNameToMetadata.getOrPut(sourceName) { SourceMetadata() }
+
+}

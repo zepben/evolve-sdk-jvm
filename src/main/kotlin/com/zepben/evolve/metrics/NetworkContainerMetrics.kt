@@ -8,6 +8,30 @@
 
 package com.zepben.evolve.metrics
 
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.full.createType
+import kotlin.reflect.full.isSubtypeOf
+
 data class NetworkContainerMetrics (
-    var numDistTx: Int = 0
-)
+    var numDistTx: Int? = null
+) {
+
+    private val fieldsBySqlName: Map<String, KMutableProperty<out Number?>> = mapOf(
+        "NUM_DIST_TX" to ::numDistTx
+    )
+
+    val entries: List<Pair<String, Number>> = fieldsBySqlName.map { (name, prop) ->
+        prop.getter.call()?.let { name to it }
+    }.filterNotNull()
+
+    operator fun set(fieldName: String, value: Double?) {
+        fieldsBySqlName[fieldName]?.let {
+            if (it.returnType.isSubtypeOf(Int::class.createType(nullable = true))) {
+                it.setter.call(value?.toInt())
+            } else if (it.returnType.isSubtypeOf(Float::class.createType(nullable = true))) {
+                it.setter.call(value?.toFloat())
+            } else it.setter.call(value)
+        } ?: throw IllegalArgumentException("No network container metric named '$fieldName'. Please upgrade the SDK if needed.")
+    }
+
+}
