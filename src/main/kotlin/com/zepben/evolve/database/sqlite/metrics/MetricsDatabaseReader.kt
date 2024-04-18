@@ -18,7 +18,9 @@ import java.util.*
 
 class MetricsDatabaseReader(
     private val connection: Connection,
+    private val metricsCollection: IngestionMetricsCollection,
     private val tables: MetricsDatabaseTables = MetricsDatabaseTables(),
+    private val reader: MetricsReader = MetricsReader(metricsCollection, tables, connection)
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -26,18 +28,24 @@ class MetricsDatabaseReader(
     private val tableVersion: TableVersion = tables.getTable()
     private val supportedVersion = tableVersion.supportedVersion
 
+    fun load(): Boolean = checkVersion() && reader.load()
+
     fun load(jobId: UUID): IngestionMetrics? {
+        return if (checkVersion() && reader.load(jobId))
+            metricsCollection[jobId]
+        else
+            null
+    }
+
+    private fun checkVersion(): Boolean {
         val version = tableVersion.getVersion(connection)
-        if (version == supportedVersion) {
+        return if (version == supportedVersion) {
             logger.info("Loading from metrics database version v$version")
+            true
         } else {
             logger.error(formatVersionError(version))
-            return null
+            false
         }
-
-        val metricsCollection = IngestionMetricsCollection()
-        MetricsReader(metricsCollection, tables, connection).load()
-        return metricsCollection[jobId]
     }
 
     private fun formatVersionError(version: Int?): String =
