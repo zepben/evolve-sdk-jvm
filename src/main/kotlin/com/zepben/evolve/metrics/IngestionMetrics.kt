@@ -20,7 +20,7 @@ import java.util.*
  */
 data class IngestionMetrics(
     val jobId: UUID,
-    val metadata: IngestionMetadata,
+    var metadata: IngestionMetadata? = null,
     val jobSources: JobSources = JobSources(),
     val networkMetrics: NetworkMetrics = NetworkMetrics()
 )
