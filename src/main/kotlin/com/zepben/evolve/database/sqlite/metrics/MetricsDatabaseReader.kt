@@ -8,10 +8,10 @@
 
 package com.zepben.evolve.database.sqlite.metrics
 
+import com.zepben.evolve.database.sqlite.common.TableVersion
 import com.zepben.evolve.database.sqlite.extensions.getInstant
 import com.zepben.evolve.database.sqlite.metrics.tables.TableJobs
 import com.zepben.evolve.database.sqlite.metrics.tables.prepareSelectJobStatement
-import com.zepben.evolve.database.sqlite.metrics.tables.tableMetricsVersion
 import com.zepben.evolve.metrics.IngestionMetadata
 import com.zepben.evolve.metrics.IngestionMetrics
 import org.slf4j.Logger
@@ -21,15 +21,16 @@ import java.util.*
 
 class MetricsDatabaseReader(
     private val connection: Connection,
-    private val tables: MetricsDatabaseTables = MetricsDatabaseTables()
+    private val tables: MetricsDatabaseTables = MetricsDatabaseTables(),
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    private val supportedVersion = tableMetricsVersion.supportedVersion
+    private val tableVersion: TableVersion = tables.getTable()
+    private val supportedVersion = tableVersion.supportedVersion
 
     fun load(jobId: UUID): IngestionMetrics? {
-        val version = tableMetricsVersion.getVersion(connection)
+        val version = tableVersion.getVersion(connection)
         if (version == supportedVersion) {
             logger.info("Loading from metrics database version v$version")
         } else {
@@ -37,16 +38,16 @@ class MetricsDatabaseReader(
             return null
         }
 
-        val jobsTable = tables.getTable<TableJobs>()
-        val ingestionMetadata = connection.prepareSelectJobStatement(jobsTable, jobId).use { statement ->
+        val tableJobs = tables.getTable<TableJobs>()
+        val ingestionMetadata = connection.prepareSelectJobStatement(tableJobs, jobId).use { statement ->
             statement.setString(1, jobId.toString())
             statement.executeQuery().use { rs ->
                 if (rs.next())
                     IngestionMetadata(
-                        startTime = rs.getInstant(jobsTable.INGEST_TIME.queryIndex) ?: return null,
-                        source = rs.getString(jobsTable.SOURCE.queryIndex),
-                        application = rs.getString(jobsTable.APPLICATION.queryIndex),
-                        applicationVersion = rs.getString(jobsTable.APPLICATION_VERSION.queryIndex)
+                        startTime = rs.getInstant(tableJobs.INGEST_TIME.queryIndex) ?: return null,
+                        source = rs.getString(tableJobs.SOURCE.queryIndex),
+                        application = rs.getString(tableJobs.APPLICATION.queryIndex),
+                        applicationVersion = rs.getString(tableJobs.APPLICATION_VERSION.queryIndex)
                     )
                 else return null
             }

@@ -24,10 +24,6 @@ abstract class MultiJobTable : SqliteTable() {
 
     val preparedSelectJobSql: String by lazy { "$selectSql WHERE jobId = ?" }
 
-    override val uniqueIndexColumns: MutableList<List<Column>> = mutableListOf()
-
-    override val nonUniqueIndexColumns: MutableList<List<Column>> = mutableListOf()
-
 }
 
 fun Connection.prepareSelectJobStatement(table: MultiJobTable, jobId: UUID) = prepareStatement(table.preparedSelectJobSql).apply {
