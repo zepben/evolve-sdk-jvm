@@ -10,7 +10,23 @@ package com.zepben.evolve.metrics
 
 import java.util.*
 
-typealias IngestionMetricsCollection = MutableMap<UUID, IngestionMetrics>
+class IngestionMetricsCollection {
 
-fun IngestionMetricsCollection.oldestFirst(): List<IngestionMetrics> = values.sortedBy { it.metadata.startTime }
-fun IngestionMetricsCollection.newestFirst(): List<IngestionMetrics> = values.sortedByDescending { it.metadata.startTime }
+    private val metricsByUUID: MutableMap<UUID, IngestionMetrics> = mutableMapOf()
+
+    fun oldestFirst(): List<IngestionMetrics> = metricsByUUID.values.sortedWith(compareBy(nullsLast()) { it.metadata?.startTime })
+
+    fun newestFirst(): List<IngestionMetrics> = metricsByUUID.values.sortedWith(compareByDescending(nullsLast()) { it.metadata?.startTime })
+
+    fun add(metrics: IngestionMetrics) {
+        metricsByUUID[metrics.jobId] = metrics
+    }
+
+    fun remove(uuid: UUID) = metricsByUUID.remove(uuid)
+
+    operator fun get(jobId: UUID): IngestionMetrics = metricsByUUID.getOrPut(jobId) { IngestionMetrics(jobId) }
+    operator fun get(jobId: String) = get(UUID.fromString(jobId))
+
+    operator fun plusAssign(metrics: IngestionMetrics) = add(metrics)
+
+}

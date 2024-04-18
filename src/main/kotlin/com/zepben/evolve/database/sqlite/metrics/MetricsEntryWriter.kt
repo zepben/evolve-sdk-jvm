@@ -21,7 +21,9 @@ class MetricsEntryWriter(
     private val jobId: UUID
 ) : BaseEntryWriter() {
 
-    fun save(metadata: IngestionMetadata): Boolean {
+    fun save(metadata: IngestionMetadata?): Boolean {
+        if (metadata == null) return true // signals "saved 0 metadata successfully"
+
         val table = databaseTables.getTable<TableJobs>()
         val insert = databaseTables.getInsert<TableJobs>()
 
