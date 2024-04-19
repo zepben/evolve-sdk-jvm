@@ -23,8 +23,8 @@
 
 ### New Features
 * Added `EwbDataFilePaths` for working with files and folders used by EWB.
-* Added schema for metrics database and model for ingestion job.
-  * A single `IngestionJob` may be saved to the database along with its metrics and job sources.
+* Added tables for metrics database (`MetricsDatabaseTables`) and model for ingestion job (`IngestionJob`).
+  * Using `MetricsDatabaseWriter`, A single `IngestionJob` may be saved to the database along with its metrics and job sources.
 
 ### Enhancements
 * None.
