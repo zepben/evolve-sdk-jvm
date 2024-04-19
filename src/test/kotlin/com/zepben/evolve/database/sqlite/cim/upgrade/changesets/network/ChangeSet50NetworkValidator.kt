@@ -9,8 +9,8 @@
 package com.zepben.evolve.database.sqlite.cim.upgrade.changesets.network
 
 import com.zepben.evolve.database.paths.DatabaseType
-import com.zepben.evolve.database.sqlite.upgrade.changesets.ChangeSet50Helpers
-import com.zepben.evolve.database.sqlite.upgrade.changesets.ChangeSetValidator
+import com.zepben.evolve.database.sqlite.cim.upgrade.changesets.ChangeSet50Helpers
+import com.zepben.evolve.database.sqlite.cim.upgrade.changesets.ChangeSetValidator
 import java.sql.Statement
 
 object ChangeSet50NetworkValidator : ChangeSetValidator {
