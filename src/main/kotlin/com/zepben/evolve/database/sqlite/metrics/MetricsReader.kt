@@ -10,7 +10,6 @@ package com.zepben.evolve.database.sqlite.metrics
 
 import com.zepben.evolve.database.sqlite.common.BaseCollectionReader
 import com.zepben.evolve.database.sqlite.extensions.getInstant
-import com.zepben.evolve.database.sqlite.extensions.getNullableDouble
 import com.zepben.evolve.database.sqlite.metrics.tables.TableJobSources
 import com.zepben.evolve.database.sqlite.metrics.tables.TableJobs
 import com.zepben.evolve.database.sqlite.metrics.tables.TableNetworkContainerMetrics
@@ -84,7 +83,7 @@ class MetricsReader(
         setIdentifier("$jobId-container-$networkContainer-metric-$metricName")
 
         jobCollection[jobId].networkMetrics[networkContainer][rs.getString(table.METRIC_NAME.queryIndex)] =
-            rs.getNullableDouble(table.METRIC_VALUE.queryIndex)
+            rs.getDouble(table.METRIC_VALUE.queryIndex)
 
         return true
     }

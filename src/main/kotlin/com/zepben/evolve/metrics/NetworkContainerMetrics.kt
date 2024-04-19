@@ -24,7 +24,7 @@ data class NetworkContainerMetrics (
         prop.getter.call()?.let { name to it }
     }.filterNotNull()
 
-    operator fun set(fieldName: String, value: Double?) {
+    operator fun set(fieldName: String, value: Number?) {
         fieldsBySqlName[fieldName]?.let {
             if (it.returnType.isSubtypeOf(Int::class.createType(nullable = true))) {
                 it.setter.call(value?.toInt())
