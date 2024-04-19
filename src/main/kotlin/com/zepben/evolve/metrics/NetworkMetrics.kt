@@ -10,6 +10,11 @@ package com.zepben.evolve.metrics
 
 typealias NetworkMetric = Map.Entry<NetworkContainer, NetworkContainerMetrics>
 
+/**
+ * A collection of network container metrics.
+ *
+ * @property entries Map entries from network containers to their metrics.
+ */
 class NetworkMetrics {
 
     private val containerToMetrics: MutableMap<NetworkContainer, NetworkContainerMetrics> = mutableMapOf()

@@ -10,6 +10,11 @@ package com.zepben.evolve.metrics
 
 typealias JobSource = Map.Entry<String, SourceMetadata>
 
+/**
+ * A collection of data sources for a job.
+ *
+ * @property entries a collection of map entries from a source's identifier to its metadata
+ */
 class JobSources {
 
     private val sourceNameToMetadata: MutableMap<String, SourceMetadata> = mutableMapOf()

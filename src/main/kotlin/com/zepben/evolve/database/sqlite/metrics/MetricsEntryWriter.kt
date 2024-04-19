@@ -56,6 +56,8 @@ class MetricsEntryWriter(
         insert.setString(table.JOB_ID.queryIndex, jobId.toString())
         when (container) {
             is TotalNetworkContainer -> {
+                insert.setString(table.HIERARCHY_ID.queryIndex, "GLOBAL")
+                insert.setString(table.HIERARCHY_NAME.queryIndex, "")
                 insert.setString(table.CONTAINER_TYPE.queryIndex, "TOTAL")
             }
             is PartialNetworkContainer -> {

@@ -6,6 +6,9 @@ import com.zepben.evolve.cim.iec61970.base.core.SubGeographicalRegion
 import com.zepben.evolve.cim.iec61970.base.core.Substation
 import com.zepben.evolve.cim.iec61970.infiec61970.feeder.LvFeeder
 
+/**
+ * A union type of TotalNetworkContainer (all network processed in a run) and PartialNetworkContainer (network within a equipment container)
+ */
 sealed interface NetworkContainer
 
 data class PartialNetworkContainer(
