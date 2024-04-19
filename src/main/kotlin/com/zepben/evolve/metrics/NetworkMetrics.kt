@@ -16,6 +16,6 @@ class NetworkMetrics {
 
     val entries: Set<NetworkMetric> get() = containerToMetrics.entries
 
-    operator fun get(container: NetworkContainer) = containerToMetrics.getOrPut(container) { NetworkContainerMetrics() }
+    operator fun get(container: NetworkContainer) = containerToMetrics.getOrPut(container) { mutableMapOf() }
 
 }

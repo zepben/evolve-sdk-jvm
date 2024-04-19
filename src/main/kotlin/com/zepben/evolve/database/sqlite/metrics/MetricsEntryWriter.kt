@@ -67,7 +67,7 @@ class MetricsEntryWriter(
 
         containerMetric.entries.forEach { (metricName, metricValue) ->
             insert.setString(table.METRIC_NAME.queryIndex, metricName)
-            insert.setDouble(table.METRIC_VALUE.queryIndex, metricValue.toDouble())
+            insert.setDouble(table.METRIC_VALUE.queryIndex, metricValue)
             insert.addBatch()
         }
 
