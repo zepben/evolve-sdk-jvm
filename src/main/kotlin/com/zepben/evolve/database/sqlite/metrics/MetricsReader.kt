@@ -31,10 +31,7 @@ class MetricsReader(
             .andLoadEach<TableJobSources>(::load)
             .andLoadEach<TableNetworkContainerMetrics>(::load)
 
-    fun load(jobId: UUID): Boolean =
-        loadEach<TableJobs>(::load) { prepareSelectJobStatement(it, jobId) }
-            .andLoadEach<TableJobSources>(::load) { prepareSelectJobStatement(it, jobId) }
-            .andLoadEach<TableNetworkContainerMetrics>(::load) { prepareSelectJobStatement(it, jobId) }
+    fun loadAllJobs(): Boolean = loadEach<TableJobs>(::load)
 
     fun loadNewestJob(): IngestionJob? {
         val tableJobs = databaseTables.getTable<TableJobs>()

@@ -18,9 +18,9 @@ import java.util.*
 
 class MetricsDatabaseReader(
     private val connection: Connection,
-    private val metricsCollection: IngestionJobCollection,
+    private val jobCollection: IngestionJobCollection,
     private val tables: MetricsDatabaseTables = MetricsDatabaseTables(),
-    private val reader: MetricsReader = MetricsReader(, tables, connection)
+    private val reader: MetricsReader = MetricsReader(jobCollection, tables, connection)
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -28,14 +28,13 @@ class MetricsDatabaseReader(
     private val tableVersion: TableVersion = tables.getTable()
     private val supportedVersion = tableVersion.supportedVersion
 
-    fun load(): Boolean = checkVersion() && reader.load()
+    fun loadAllJobs(): Boolean = checkVersion() && reader.loadAllJobs()
 
-    fun load(jobId: UUID): IngestionJob? {
-        return if (checkVersion() && reader.load(jobId))
-            metricsCollection[jobId]
-        else
-            null
-    }
+    fun loadNewestJob(): IngestionJob? = if (checkVersion()) { reader.loadNewestJob() } else null
+
+    fun loadMetrics(jobId: UUID): Boolean = checkVersion() && reader.loadMetrics(jobId)
+
+    fun loadSources(jobId: UUID): Boolean = checkVersion() && reader.loadSources(jobId)
 
     private fun checkVersion(): Boolean {
         val version = tableVersion.getVersion(connection)

@@ -12,6 +12,7 @@ import com.zepben.evolve.database.sqlite.cim.tables.Column
 import com.zepben.evolve.database.sqlite.cim.tables.Column.Nullable.NOT_NULL
 import com.zepben.evolve.database.sqlite.cim.tables.SqliteTable
 import java.sql.Connection
+import java.sql.PreparedStatement
 import java.util.*
 
 /**
@@ -26,6 +27,6 @@ abstract class MultiJobTable : SqliteTable() {
 
 }
 
-fun Connection.prepareSelectJobStatement(table: MultiJobTable, jobId: UUID) = prepareStatement(table.preparedSelectJobSql).apply {
+fun Connection.prepareSelectJobStatement(table: MultiJobTable, jobId: UUID): PreparedStatement = prepareStatement(table.preparedSelectJobSql).apply {
     setString(1, jobId.toString())
 }
