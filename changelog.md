@@ -3,10 +3,28 @@
 ### Breaking Changes
 * Removed `EwbDatabaseType`. Use `DatabaseType` instead. 
 * The filename of the `results cache` database has been changed to `results-cache` from `results_cache`. Any existing `results cache` database files will need to be renamed to `results-cache` to continue to be used.
-
+* Moved the following modules and classes under `com.zepben.evolve.database.sqlite` to `com.zepben.evolve.database.sqlite.cim`:
+  * `customer`
+  * `diagram`
+  * `metadata`
+  * `network`
+  * `tables`
+  * `upgrade`
+* Moved (with some renaming) the following classes from `com.zepben.evolve.database.sqlite.common` to `com.zepben.evolve.database.sqlite.cim`:
+  * `BaseServiceReader`
+  * `BaseServiceWriter`
+  * `BaseDatabaseReader` as `CimDatabaseReader`
+  * `BaseDatabaseTables` as `CimDatabaseTables`
+  * `BaseDatabaseWriter` as `CimDatabaseWriter`
+  * `BaseCimReader` as `CimReader`
+  * `BaseCimWriter` as `CimWriter`
+* Moved `TableVersion` to `com.zepben.evolve.database.sqlite.common`. Instances for CIM and metrics are in `com.zepben.evolve.database.sqlite.cim.tables`
+  and `com.zepben.evolve.database.sqlite.metrics.tables` respectively.
 
 ### New Features
 * Added `EwbDataFilePaths` for working with files and folders used by EWB.
+* Added schema for metrics database and model for ingestion job.
+  * A single `IngestionJob` may be saved to the database along with its metrics and job sources.
 
 ### Enhancements
 * None.
