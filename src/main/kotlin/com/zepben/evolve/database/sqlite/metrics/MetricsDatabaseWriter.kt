@@ -9,13 +9,13 @@
 package com.zepben.evolve.database.sqlite.metrics
 
 import com.zepben.evolve.database.sqlite.common.BaseDatabaseWriter
-import com.zepben.evolve.metrics.IngestionMetrics
+import com.zepben.evolve.metrics.IngestionJob
 import java.sql.Connection
 import java.sql.DriverManager
 
 class MetricsDatabaseWriter @JvmOverloads constructor(
     databaseFile: String,
-    metrics: IngestionMetrics,
+    metrics: IngestionJob,
     databaseTables: MetricsDatabaseTables = MetricsDatabaseTables(),
     val createMetricsWriter: (Connection) -> MetricsWriter = { MetricsWriter(metrics, databaseTables) },
     getConnection: (String) -> Connection = DriverManager::getConnection

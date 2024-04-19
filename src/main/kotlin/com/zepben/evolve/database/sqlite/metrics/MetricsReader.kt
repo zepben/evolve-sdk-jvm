@@ -11,14 +11,17 @@ package com.zepben.evolve.database.sqlite.metrics
 import com.zepben.evolve.database.sqlite.common.BaseCollectionReader
 import com.zepben.evolve.database.sqlite.extensions.getInstant
 import com.zepben.evolve.database.sqlite.extensions.getNullableDouble
-import com.zepben.evolve.database.sqlite.metrics.tables.*
+import com.zepben.evolve.database.sqlite.metrics.tables.TableJobSources
+import com.zepben.evolve.database.sqlite.metrics.tables.TableJobs
+import com.zepben.evolve.database.sqlite.metrics.tables.TableNetworkContainerMetrics
+import com.zepben.evolve.database.sqlite.metrics.tables.prepareSelectJobStatement
 import com.zepben.evolve.metrics.*
 import java.sql.Connection
 import java.sql.ResultSet
 import java.util.*
 
 class MetricsReader(
-    private val metricsCollection: IngestionMetricsCollection,
+    private val jobCollection: IngestionJobCollection,
     databaseTables: MetricsDatabaseTables,
     connection: Connection
 ) : BaseCollectionReader(databaseTables, connection) {
@@ -33,8 +36,23 @@ class MetricsReader(
             .andLoadEach<TableJobSources>(::load) { prepareSelectJobStatement(it, jobId) }
             .andLoadEach<TableNetworkContainerMetrics>(::load) { prepareSelectJobStatement(it, jobId) }
 
+    fun loadNewestJob(): IngestionJob? {
+        val tableJobs = databaseTables.getTable<TableJobs>()
+        connection.prepareStatement(tableJobs.selectNewestSql).use { statement ->
+            statement.executeQuery().use { rs ->
+                return if (rs.next() && load(tableJobs, rs) { it }) {
+                    jobCollection[rs.getString(tableJobs.JOB_ID.queryIndex)]
+                } else null
+            }
+        }
+    }
+
+    fun loadMetrics(jobId: UUID): Boolean = loadEach<TableJobSources>(::load) { prepareSelectJobStatement(it, jobId) }
+
+    fun loadSources(jobId: UUID): Boolean = loadEach<TableNetworkContainerMetrics>(::load) { prepareSelectJobStatement(it, jobId) }
+
     private fun load(table: TableJobs, rs: ResultSet, setIdentifier: (String) -> String): Boolean {
-        metricsCollection[setIdentifier(rs.getString(table.JOB_ID.queryIndex))].metadata =
+        jobCollection[setIdentifier(rs.getString(table.JOB_ID.queryIndex))].metadata =
             IngestionMetadata(
                 startTime = rs.getInstant(table.INGEST_TIME.queryIndex)!!,
                 source = rs.getString(table.SOURCE.queryIndex),
@@ -49,7 +67,7 @@ class MetricsReader(
         val dataSourceName = rs.getString(table.DATA_SOURCE.queryIndex)
         setIdentifier("$jobId-source-$dataSourceName")
 
-        metricsCollection[jobId].jobSources[dataSourceName].fileHash =
+        jobCollection[jobId].sources[dataSourceName].fileHash =
             rs.getClob(table.FILE_SHA.queryIndex).takeUnless { rs.wasNull() }?.asciiStream?.readAllBytes()
 
         return true
@@ -68,7 +86,7 @@ class MetricsReader(
         val metricName = rs.getString(table.METRIC_NAME.queryIndex)
         setIdentifier("$jobId-container-$networkContainer-metric-$metricName")
 
-        metricsCollection[jobId].networkMetrics[networkContainer][rs.getString(table.METRIC_NAME.queryIndex)] =
+        jobCollection[jobId].networkMetrics[networkContainer][rs.getString(table.METRIC_NAME.queryIndex)] =
             rs.getNullableDouble(table.METRIC_VALUE.queryIndex)
 
         return true

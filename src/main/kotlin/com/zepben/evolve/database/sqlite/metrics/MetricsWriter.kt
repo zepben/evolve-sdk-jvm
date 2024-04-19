@@ -9,16 +9,16 @@
 package com.zepben.evolve.database.sqlite.metrics
 
 import com.zepben.evolve.database.sqlite.common.BaseCollectionWriter
-import com.zepben.evolve.metrics.IngestionMetrics
+import com.zepben.evolve.metrics.IngestionJob
 
 class MetricsWriter(
-    private val metrics: IngestionMetrics,
+    private val metrics: IngestionJob,
     databaseTables: MetricsDatabaseTables,
-    private val writer: MetricsEntryWriter = MetricsEntryWriter(databaseTables, metrics.jobId)
+    private val writer: MetricsEntryWriter = MetricsEntryWriter(databaseTables, metrics.id)
 ): BaseCollectionWriter() {
 
     override fun save(): Boolean = writer.save(metrics.metadata)
-        .andSaveEach(metrics.jobSources.entries, writer::saveSource) { jobSource, e -> logger.error("Failed to save job source $jobSource: ${e.message}")}
+        .andSaveEach(metrics.sources.entries, writer::saveSource) { jobSource, e -> logger.error("Failed to save job source $jobSource: ${e.message}")}
         .andSaveEach(metrics.networkMetrics.entries, writer::saveMetric) { metric, e -> logger.error("Failed to save metric $metric: ${e.message}") }
 
 }

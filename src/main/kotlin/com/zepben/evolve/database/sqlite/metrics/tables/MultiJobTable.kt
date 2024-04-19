@@ -22,7 +22,7 @@ abstract class MultiJobTable : SqliteTable() {
 
     val JOB_ID: Column = Column(++columnIndex, "job_id", "TEXT", NOT_NULL)
 
-    val preparedSelectJobSql: String by lazy { "$selectSql WHERE jobId = ?" }
+    val preparedSelectJobSql: String by lazy { "$selectSql WHERE job_id = ?" }
 
 }
 

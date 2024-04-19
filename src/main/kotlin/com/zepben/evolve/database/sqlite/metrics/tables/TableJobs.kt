@@ -19,6 +19,8 @@ class TableJobs : MultiJobTable() {
     val APPLICATION: Column = Column(++columnIndex, "application", "TEXT", NOT_NULL)
     val APPLICATION_VERSION: Column = Column(++columnIndex, "application_version", "TEXT", NOT_NULL)
 
+    val selectNewestSql = "$selectSql ORDER BY ingest_time DESC LIMIT 1"
+
     override val uniqueIndexColumns: MutableList<List<Column>> = mutableListOf(
         listOf(JOB_ID)
     )

@@ -11,7 +11,7 @@ package com.zepben.evolve.database.sqlite.metrics
 import com.zepben.evolve.database.sqlite.common.TableVersion
 import com.zepben.evolve.database.sqlite.metrics.tables.TableJobs
 import com.zepben.evolve.metrics.IngestionMetadata
-import com.zepben.evolve.metrics.IngestionMetrics
+import com.zepben.evolve.metrics.IngestionJob
 import com.zepben.testutils.junit.SystemLogExtension
 import io.mockk.*
 import org.hamcrest.CoreMatchers.equalTo
@@ -77,7 +77,7 @@ internal class MetricsDatabaseReaderTest {
         mockkConstructor(MetricsReader::class)
         every {
             constructedWith<MetricsReader>(
-                FunctionMatcher<IngestionMetrics>({ it.jobId == uuid && it.metadata == metadata }, IngestionMetrics::class),
+                FunctionMatcher<IngestionJob>({ it.id == uuid && it.metadata == metadata }, IngestionJob::class),
                 EqMatcher(tables),
                 EqMatcher(connection)
             ).load()
@@ -87,7 +87,7 @@ internal class MetricsDatabaseReaderTest {
     @Test
     internal fun `can load from valid database`() {
         val metrics = reader.load(uuid)!!
-        MatcherAssert.assertThat(metrics.jobId, equalTo(uuid))
+        MatcherAssert.assertThat(metrics.id, equalTo(uuid))
         MatcherAssert.assertThat(metrics.metadata, equalTo(metadata))
     }
 
