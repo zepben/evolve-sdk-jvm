@@ -15,9 +15,9 @@ import java.sql.DriverManager
 
 class MetricsDatabaseWriter @JvmOverloads constructor(
     databaseFile: String,
-    metrics: IngestionJob,
+    job: IngestionJob,
     databaseTables: MetricsDatabaseTables = MetricsDatabaseTables(),
-    val createMetricsWriter: (Connection) -> MetricsWriter = { MetricsWriter(metrics, databaseTables) },
+    val createMetricsWriter: (Connection) -> MetricsWriter = { MetricsWriter(job, databaseTables) },
     getConnection: (String) -> Connection = DriverManager::getConnection
 ) : BaseDatabaseWriter(databaseFile, databaseTables, getConnection) {
 
