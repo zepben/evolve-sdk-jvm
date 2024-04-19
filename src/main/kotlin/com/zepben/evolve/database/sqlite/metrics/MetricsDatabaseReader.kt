@@ -9,8 +9,8 @@
 package com.zepben.evolve.database.sqlite.metrics
 
 import com.zepben.evolve.database.sqlite.common.TableVersion
-import com.zepben.evolve.metrics.IngestionMetrics
-import com.zepben.evolve.metrics.IngestionMetricsCollection
+import com.zepben.evolve.metrics.IngestionJob
+import com.zepben.evolve.metrics.IngestionJobCollection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.sql.Connection
@@ -18,9 +18,9 @@ import java.util.*
 
 class MetricsDatabaseReader(
     private val connection: Connection,
-    private val metricsCollection: IngestionMetricsCollection,
+    private val metricsCollection: IngestionJobCollection,
     private val tables: MetricsDatabaseTables = MetricsDatabaseTables(),
-    private val reader: MetricsReader = MetricsReader(metricsCollection, tables, connection)
+    private val reader: MetricsReader = MetricsReader(, tables, connection)
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -30,7 +30,7 @@ class MetricsDatabaseReader(
 
     fun load(): Boolean = checkVersion() && reader.load()
 
-    fun load(jobId: UUID): IngestionMetrics? {
+    fun load(jobId: UUID): IngestionJob? {
         return if (checkVersion() && reader.load(jobId))
             metricsCollection[jobId]
         else

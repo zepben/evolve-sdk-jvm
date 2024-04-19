@@ -1,7 +1,7 @@
 package com.zepben.evolve.database.sqlite.metrics
 
 import com.zepben.evolve.metrics.IngestionMetadata
-import com.zepben.evolve.metrics.IngestionMetrics
+import com.zepben.evolve.metrics.IngestionJob
 import com.zepben.testutils.junit.SystemLogExtension
 import io.mockk.every
 import io.mockk.mockk
@@ -18,7 +18,7 @@ internal class MetricsWriterTest {
     var systemErr: SystemLogExtension = SystemLogExtension.SYSTEM_ERR.captureLog().muteOnSuccess()
 
     private val metadata = IngestionMetadata(Instant.EPOCH, "N/A", "test", "0.0.0")
-    private val metrics = IngestionMetrics(UUID.randomUUID(), metadata)
+    private val metrics = IngestionJob(UUID.randomUUID(), metadata)
     private val metricsEntryWriter = mockk<MetricsEntryWriter> { every { save(any<IngestionMetadata>()) } returns true }
     private val metricsWriter = MetricsWriter(metrics, mockk(), metricsEntryWriter)
 

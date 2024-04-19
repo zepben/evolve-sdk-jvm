@@ -11,16 +11,16 @@ package com.zepben.evolve.metrics
 import java.util.*
 
 /**
- * Holds metadata about a run of an ingestor and metrics.
+ * Represents a single run of an ingestor.
  *
- * @property jobId A unique UUID for the run.
+ * @property id A unique UUID for the run.
  * @property metadata Metadata for the run.
- * @property jobSources A map from strings identifying data sources (e.g. files) to their metadata.
+ * @property sources A map from data sources identifiers to their metadata.
  * @property networkMetrics A map from network containers to their metrics.
  */
-data class IngestionMetrics(
-    val jobId: UUID,
+data class IngestionJob(
+    val id: UUID,
     var metadata: IngestionMetadata? = null,
-    val jobSources: JobSources = JobSources(),
+    val sources: JobSources = JobSources(),
     val networkMetrics: NetworkMetrics = NetworkMetrics()
 )
