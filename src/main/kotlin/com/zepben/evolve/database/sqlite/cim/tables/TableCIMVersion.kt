@@ -11,6 +11,6 @@ package com.zepben.evolve.database.sqlite.cim.tables
 import com.zepben.evolve.database.sqlite.common.TableVersion
 
 /**
- * The `version` table in the CIM databases.
+ * The `version` table in the CIM databases. Increment this when doing a schema update.
  */
 val tableCimVersion: TableVersion = TableVersion(52)
