@@ -118,6 +118,13 @@ class EwbDataFilePaths @JvmOverloads constructor(
     fun resultsCache(): Path = baseDir.resolve(DatabaseType.RESULTS_CACHE.fileDescriptor + ".sqlite")
 
     /**
+     * Determine the path to the "metrics" database.
+     *
+     * @return The path to the "metrics" database.
+     */
+    fun metrics(): Path = baseDir.resolve(DatabaseType.METRICS.fileDescriptor + ".sqlite")
+
+    /**
      * Create the directories required to have a valid path for the specified date.
      *
      * @param date The [LocalDate] required in the path.

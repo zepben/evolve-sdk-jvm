@@ -86,6 +86,7 @@ class EwbDataFilePathsTest {
         assertThat(ewbPaths.loadAggregatorMetersByDate(), equalTo(baseDir.resolve("load-aggregator-mbd.sqlite")))
         assertThat(ewbPaths.weatherReading(), equalTo(baseDir.resolve("weather-readings.sqlite")))
         assertThat(ewbPaths.resultsCache(), equalTo(baseDir.resolve("results-cache.sqlite")))
+        assertThat(ewbPaths.metrics(), equalTo(baseDir.resolve("metrics.sqlite")))
     }
 
     @Test
