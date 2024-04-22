@@ -4,12 +4,13 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.not
 import org.junit.jupiter.api.Test
+import java.time.Instant
 
 internal class SourceMetadataTest {
 
-    private val sourceMetadata1 = SourceMetadata("ABC".toByteArray())
-    private val sourceMetadata2 = SourceMetadata("ABC".toByteArray())
-    private val sourceMetadata3 = SourceMetadata("XYZ".toByteArray())
+    private val sourceMetadata1 = SourceMetadata(Instant.EPOCH, "ABC".toByteArray())
+    private val sourceMetadata2 = SourceMetadata(Instant.EPOCH, "ABC".toByteArray())
+    private val sourceMetadata3 = SourceMetadata(Instant.EPOCH, "XYZ".toByteArray())
 
     @Test
     internal fun equality() {
@@ -21,6 +22,14 @@ internal class SourceMetadataTest {
     internal fun hash() {
         assertThat(sourceMetadata1.hashCode(), equalTo(sourceMetadata2.hashCode()))
         assertThat(sourceMetadata1.hashCode(), not(equalTo(sourceMetadata3.hashCode())))
+    }
+
+    @Test
+    internal fun setters() {
+        sourceMetadata1.timestamp = Instant.EPOCH.plusSeconds(123)
+        sourceMetadata1.fileHash = "123".toByteArray()
+        assertThat(sourceMetadata1.timestamp, equalTo(Instant.EPOCH.plusSeconds(123)))
+        assertThat(sourceMetadata1.fileHash, equalTo("123".toByteArray()))
     }
 
 }

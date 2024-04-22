@@ -1,7 +1,7 @@
 package com.zepben.evolve.database.sqlite.metrics
 
-import com.zepben.evolve.metrics.IngestionMetadata
 import com.zepben.evolve.metrics.IngestionJob
+import com.zepben.evolve.metrics.IngestionMetadata
 import com.zepben.testutils.junit.SystemLogExtension
 import io.mockk.every
 import io.mockk.mockk
@@ -21,10 +21,6 @@ internal class MetricsWriterTest {
     private val metrics = IngestionJob(UUID.randomUUID(), metadata)
     private val metricsEntryWriter = mockk<MetricsEntryWriter> { every { save(any<IngestionMetadata>()) } returns true }
     private val metricsWriter = MetricsWriter(metrics, mockk(), metricsEntryWriter)
-
-    //
-    // NOTE: We don't do an exhaustive test of saving objects as this is done via the schema test.
-    //
 
     @Test
     internal fun `passes objects through to the metrics entry writer`() {

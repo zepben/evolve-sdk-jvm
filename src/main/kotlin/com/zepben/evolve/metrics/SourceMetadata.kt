@@ -8,12 +8,16 @@
 
 package com.zepben.evolve.metrics
 
+import java.time.Instant
+
 /**
  * Metadata for a data source used in ingestion.
  *
+ * @property timestamp The time the source was exported from the source system.
  * @property fileHash SHA-256 of the file. // TODO check if this is the correct type of SHA to use
  */
 data class SourceMetadata(
+    var timestamp: Instant? = null,
     var fileHash: ByteArray? = null
 ) {
 
