@@ -59,7 +59,7 @@ abstract class BaseDatabaseWriter(
         }
 
         val status = try {
-            saveWithConnection(saveConnection)
+            saveSchema()
         } catch (e: MissingTableConfigException) {
             logger.error("Unable to save database: " + e.message, e)
             false
@@ -68,7 +68,7 @@ abstract class BaseDatabaseWriter(
         return status and postSave()
     }
     
-    abstract fun saveWithConnection(connection: Connection): Boolean
+    abstract fun saveSchema(): Boolean
 
     private fun preSave(): Boolean =
         removeExisting()
@@ -168,4 +168,3 @@ abstract class BaseDatabaseWriter(
         }
 
 }
-

@@ -27,13 +27,13 @@ class NetworkDatabaseWriter @JvmOverloads constructor(
     metadata: MetadataCollection,
     service: NetworkService,
     databaseTables: NetworkDatabaseTables = NetworkDatabaseTables(),
-    createMetadataWriter: (Connection) -> MetadataCollectionWriter = { MetadataCollectionWriter(metadata, databaseTables) },
-    createServiceWriter: (Connection) -> NetworkServiceWriter = { NetworkServiceWriter(service, databaseTables) },
+    metadataWriter: MetadataCollectionWriter = MetadataCollectionWriter(metadata, databaseTables),
+    serviceWriter: NetworkServiceWriter = NetworkServiceWriter(service, databaseTables),
     getConnection: (String) -> Connection = DriverManager::getConnection
 ) : CimDatabaseWriter(
     databaseFile,
     databaseTables,
     getConnection,
-    createMetadataWriter,
-    createServiceWriter
+    metadataWriter,
+    serviceWriter
 )

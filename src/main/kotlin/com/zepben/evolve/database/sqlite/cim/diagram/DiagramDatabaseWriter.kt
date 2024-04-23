@@ -27,13 +27,13 @@ class DiagramDatabaseWriter @JvmOverloads constructor(
     metadata: MetadataCollection,
     service: DiagramService,
     databaseTables: DiagramDatabaseTables = DiagramDatabaseTables(),
-    createMetadataWriter: (Connection) -> MetadataCollectionWriter = { MetadataCollectionWriter(metadata, databaseTables) },
-    createServiceWriter: (Connection) -> DiagramServiceWriter = { DiagramServiceWriter(service, databaseTables) },
+    metadataWriter: MetadataCollectionWriter = MetadataCollectionWriter(metadata, databaseTables),
+    serviceWriter: DiagramServiceWriter = DiagramServiceWriter(service, databaseTables),
     getConnection: (String) -> Connection = DriverManager::getConnection
 ) : CimDatabaseWriter(
     databaseFile,
     databaseTables,
     getConnection,
-    createMetadataWriter,
-    createServiceWriter
+    metadataWriter,
+    serviceWriter
 )

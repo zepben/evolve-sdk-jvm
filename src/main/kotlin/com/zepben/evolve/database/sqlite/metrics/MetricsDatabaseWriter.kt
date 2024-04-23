@@ -19,22 +19,20 @@ import java.sql.DriverManager
  * @param databaseFile The filename of the metrics database.
  * @param job The ingestion job to write.
  * @param databaseTables The tables in the database.
- * @param createMetricsWriter The function to use to create the metrics writer from a connection.
+ * @param metricsWriter The metrics writer to use.
  * @param getConnection Provider of the connection to the specified database.
  */
 class MetricsDatabaseWriter @JvmOverloads constructor(
     databaseFile: String,
     job: IngestionJob,
     databaseTables: MetricsDatabaseTables = MetricsDatabaseTables(),
-    val createMetricsWriter: (Connection) -> MetricsWriter = { MetricsWriter(job, databaseTables) },
+    private val metricsWriter: MetricsWriter = MetricsWriter(job, databaseTables),
     getConnection: (String) -> Connection = DriverManager::getConnection
 ) : BaseDatabaseWriter(databaseFile, databaseTables, getConnection) {
 
     /**
-     * Save the ingestion job (and associated data) with the specified connection.
-     *
-     * @param connection The connection to use for saving the job.
+     * Save the ingestion job (and associated data).
      */
-    override fun saveWithConnection(connection: Connection): Boolean = createMetricsWriter(connection).save()
+    override fun saveSchema(): Boolean = metricsWriter.save()
 
 }

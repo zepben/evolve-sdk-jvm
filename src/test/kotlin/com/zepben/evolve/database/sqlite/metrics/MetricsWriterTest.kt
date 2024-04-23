@@ -5,8 +5,12 @@ import com.zepben.testutils.junit.SystemLogExtension
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
+import org.sqlite.SQLiteErrorCode
+import org.sqlite.SQLiteException
 import java.time.Instant
 import java.util.*
 
@@ -37,6 +41,24 @@ internal class MetricsWriterTest {
             metricsEntryWriter.saveSource(job.sources.entries.first())
             metricsEntryWriter.saveMetric(job.networkMetrics.entries.first())
         }
+    }
+
+    @Test
+    internal fun `source failure message`() {
+        every { metricsEntryWriter.saveSource(any<JobSource>()) } throws SQLiteException("message", SQLiteErrorCode.SQLITE_ERROR)
+        metricsWriter.save()
+
+        assertThat(systemErr.log, containsString("Failed to save job source"))
+        assertThat(systemErr.log, containsString("message"))
+    }
+
+    @Test
+    internal fun `metric failure message`() {
+        every { metricsEntryWriter.saveMetric(any<NetworkMetric>()) } throws SQLiteException("message", SQLiteErrorCode.SQLITE_ERROR)
+        metricsWriter.save()
+
+        assertThat(systemErr.log, containsString("Failed to save metric"))
+        assertThat(systemErr.log, containsString("message"))
     }
 
 }

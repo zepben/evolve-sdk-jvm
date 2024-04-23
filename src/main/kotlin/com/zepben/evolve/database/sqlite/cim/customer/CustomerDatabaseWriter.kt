@@ -27,13 +27,13 @@ class CustomerDatabaseWriter @JvmOverloads constructor(
     metadata: MetadataCollection,
     service: CustomerService,
     databaseTables: CustomerDatabaseTables = CustomerDatabaseTables(),
-    createMetadataWriter: (Connection) -> MetadataCollectionWriter = { MetadataCollectionWriter(metadata, databaseTables) },
-    createServiceWriter: (Connection) -> CustomerServiceWriter = { CustomerServiceWriter(service, databaseTables) },
+    metadataWriter: MetadataCollectionWriter = MetadataCollectionWriter(metadata, databaseTables),
+    serviceWriter: CustomerServiceWriter = CustomerServiceWriter(service, databaseTables),
     getConnection: (String) -> Connection = DriverManager::getConnection
 ) : CimDatabaseWriter(
     databaseFile,
     databaseTables,
     getConnection,
-    createMetadataWriter,
-    createServiceWriter
+    metadataWriter,
+    serviceWriter
 )

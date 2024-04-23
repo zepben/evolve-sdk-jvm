@@ -18,8 +18,8 @@ import java.sql.Connection
  * @param databaseFile The filename of the database to write.
  * @param databaseTables The tables to create in the database.
  * @param getConnection Provider of the connection to the specified database.
- * @param createMetadataWriter Create a [MetadataCollectionWriter] that uses the provided [Connection].
- * @param createServiceWriter Create a [BaseServiceWriter] that uses the provided [Connection].
+ * @param metadataWriter The [MetadataCollectionWriter] to use.
+ * @param serviceWriter The [BaseServiceWriter] to use.
  *
  * @property logger The logger to use for this database writer.
  */
@@ -27,10 +27,13 @@ abstract class CimDatabaseWriter(
     databaseFile: String,
     databaseTables: CimDatabaseTables,
     getConnection: (String) -> Connection,
-    private val createMetadataWriter: (Connection) -> MetadataCollectionWriter,
-    private val createServiceWriter: (Connection) -> BaseServiceWriter
+    private val metadataWriter: MetadataCollectionWriter,
+    private val serviceWriter: BaseServiceWriter
 ) : BaseDatabaseWriter(databaseFile, databaseTables, getConnection) {
 
-    override fun saveWithConnection(connection: Connection): Boolean = createMetadataWriter(connection).save() and createServiceWriter(connection).save()
+    /**
+     * Save metadata and service.
+     */
+    override fun saveSchema(): Boolean = metadataWriter.save() and serviceWriter.save()
 
 }
