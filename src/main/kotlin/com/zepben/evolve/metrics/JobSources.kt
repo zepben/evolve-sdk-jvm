@@ -8,6 +8,9 @@
 
 package com.zepben.evolve.metrics
 
+/**
+ * Type holding a source's name and its metadata.
+ */
 typealias JobSource = Map.Entry<String, SourceMetadata>
 
 /**
@@ -21,6 +24,9 @@ class JobSources {
 
     val entries: Set<JobSource> get() = sourceNameToMetadata.entries
 
-    operator fun get(sourceName: String) = sourceNameToMetadata.getOrPut(sourceName) { SourceMetadata() }
+    /**
+     * Get metadata for a source by its name. Creates default metadata if none exists for the source.
+     */
+    operator fun get(sourceName: String): SourceMetadata = sourceNameToMetadata.getOrPut(sourceName) { SourceMetadata() }
 
 }

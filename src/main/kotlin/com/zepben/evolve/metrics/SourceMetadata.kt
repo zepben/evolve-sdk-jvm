@@ -20,13 +20,13 @@ data class SourceMetadata(
     var timestamp: Instant? = null,
     var fileHash: ByteArray? = null
 ) {
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
         other as SourceMetadata
 
+        if (timestamp != other.timestamp) return false
         if (fileHash != null) {
             if (other.fileHash == null) return false
             if (!fileHash.contentEquals(other.fileHash)) return false
@@ -36,7 +36,9 @@ data class SourceMetadata(
     }
 
     override fun hashCode(): Int {
-        return fileHash?.contentHashCode() ?: 0
+        var result = timestamp?.hashCode() ?: 0
+        result = 31 * result + (fileHash?.contentHashCode() ?: 0)
+        return result
     }
 
 }
