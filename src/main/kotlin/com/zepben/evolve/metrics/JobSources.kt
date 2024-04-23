@@ -14,19 +14,10 @@ package com.zepben.evolve.metrics
 typealias JobSource = Map.Entry<String, SourceMetadata>
 
 /**
- * A collection of data sources for a job.
- *
- * @property entries a collection of map entries from a source's identifier to its metadata
+ * A collection of data sources for a job. Missing metadata is automatically created.
  */
-class JobSources {
+class JobSources : AutoMap<String, SourceMetadata>() {
 
-    private val sourceNameToMetadata: MutableMap<String, SourceMetadata> = mutableMapOf()
-
-    val entries: Set<JobSource> get() = sourceNameToMetadata.entries
-
-    /**
-     * Get metadata for a source by its name. Creates default metadata if none exists for the source.
-     */
-    operator fun get(sourceName: String): SourceMetadata = sourceNameToMetadata.getOrPut(sourceName) { SourceMetadata() }
+    override fun defaultValue(): SourceMetadata = SourceMetadata()
 
 }

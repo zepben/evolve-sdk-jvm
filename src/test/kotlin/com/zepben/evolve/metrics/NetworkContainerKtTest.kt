@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 internal class NetworkContainerTest {
 
     @Test
-    internal fun extensionFunctions() {
+    internal fun `extension functions`() {
         val fromGeoRegion = GeographicalRegion("GR").apply { name = "geoRegion" }.toNetworkContainer()
         val fromSubGeoRegion = SubGeographicalRegion("SGR").apply { name = "subGeoRegion" }.toNetworkContainer()
         val fromSubstation = Substation("SS").apply { name = "substation" }.toNetworkContainer()
@@ -24,6 +24,14 @@ internal class NetworkContainerTest {
         assertThat(fromSubstation, equalTo(PartialNetworkContainer(NetworkLevel.Substation, "SS", "substation")))
         assertThat(fromFeeder, equalTo(PartialNetworkContainer(NetworkLevel.Feeder, "FDR", "feeder")))
         assertThat(fromLvFeeder, equalTo(PartialNetworkContainer(NetworkLevel.LvFeeder, "LVF", "lvFeeder")))
+    }
+
+    @Test
+    internal fun `accessor coverage`() {
+        val partialNetworkContainer = PartialNetworkContainer(NetworkLevel.GeographicalRegion, "GR", "geoRegion")
+        assertThat(partialNetworkContainer.level, equalTo(NetworkLevel.GeographicalRegion))
+        assertThat(partialNetworkContainer.mRID, equalTo("GR"))
+        assertThat(partialNetworkContainer.name, equalTo("geoRegion"))
     }
 
 }
