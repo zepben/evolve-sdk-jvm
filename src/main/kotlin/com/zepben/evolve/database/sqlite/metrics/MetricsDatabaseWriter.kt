@@ -13,6 +13,15 @@ import com.zepben.evolve.metrics.IngestionJob
 import java.sql.Connection
 import java.sql.DriverManager
 
+/**
+ * Class for writing an ingestion job (and associated metadata, metrics, and sources) to a metrics database.
+ *
+ * @param databaseFile The filename of the metrics database.
+ * @param job The ingestion job to write.
+ * @param databaseTables The tables in the database.
+ * @param createMetricsWriter The function to use to create the metrics writer from a connection.
+ * @param getConnection Provider of the connection to the specified database.
+ */
 class MetricsDatabaseWriter @JvmOverloads constructor(
     databaseFile: String,
     job: IngestionJob,
@@ -21,6 +30,11 @@ class MetricsDatabaseWriter @JvmOverloads constructor(
     getConnection: (String) -> Connection = DriverManager::getConnection
 ) : BaseDatabaseWriter(databaseFile, databaseTables, getConnection) {
 
+    /**
+     * Save the ingestion job (and associated data) with the specified connection.
+     *
+     * @param connection The connection to use for saving the job.
+     */
     override fun saveWithConnection(connection: Connection): Boolean = createMetricsWriter(connection).save()
 
 }

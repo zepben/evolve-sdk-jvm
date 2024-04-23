@@ -16,11 +16,23 @@ import com.zepben.evolve.database.sqlite.metrics.tables.TableNetworkContainerMet
 import com.zepben.evolve.metrics.*
 import java.util.*
 
+/**
+ * Class for writing entries to the metrics database.
+ *
+ * @param databaseTables The tables in the metrics database.
+ * @param jobId The ID of the job to write entries for.
+ */
 class MetricsEntryWriter(
     private val databaseTables: MetricsDatabaseTables,
     private val jobId: UUID
 ) : BaseEntryWriter() {
 
+    /**
+     * Save an [IngestionMetadata] to the `jobs` table.
+     *
+     * @param metadata the [IngestionMetadata] to save.
+     * @return true if the [metadata] saved successfully or [metadata] is null.
+     */
     fun save(metadata: IngestionMetadata?): Boolean {
         if (metadata == null) return true // signals "saved 0 metadata successfully"
 
@@ -36,6 +48,12 @@ class MetricsEntryWriter(
         return insert.tryExecuteSingleUpdate("job")
     }
 
+    /**
+     * Save a [JobSource] to the `job_sources` table.
+     *
+     * @param jobSource The [JobSource] to save.
+     * @return true if the [jobSource] was saved successfully.
+     */
     fun saveSource(jobSource: JobSource): Boolean {
         val table = databaseTables.getTable<TableJobSources>()
         val insert = databaseTables.getInsert<TableJobSources>()
@@ -49,6 +67,12 @@ class MetricsEntryWriter(
         return insert.tryExecuteSingleUpdate("job source")
     }
 
+    /**
+     * Save a [NetworkMetric] to the `job_sources` table.
+     *
+     * @param networkMetric The [NetworkMetric] to save.
+     * @return true if the [networkMetric] was saved successfully.
+     */
     fun saveMetric(networkMetric: NetworkMetric): Boolean {
         val table = databaseTables.getTable<TableNetworkContainerMetrics>()
         val insert = databaseTables.getInsert<TableNetworkContainerMetrics>()
