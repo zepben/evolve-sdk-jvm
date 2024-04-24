@@ -1717,8 +1717,8 @@ class NetworkCimWriter(
      */
     @Throws(SQLException::class)
     fun save(perLengthSequenceImpedance: PerLengthSequenceImpedance): Boolean {
-        val table = databaseTables.getTable<com.zepben.evolve.database.sqlite.cim.tables.iec61970.base.wires.TablePerLengthSequenceImpedances>()
-        val insert = databaseTables.getInsert<com.zepben.evolve.database.sqlite.cim.tables.iec61970.base.wires.TablePerLengthSequenceImpedances>()
+        val table = databaseTables.getTable<TablePerLengthSequenceImpedances>()
+        val insert = databaseTables.getInsert<TablePerLengthSequenceImpedances>()
 
         insert.setNullableDouble(table.R.queryIndex, perLengthSequenceImpedance.r)
         insert.setNullableDouble(table.X.queryIndex, perLengthSequenceImpedance.x)
@@ -2256,8 +2256,8 @@ class NetworkCimWriter(
 
     @Throws(SQLException::class)
     private fun saveAssociation(protectionRelayFunction: ProtectionRelayFunction, sensor: Sensor): Boolean {
-        val table = databaseTables.getTable<com.zepben.evolve.database.sqlite.cim.tables.associations.TableProtectionRelayFunctionsSensors>()
-        val insert = databaseTables.getInsert<com.zepben.evolve.database.sqlite.cim.tables.associations.TableProtectionRelayFunctionsSensors>()
+        val table = databaseTables.getTable<TableProtectionRelayFunctionsSensors>()
+        val insert = databaseTables.getInsert<TableProtectionRelayFunctionsSensors>()
 
         insert.setString(table.PROTECTION_RELAY_FUNCTION_MRID.queryIndex, protectionRelayFunction.mRID)
         insert.setString(table.SENSOR_MRID.queryIndex, sensor.mRID)
