@@ -62,7 +62,7 @@ class MetricsEntryWriter(
         insert.setString(table.JOB_ID.queryIndex, jobId.toString())
         insert.setString(table.DATA_SOURCE.queryIndex, sourceName)
         insert.setInstant(table.SOURCE_TIME.queryIndex, sourceMetadata.timestamp)
-        insert.setObject(table.FILE_SHA.queryIndex, sourceMetadata.fileHash) // TODO test if this works for sqlite
+        insert.setObject(table.FILE_SHA.queryIndex, sourceMetadata.fileHash)
 
         return insert.tryExecuteSingleUpdate("job source")
     }
