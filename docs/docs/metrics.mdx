@@ -30,7 +30,7 @@ The above information is captured in an in-memory model named `IngestionJob`. an
 
 ## Ingestion Job Model
 
-The following is an example of creating and populating an `IngestionJob` object.
+The following is an example of creating, populating, and saving an `IngestionJob` object to a metrics database file, `metrics.sqlite`.
 
 <Tabs
     groupId="code-example"
@@ -44,6 +44,7 @@ The following is an example of creating and populating an `IngestionJob` object.
 
 ```java
 import com.zepben.evolve.cim.iec61970.base.core.Feeder;
+import com.zepben.evolve.database.sqlite.metrics.MetricsDatabaseWriter;
 import com.zepben.evolve.metrics.IngestionJob;
 import com.zepben.evolve.metrics.IngestionMetadata;
 import com.zepben.evolve.metrics.TotalNetworkContainer;
@@ -72,11 +73,18 @@ public class IngestionJobExample {
                 "0.12.0"
             )
         );
+
         // Sources and network metrics are "automaps", which populate default values for new keys as they are accessed.
         ingestionJob.getSources().get("ABC_feeder.xml").setTimestamp(Instant.parse("2020-01-02T10:30:00.00Z"));
         ingestionJob.getSources().get("ABC_feeder.xml").setFileHash(digest.digest("file contents".getBytes()));
         ingestionJob.getNetworkMetrics().get(TotalNetworkContainer.INSTANCE).put("total cable length", 123.45);
         ingestionJob.getNetworkMetrics().get(networkContainer(feeder)).put("total cable length", 123.45);
+
+        if (new MetricsDatabaseWriter("metrics.sqlite", ingestionJob).save()) {
+            System.out.println("Ingestion job saved successfully");
+        } else {
+            System.out.println("Ingestion job could not be saved successfully");
+        }
     }
 }
 ```
@@ -86,6 +94,7 @@ public class IngestionJobExample {
 
 ```kotlin
 import com.zepben.evolve.cim.iec61970.base.core.Feeder
+import com.zepben.evolve.database.sqlite.metrics.MetricsDatabaseWriter
 import com.zepben.evolve.metrics.IngestionJob
 import com.zepben.evolve.metrics.IngestionMetadata
 import com.zepben.evolve.metrics.TotalNetworkContainer
@@ -110,6 +119,14 @@ val ingestionJob = IngestionJob(UUID.randomUUID()).apply {
     sources["ABC_feeder.xml"].fileHash = MessageDigest.getInstance("SHA-256").digest("file contents".toByteArray())
     networkMetrics[TotalNetworkContainer]["total cable length"] = 123.45
     networkMetrics[feeder.toNetworkContainer()]["total cable length"] = 123.45
+}
+
+fun main() {
+    if (MetricsDatabaseWriter("metrics.sqlite", ingestionJob).save()) {
+        println("Ingestion job saved successfully")
+    } else {
+        println("Ingestion job could not be saved successfully")
+    }
 }
 ```
 
