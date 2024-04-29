@@ -21,8 +21,8 @@ about each run:
     * Timestamp of when the data source was exported
     * The SHA-256 of the data source's contents, if applicable
 * Network container metrics:
-    * A network container may either be the entire network processed in a run, or a section of the network (geographical region, subgeographical region, feeder,
-      or LV feeder).
+    * A network container may either be the entire network processed in a run, or a section of the network (geographical region, subgeographical region,
+      substation, feeder, or LV feeder).
     * For each network container, any number of metrics may be recorded. Each metric may have an arbitrary string name and a numeric value.
 
 The above information is captured in an in-memory model named `IngestionJob`. an `IngestionJob` with metadata may be saved to a "metrics" database using the
@@ -132,3 +132,6 @@ fun main() {
 
 </TabItem>
 </Tabs>
+
+Each job in a metrics database should have a unique UUID. If you attempt to save a job to an existing database, it will be added to it rather than replacing the
+entire database.
