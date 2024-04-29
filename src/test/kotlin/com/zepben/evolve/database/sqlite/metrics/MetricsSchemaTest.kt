@@ -47,12 +47,12 @@ internal class MetricsSchemaTest {
     @Test
     internal fun `test schema for each supported type`() {
         validateJob(
-            IngestionJob(uuid, metadata = IngestionMetadata(Instant.EPOCH, "source", "application", "applicationVersion")),
+            baseJob(),
             "jobs",
             listOf(uuidString, Instant.EPOCH.toString(), "source", "application", "applicationVersion")
         )
         validateJob(
-            IngestionJob(uuid).apply {
+            baseJob().apply {
                 sources["abc"].timestamp = Instant.EPOCH
                 sources["abc"].fileHash = "xyz".toByteArray()
             },
@@ -60,14 +60,14 @@ internal class MetricsSchemaTest {
             listOf(uuidString, "abc", Instant.EPOCH.toString(), "xyz".toByteArray())
         )
         validateJob(
-            IngestionJob(uuid).apply {
+            baseJob().apply {
                 networkMetrics[TotalNetworkContainer]["abc"] = 1.2
             },
             "network_container_metrics",
             listOf(uuidString, "GLOBAL", "", "TOTAL", "abc", 1.2)
         )
         validateJob(
-            IngestionJob(uuid).apply {
+            baseJob().apply {
                 networkMetrics[PartialNetworkContainer(NetworkLevel.Feeder, "fdr", "feeder")]["abc"] = 1.2
             },
             "network_container_metrics",
@@ -75,6 +75,8 @@ internal class MetricsSchemaTest {
         )
 
     }
+
+    private fun baseJob() = IngestionJob(uuid, metadata = IngestionMetadata(Instant.EPOCH, "source", "application", "applicationVersion"))
 
     private fun validateJob(expectedJob: IngestionJob, tableName: String, values: List<Any>) {
         systemErr.clearCapturedLog()
