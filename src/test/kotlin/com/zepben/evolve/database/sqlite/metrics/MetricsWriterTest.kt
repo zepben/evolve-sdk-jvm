@@ -69,4 +69,10 @@ internal class MetricsWriterTest {
         assertThat(systemErr.log, containsString("message"))
     }
 
+    @Test
+    internal fun `save returns false if missing job metadata`() {
+        every { metricsEntryWriter.save(any<IngestionMetadata>()) } returns false
+        assertThat("Ingestion job without metadata should not save", !metricsWriter.save())
+    }
+
 }
