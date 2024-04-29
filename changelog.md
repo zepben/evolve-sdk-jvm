@@ -3,7 +3,7 @@
 ### Breaking Changes
 * Removed `EwbDatabaseType`. Use `DatabaseType` instead. 
 * The filename of the `results cache` database has been changed to `results-cache` from `results_cache`. Any existing `results cache` database files will need to be renamed to `results-cache` to continue to be used.
-* Moved the following modules and classes under `com.zepben.evolve.database.sqlite` to `com.zepben.evolve.database.sqlite.cim`:
+* Moved the following modules under `com.zepben.evolve.database.sqlite` to `com.zepben.evolve.database.sqlite.cim`:
   * `customer`
   * `diagram`
   * `metadata`
