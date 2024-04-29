@@ -18,7 +18,7 @@ import java.util.*
  * @property sources A map from data sources identifiers to their metadata.
  * @property networkMetrics A map from network containers to their metrics.
  */
-data class IngestionJob(
+data class IngestionJob @JvmOverloads constructor(
     val id: UUID,
     var metadata: IngestionMetadata? = null,
     val sources: JobSources = JobSources(),

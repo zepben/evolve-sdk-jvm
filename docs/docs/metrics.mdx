@@ -1,0 +1,117 @@
+---
+id: sdk-metrics
+title: Ingestion Jobs and Metrics
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+## Record-Keeping
+
+It's often useful to have a record of previous runs of a data ingestor. For this reason, the Evolve SDK supports the ability to save the following information
+about each run:
+
+* Metadata:
+    * Timestamp of when the run started
+    * A short description of the source data (e.g. "ExampleEnergy full HV/LV 2024-01-02 cut")
+    * The name of the application used to process the source data (e.g. "example-energy-ingestor")
+    * The version of the application used to process the source data (e.g. "0.12.0")
+* For each data source used (e.g. files) for the run:
+    * The name of the data source (e.g. "ABC_feeder.xml")
+    * Timestamp of when the data source was exported
+    * The SHA-256 of the data source's contents, if applicable
+* Network container metrics:
+    * A network container may either be the entire network processed in a run, or a section of the network (geographical region, subgeographical region, feeder,
+      or LV feeder).
+    * For each network container, any number of metrics may be recorded. Each metric may have an arbitrary string name and a numeric value.
+
+The above information is captured in an in-memory model named `IngestionJob`. an `IngestionJob` with metadata may be saved to a "metrics" database using the
+`MetricsDatabaseWriter`.
+
+## Ingestion Job Model
+
+The following is an example of creating and populating an `IngestionJob` object.
+
+<Tabs
+    groupId="code-example"
+    defaultValue="java"
+    values={[
+        { label: "Java", value: "java", },
+        { label: "Kotlin", value: "kotlin", },
+    ]
+}>
+<TabItem value="java">
+
+```java
+import com.zepben.evolve.cim.iec61970.base.core.Feeder;
+import com.zepben.evolve.metrics.IngestionJob;
+import com.zepben.evolve.metrics.IngestionMetadata;
+import com.zepben.evolve.metrics.TotalNetworkContainer;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+import java.util.UUID;
+
+import static com.zepben.evolve.metrics.NetworkContainerKt.networkContainer;
+
+public class IngestionJobExample {
+    public static void main(String[] args) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+        // This would normally be inside a NetworkService, but it is created here for this example.
+        Feeder feeder = new Feeder("abc-feeder");
+        feeder.setName("ABC feeder");
+
+        IngestionJob ingestionJob = new IngestionJob(
+            UUID.randomUUID(),
+            new IngestionMetadata(
+                Instant.now(),
+                "ExampleEnergy full HV/LV 2024-01-02 cut",
+                "example-energy-ingestor",
+                "0.12.0"
+            )
+        );
+        // Sources and network metrics are "automaps", which populate default values for new keys as they are accessed.
+        ingestionJob.getSources().get("ABC_feeder.xml").setTimestamp(Instant.parse("2020-01-02T10:30:00.00Z"));
+        ingestionJob.getSources().get("ABC_feeder.xml").setFileHash(digest.digest("file contents".getBytes()));
+        ingestionJob.getNetworkMetrics().get(TotalNetworkContainer.INSTANCE).put("total cable length", 123.45);
+        ingestionJob.getNetworkMetrics().get(networkContainer(feeder)).put("total cable length", 123.45);
+    }
+}
+```
+
+</TabItem>
+<TabItem  value="kotlin">
+
+```kotlin
+import com.zepben.evolve.cim.iec61970.base.core.Feeder
+import com.zepben.evolve.metrics.IngestionJob
+import com.zepben.evolve.metrics.IngestionMetadata
+import com.zepben.evolve.metrics.TotalNetworkContainer
+import com.zepben.evolve.metrics.toNetworkContainer
+import java.security.MessageDigest
+import java.time.Instant
+import java.util.*
+
+// This would normally be inside a NetworkService, but it is created here for this example.
+val feeder = Feeder("abc-feeder").apply { name = "ABC Feeder" }
+
+val ingestionJob = IngestionJob(UUID.randomUUID()).apply {
+    metadata = IngestionMetadata(
+        startTime = Instant.now(),
+        source = "ExampleEnergy full HV/LV 2024-01-02 cut",
+        application = "example-energy-ingestor",
+        applicationVersion = "0.12.0"
+    )
+
+    // Sources and network metrics are "automaps", which populate default values for new keys as they are accessed.
+    sources["ABC_feeder.xml"].timestamp = Instant.parse("2020-01-02T10:30:00.00Z")
+    sources["ABC_feeder.xml"].fileHash = MessageDigest.getInstance("SHA-256").digest("file contents".toByteArray())
+    networkMetrics[TotalNetworkContainer]["total cable length"] = 123.45
+    networkMetrics[feeder.toNetworkContainer()]["total cable length"] = 123.45
+}
+```
+
+</TabItem>
+</Tabs>

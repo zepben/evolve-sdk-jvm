@@ -45,3 +45,10 @@ fun Feeder.toNetworkContainer(): PartialNetworkContainer =
     PartialNetworkContainer(NetworkLevel.Feeder, mRID, name)
 fun LvFeeder.toNetworkContainer(): PartialNetworkContainer =
     PartialNetworkContainer(NetworkLevel.LvFeeder, mRID, name)
+
+// Java interop
+fun networkContainer(geographicalRegion: GeographicalRegion) = geographicalRegion.toNetworkContainer()
+fun networkContainer(subGeographicalRegion: SubGeographicalRegion) = subGeographicalRegion.toNetworkContainer()
+fun networkContainer(substation: Substation) = substation.toNetworkContainer()
+fun networkContainer(feeder: Feeder) = feeder.toNetworkContainer()
+fun networkContainer(lvFeeder: LvFeeder) = lvFeeder.toNetworkContainer()
