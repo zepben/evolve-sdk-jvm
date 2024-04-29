@@ -31,11 +31,9 @@ class MetricsEntryWriter(
      * Save an [IngestionMetadata] to the `jobs` table.
      *
      * @param metadata the [IngestionMetadata] to save.
-     * @return true if the [metadata] saved successfully or [metadata] is null.
+     * @return true if the [metadata] saved successfully.
      */
-    fun save(metadata: IngestionMetadata?): Boolean {
-        if (metadata == null) return true // signals "saved 0 metadata successfully"
-
+    fun save(metadata: IngestionMetadata): Boolean {
         val table = databaseTables.getTable<TableJobs>()
         val insert = databaseTables.getInsert<TableJobs>()
 

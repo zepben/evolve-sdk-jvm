@@ -24,7 +24,7 @@ class MetricsWriter(
     private val writer: MetricsEntryWriter = MetricsEntryWriter(databaseTables, job.id)
 ): BaseCollectionWriter() {
 
-    override fun save(): Boolean = writer.save(job.metadata)
+    override fun save(): Boolean = (job.metadata?.let { writer.save(it) } ?: false)
         .andSaveEach(job.sources.entries, writer::saveSource) { jobSource, e -> logger.error("Failed to save job source $jobSource: ${e.message}") }
         .andSaveEach(job.networkMetrics.entries, writer::saveMetric) { metric, e -> logger.error("Failed to save metric $metric: ${e.message}") }
 
