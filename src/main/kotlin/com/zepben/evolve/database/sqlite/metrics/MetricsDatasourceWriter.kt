@@ -12,27 +12,78 @@ import com.zepben.evolve.database.sqlite.common.TableVersion
 import com.zepben.evolve.metrics.IngestionJob
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.sql.Connection
+import java.sql.SQLException
 import javax.sql.DataSource
 
 class MetricsDatasourceWriter(
     private val dataSource: DataSource,
-    private val job: IngestionJob,
     private val databaseTables: MetricsDatabaseTables = MetricsDatabaseTables()
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
+    private val versionTable = databaseTables.getTable<TableVersion>()
 
-    fun save() {
-        val localVersion = databaseTables.getTable<TableVersion>().supportedVersion
-        when (val remoteVersion = getVersion()) {
-            null -> TODO("No version found, so create schema here (tables and indexes) and populate tables")
-            localVersion -> TODO("Matching version found, so just populate tables")
-            else -> throw IncompatibleVersionException(localVersion, remoteVersion)
+    @Throws(IncompatibleVersionException::class)
+    fun save(job: IngestionJob): Boolean {
+        return dataSource.connection.use { connection ->
+            val localVersion = versionTable.supportedVersion
+            when (val remoteVersion = getVersion(connection)) {
+                null -> createSchema(connection) && populateTables(connection, job)
+                localVersion -> populateTables(connection, job)
+                else -> throw IncompatibleVersionException(localVersion, remoteVersion)
+            }
         }
     }
 
-    private fun getVersion(): Int? {
-        TODO("Implement this. Should return null if no version table is found and the version number found otherwise.")
+    private fun createSchema(connection: Connection): Boolean =
+        try {
+            logger.info("Creating database schema v${versionTable.supportedVersion}...")
+
+            connection.createStatement().use { statement ->
+                statement.queryTimeout = 2
+
+                databaseTables.forEachTable { table ->
+                    statement.executeUpdate(table.createTableSql)
+                    table.createIndexesSql.forEach { sql ->
+                        statement.executeUpdate(sql)
+                    }
+                }
+
+                // Add the version number to the database.
+                connection.prepareStatement(versionTable.preparedInsertSql).use { insert ->
+                    insert.setInt(versionTable.VERSION.queryIndex, versionTable.supportedVersion)
+                    insert.executeUpdate()
+                }
+
+                connection.commit()
+                logger.info("Schema created.")
+            }
+            true
+        } catch (e: SQLException) {
+            logger.error("Failed to create database schema: " + e.message)
+            false
+        }
+
+    private fun getVersion(connection: Connection): Int? =
+        connection.createStatement().use { statement ->
+            val tableVersion = databaseTables.getTable<TableVersion>()
+            try {
+                statement.executeQuery(tableVersion.selectSql).use { rs ->
+                    if (rs.next()) {
+                        rs.getInt(tableVersion.VERSION.queryIndex)
+                    } else {
+                        throw MissingVersionException
+                    }
+                }
+            } catch (e: SQLException) {
+                null
+            }
+        }
+
+    private fun populateTables(connection: Connection, job: IngestionJob): Boolean {
+        databaseTables.prepareInsertStatements(connection)
+        return MetricsWriter(job, databaseTables).save()
     }
 
 }
@@ -48,3 +99,8 @@ class IncompatibleVersionException(
     val remoteVersion: Int
 ) : Exception("Incompatible version in remote metrics database: expected v$localVersion, found v$remoteVersion. " +
     "Please ${if (localVersion > remoteVersion) "upgrade the remote database" else "use a newer version of the SDK"}.")
+
+/**
+ * Thrown if the version table in the remote metrics database has no entry.
+ */
+object MissingVersionException : Exception("Version table present in remote metrics database, but it missing an entry.")
