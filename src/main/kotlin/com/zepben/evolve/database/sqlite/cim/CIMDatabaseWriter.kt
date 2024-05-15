@@ -34,6 +34,6 @@ abstract class CimDatabaseWriter(
     /**
      * Save metadata and service.
      */
-    override fun saveSchema(): Boolean = metadataWriter.save() and serviceWriter.save()
+    override fun populateTables(): Boolean = metadataWriter.save() and serviceWriter.save()
 
 }

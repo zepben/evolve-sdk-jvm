@@ -33,6 +33,6 @@ class MetricsDatabaseWriter @JvmOverloads constructor(
     /**
      * Save the ingestion job (and associated data).
      */
-    override fun saveSchema(): Boolean = metricsWriter.save()
+    override fun populateTables(): Boolean = metricsWriter.save()
 
 }

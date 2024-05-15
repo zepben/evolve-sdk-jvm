@@ -26,7 +26,7 @@ internal class MetricsDatabaseWriterTest {
             "databaseFile",
             mockk(), // ingestion job isn't actually used to create the MetricsWriter
             metricsWriter = writer
-        ).saveSchema()
+        ).populateTables()
 
         assertThat("Should have saved successfully", result)
 

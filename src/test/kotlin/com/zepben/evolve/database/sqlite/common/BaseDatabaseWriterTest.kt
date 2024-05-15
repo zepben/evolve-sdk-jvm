@@ -59,7 +59,7 @@ internal class BaseDatabaseWriterTest {
         DriverManager::getConnection,
         persistFile = true
     ) {
-        override fun saveSchema(): Boolean = true
+        override fun populateTables(): Boolean = true
     }
 
 }

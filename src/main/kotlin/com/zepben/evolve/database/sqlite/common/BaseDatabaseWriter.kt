@@ -61,7 +61,7 @@ abstract class BaseDatabaseWriter(
         }
 
         val status = try {
-            saveSchema()
+            populateTables()
         } catch (e: MissingTableConfigException) {
             logger.error("Unable to save database: " + e.message, e)
             false
@@ -70,7 +70,12 @@ abstract class BaseDatabaseWriter(
         return status and postSave()
     }
 
-    abstract fun saveSchema(): Boolean
+    /**
+     * Populate tables with entries determined by the model for this database writer.
+     *
+     * @return true if the model was saved successfully.
+     */
+    internal abstract fun populateTables(): Boolean
 
     private fun preSave(): Boolean =
         if (persistFile && Files.exists(Paths.get(databaseFile))) {
@@ -197,4 +202,3 @@ abstract class BaseDatabaseWriter(
         }
 
 }
-
