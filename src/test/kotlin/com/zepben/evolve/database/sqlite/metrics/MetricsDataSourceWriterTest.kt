@@ -28,12 +28,12 @@ internal class MetricsDataSourceWriterTest : MetricsSchemaTest() {
             val result = MetricsDataSourceWriter(dataSource, databaseTables).populateTables(connection, ingestionJob)
 
             assertThat("Should have saved successfully", result)
-        }
 
-        verifySequence {
-            databaseTables.tables
-            databaseTables.prepareInsertStatements(connection)
-            MetricsWriter(ingestionJob, databaseTables).save()
+            verifySequence {
+                databaseTables.tables
+                databaseTables.prepareInsertStatements(connection)
+                MetricsWriter(ingestionJob, databaseTables).save()
+            }
         }
     }
 
