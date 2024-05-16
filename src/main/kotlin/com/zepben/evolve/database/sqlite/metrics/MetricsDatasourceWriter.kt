@@ -9,6 +9,7 @@
 package com.zepben.evolve.database.sqlite.metrics
 
 import com.zepben.evolve.database.sqlite.common.TableVersion
+import com.zepben.evolve.database.sqlite.extensions.configureBatch
 import com.zepben.evolve.metrics.IngestionJob
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -27,10 +28,11 @@ class MetricsDatasourceWriter(
     @Throws(IncompatibleVersionException::class)
     fun save(job: IngestionJob): Boolean {
         return dataSource.connection.use { connection ->
+            connection.configureBatch()
             val localVersion = versionTable.supportedVersion
             when (val remoteVersion = getVersion(connection)) {
-                null -> createSchema(connection) && populateTables(connection, job)
-                localVersion -> populateTables(connection, job)
+                null -> createSchema(connection) && populateTables(connection, job) && postSave(connection)
+                localVersion -> populateTables(connection, job) && postSave(connection)
                 else -> throw IncompatibleVersionException(localVersion, remoteVersion)
             }
         }
@@ -38,7 +40,7 @@ class MetricsDatasourceWriter(
 
     private fun createSchema(connection: Connection): Boolean =
         try {
-            logger.info("Creating database schema v${versionTable.supportedVersion}...")
+            logger.info("No version table found. Creating metrics database schema v${versionTable.supportedVersion}...")
 
             connection.createStatement().use { statement ->
                 statement.queryTimeout = 2
@@ -84,6 +86,11 @@ class MetricsDatasourceWriter(
     private fun populateTables(connection: Connection, job: IngestionJob): Boolean {
         databaseTables.prepareInsertStatements(connection)
         return MetricsWriter(job, databaseTables).save()
+    }
+
+    private fun postSave(connection: Connection): Boolean {
+        connection.commit()
+        return true
     }
 
 }
