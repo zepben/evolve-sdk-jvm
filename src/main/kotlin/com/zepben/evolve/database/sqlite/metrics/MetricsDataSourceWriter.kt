@@ -83,7 +83,7 @@ class MetricsDataSourceWriter(
             }
         }
 
-    private fun populateTables(connection: Connection, job: IngestionJob): Boolean {
+    internal fun populateTables(connection: Connection, job: IngestionJob): Boolean {
         databaseTables.prepareInsertStatements(connection)
         return MetricsWriter(job, databaseTables).save()
     }
