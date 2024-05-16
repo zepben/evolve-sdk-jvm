@@ -8,13 +8,14 @@
 
 package com.zepben.evolve.database.sqlite.metrics
 
+import com.zepben.evolve.metrics.IngestionJob
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
 
-internal class MetricsDatabaseWriterTest {
+internal class MetricsDatabaseWriterTest : MetricsSchemaTest() {
 
     private val writer = mockk<MetricsWriter> {
         every { save() } returns true
@@ -32,5 +33,7 @@ internal class MetricsDatabaseWriterTest {
 
         verify { writer.save() }
     }
+
+    override fun save(file: String, job: IngestionJob): Boolean = MetricsDatabaseWriter(file, job).save()
 
 }

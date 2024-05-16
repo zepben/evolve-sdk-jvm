@@ -17,7 +17,7 @@ import java.sql.Connection
 import java.sql.SQLException
 import javax.sql.DataSource
 
-class MetricsDatasourceWriter(
+class MetricsDataSourceWriter(
     private val dataSource: DataSource,
     private val databaseTables: MetricsDatabaseTables = MetricsDatabaseTables()
 ) {
@@ -40,7 +40,7 @@ class MetricsDatasourceWriter(
 
     private fun createSchema(connection: Connection): Boolean =
         try {
-            logger.info("No version table found. Creating metrics database schema v${versionTable.supportedVersion}...")
+            logger.info("No version table found. Creating database schema v${versionTable.supportedVersion}...")
 
             connection.createStatement().use { statement ->
                 statement.queryTimeout = 2

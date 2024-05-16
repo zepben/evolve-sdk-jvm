@@ -24,7 +24,7 @@ import java.sql.DriverManager
 import java.time.Instant
 import java.util.*
 
-internal class MetricsSchemaTest {
+abstract class MetricsSchemaTest {
 
     @JvmField
     @RegisterExtension
@@ -35,12 +35,12 @@ internal class MetricsSchemaTest {
     private val uuid = UUID.fromString(uuidString)
 
     @BeforeEach
-    private fun beforeEach() {
+    protected fun beforeEach() {
         Files.deleteIfExists(Paths.get(schemaTestFile))
     }
 
     @AfterEach
-    private fun afterEach() {
+    protected fun afterEach() {
         Files.deleteIfExists(Paths.get(schemaTestFile))
     }
 
@@ -100,7 +100,7 @@ internal class MetricsSchemaTest {
     private fun validateJob(expectedJob: IngestionJob, tableName: String, vararg rows: List<Any>) {
         systemErr.clearCapturedLog()
 
-        assertThat("Database should have been saved", MetricsDatabaseWriter(schemaTestFile, expectedJob).save())
+        assertThat("Database should have been saved", save(schemaTestFile, expectedJob))
 
         assertThat(systemErr.log, Matchers.containsString("Creating database schema v${tableMetricsVersion.supportedVersion}"))
         assertThat("Database should now exist", Files.exists(Paths.get(schemaTestFile)))
@@ -121,5 +121,7 @@ internal class MetricsSchemaTest {
         // Needed, as the metrics database is persistent
         Files.deleteIfExists(Paths.get(schemaTestFile))
     }
+
+    abstract fun save(file: String, job: IngestionJob): Boolean
 
 }
