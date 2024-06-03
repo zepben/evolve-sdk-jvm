@@ -8,10 +8,11 @@
 
 package com.zepben.evolve.streaming.grpc
 
+import com.zepben.auth.client.SSLContextUtils
 import com.zepben.auth.client.ZepbenTokenFetcher
 import com.zepben.auth.client.createTokenFetcher
 import com.zepben.auth.client.createTokenFetcherManagedIdentity
-import com.zepben.auth.common.AuthMethod
+import java.net.http.HttpClient
 
 /**
  * A collection of functions that return a channel that connects to Evolve's gRPC service, given address and authentication details.
@@ -88,7 +89,6 @@ object Connect {
             authCAFilename = authCAFilename,
             verifyCertificates = verifyCertificates
         )
-            ?: return connectTls(host, rpcPort, caFilename)
 
         return connectWithSecretUsingTokenFetcher(tokenFetcher, clientId, clientSecret, host, rpcPort, caFilename)
     }
@@ -99,8 +99,7 @@ object Connect {
      * @param clientId The client ID of the OAuth application to authenticate for
      * @param clientSecret The client secret of the OAuth application to authenticate for
      * @param audience The audience parameter to be sent in token requests. This specifies the API to grant access for.
-     * @param authMethod The authentication method to use
-     * @param issuerDomain The domain of the OAuth issuer. "/oauth/token" will be used as the path to request tokens from.
+     * @param issuer The domain of the OAuth issuer.
      * @param authCAFilename The filename of a truststore containing additional trusted root certificates for fetching the OAuth tokens.
      *                       This parameter is optional and defaults to null, in which case only the system CAs are used to verify certificates.
      * @param host The hostname where the gRPC service is hosted
@@ -115,15 +114,17 @@ object Connect {
         clientId: String,
         clientSecret: String,
         audience: String,
-        issuerDomain: String,
+        issuer: String,
         host: String = "localhost",
         rpcPort: Int = 50051,
-        authMethod: AuthMethod = AuthMethod.OAUTH,
         authCAFilename: String? = null,
         caFilename: String? = null
     ): GrpcChannel {
-        val tokenFetcher = ZepbenTokenFetcher(audience = audience, issuerDomain = issuerDomain, authMethod = authMethod, caFilename = authCAFilename)
 
+        val authClient = authCAFilename?.let {
+            HttpClient.newBuilder().sslContext(SSLContextUtils.singleCACertSSLContext(it)).build()
+        } ?: HttpClient.newBuilder().sslContext(SSLContextUtils.allTrustingSSLContext()).build()
+        val tokenFetcher = createTokenFetcher(audience = audience, issuer = issuer, authClient = authClient, verifyCertificates = false)
         return connectWithSecretUsingTokenFetcher(tokenFetcher, clientId, clientSecret, host, rpcPort, caFilename)
     }
 
@@ -159,7 +160,6 @@ object Connect {
         caFilename: String? = null
     ): GrpcChannel {
         val tokenFetcher = createTokenFetcher(confAddress ?: "https://$host/ewb/auth", confCAFilename = confCAFilename, authCAFilename = authCAFilename)
-            ?: return connectTls(host, rpcPort, caFilename)
 
         return connectWithPasswordUsingTokenFetcher(tokenFetcher, clientId, username, password, host, rpcPort, caFilename)
     }
@@ -171,8 +171,7 @@ object Connect {
      * @param username The username of the account registered with the OAuth application
      * @param password The password of the account registered with the OAuth application
      * @param audience The audience parameter to be sent in token requests. This specifies the API to grant access for.
-     * @param authMethod The authentication method to use
-     * @param issuerDomain The domain of the OAuth issuer. "/oauth/token" will be used as the path to request tokens from.
+     * @param issuer The domain of the OAuth issuer.
      * @param authCAFilename The filename of a truststore containing additional trusted root certificates for fetching the OAuth tokens.
      *                       This parameter is optional and defaults to null, in which case only the system CAs are used to verify certificates.
      * @param host The hostname where the gRPC service is hosted
@@ -188,14 +187,16 @@ object Connect {
         username: String,
         password: String,
         audience: String,
-        issuerDomain: String,
+        issuer: String,
         host: String = "localhost",
         rpcPort: Int = 50051,
-        authMethod: AuthMethod = AuthMethod.OAUTH,
         authCAFilename: String? = null,
         caFilename: String? = null
     ): GrpcChannel {
-        val tokenFetcher = ZepbenTokenFetcher(audience = audience, issuerDomain = issuerDomain, authMethod = authMethod, caFilename = authCAFilename)
+        val authClient = authCAFilename?.let {
+            HttpClient.newBuilder().sslContext(SSLContextUtils.singleCACertSSLContext(it)).build()
+        } ?: HttpClient.newBuilder().sslContext(SSLContextUtils.allTrustingSSLContext()).build()
+        val tokenFetcher = createTokenFetcher(audience = audience, issuer = issuer, authClient = authClient, verifyCertificates = false)
 
         return connectWithPasswordUsingTokenFetcher(tokenFetcher, clientId, username, password, host, rpcPort, caFilename)
     }

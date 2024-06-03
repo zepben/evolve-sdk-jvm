@@ -8,10 +8,10 @@
 
 package com.zepben.evolve.streaming.grpc
 
+import com.zepben.auth.client.AuthProviderConfig
 import com.zepben.auth.client.ZepbenTokenFetcher
 import com.zepben.auth.client.createTokenFetcher
 import com.zepben.auth.client.createTokenFetcherManagedIdentity
-import com.zepben.auth.common.AuthMethod
 import io.mockk.*
 import io.vertx.core.json.JsonObject
 import org.hamcrest.MatcherAssert.assertThat
@@ -100,24 +100,6 @@ internal class ConnectTest {
     }
 
     @Test
-    internal fun connectWithSecretConnectsWithTlsIfNoAuth() {
-        mockkStatic("com.zepben.auth.client.ZepbenTokenFetcherKt")
-        every {
-            createTokenFetcher("confAddress", "confCAFilename", "authCAFilename", any(), any(), any(), any())
-        } returns null
-
-        mockkStatic(Connect::class)
-        every {
-            Connect.connectTls("hostname", 1234, "caFilename")
-        } returns grpcChannelWithTls
-
-        assertThat(
-            Connect.connectWithSecret("clientId", "clientSecret", "hostname", 1234, "confAddress", "confCAFilename", "authCAFilename", "caFilename"),
-            equalTo(grpcChannelWithTls)
-        )
-    }
-
-    @Test
     internal fun connectWithSecretWithKnownTokenFetcherConfig() {
         mockkConstructor(ZepbenTokenFetcher::class)
         every {
@@ -130,10 +112,9 @@ internal class ConnectTest {
             "clientId",
             "clientSecret",
             "audience",
-            "issuerDomain",
+            "https://login.microsoftonline.com/contoso.onmicrosoft.com/v2.0",
             "hostname",
             1234,
-            AuthMethod.OAUTH,
             caFilename = "caFilename"
         )
 
@@ -143,6 +124,7 @@ internal class ConnectTest {
                 JsonObject(
                     """
                         {
+                            "scope": "audience/.default",
                             "client_id": "clientId",
                             "client_secret": "clientSecret",
                             "grant_type": "client_credentials"
@@ -191,24 +173,6 @@ internal class ConnectTest {
     }
 
     @Test
-    internal fun connectWithPasswordConnectsWithTlsIfNoAuth() {
-        mockkStatic("com.zepben.auth.client.ZepbenTokenFetcherKt")
-        every {
-            createTokenFetcher("confAddress", "confCAFilename", "authCAFilename", any(), any(), any())
-        } returns null
-
-        mockkStatic(Connect::class)
-        every {
-            Connect.connectTls("hostname", 1234, "caFilename")
-        } returns grpcChannel
-
-        assertThat(
-            Connect.connectWithPassword("clientId", "username", "password", "hostname", 1234, "confAddress", "confCAFilename", "authCAFilename", "caFilename"),
-            equalTo(grpcChannel)
-        )
-    }
-
-    @Test
     internal fun connectWithPasswordWithKnownTokenFetcherConfig() {
         mockkConstructor(ZepbenTokenFetcher::class)
         every {
@@ -217,15 +181,15 @@ internal class ConnectTest {
 
         every { gcbWithTls.withTokenFetcher(any()) } returns gcbWithAuth
 
+        // Use real issuer to fetch _some_ provider config
         val grpcChannel = Connect.connectWithPassword(
             "clientId",
             "username",
             "password",
             "audience",
-            "issuerDomain",
+            "https://login.microsoftonline.com/contoso.onmicrosoft.com/v2.0",
             host = "hostname",
             rpcPort = 1234,
-            AuthMethod.OAUTH,
             caFilename = "caFilename"
         )
 
@@ -285,14 +249,14 @@ internal class ConnectTest {
     internal fun connectWithSecretAndAuthConfJvmOverloadsCoverage() {
         mockkStatic(Connect::class)
         every {
-            Connect.connectWithSecret("clientId", "clientSecret", "audience", "issuerDomain", "localhost", 50051, AuthMethod.OAUTH, null, null)
+            Connect.connectWithSecret("clientId", "clientSecret", "audience", "issuerDomain", "localhost", 50051, null, null)
         } returns grpcChannelWithAuth
 
         assertThat(Connect.connectWithSecret("clientId", "clientSecret", "audience", "issuerDomain"), equalTo(grpcChannelWithAuth))
         assertThat(Connect.connectWithSecret("clientId", "clientSecret", "audience", "issuerDomain", "localhost"), equalTo(grpcChannelWithAuth))
         assertThat(Connect.connectWithSecret("clientId", "clientSecret", "audience", "issuerDomain", "localhost", 50051), equalTo(grpcChannelWithAuth))
         assertThat(
-            Connect.connectWithSecret("clientId", "clientSecret", "audience", "issuerDomain", "localhost", 50051, AuthMethod.OAUTH),
+            Connect.connectWithSecret("clientId", "clientSecret", "audience", "issuerDomain", "localhost", 50051),
             equalTo(grpcChannelWithAuth)
         )
     }
@@ -316,7 +280,7 @@ internal class ConnectTest {
     internal fun connectWithPasswordAndAuthConfJvmOverloadsCoverage() {
         mockkStatic(Connect::class)
         every {
-            Connect.connectWithPassword("clientId", "username", "password", "audience", "issuerDomain", "localhost", 50051, AuthMethod.OAUTH, null, null)
+            Connect.connectWithPassword("clientId", "username", "password", "audience", "issuerDomain", "localhost", 50051, null, null)
         } returns grpcChannelWithAuth
 
         assertThat(Connect.connectWithPassword("clientId", "username", "password", "audience", "issuerDomain"), equalTo(grpcChannelWithAuth))
@@ -326,7 +290,7 @@ internal class ConnectTest {
             equalTo(grpcChannelWithAuth)
         )
         assertThat(
-            Connect.connectWithPassword("clientId", "username", "password", "audience", "issuerDomain", "localhost", 50051, AuthMethod.OAUTH),
+            Connect.connectWithPassword("clientId", "username", "password", "audience", "issuerDomain", "localhost", 50051),
             equalTo(grpcChannelWithAuth)
         )
     }

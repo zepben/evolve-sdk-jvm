@@ -1,13 +1,19 @@
 # Zepben EWB SDK changelog
 ## [0.23.0] - UNRELEASED
 ### Breaking Changes
-* None.
+* Updated to latest ewb-conn, and hence the signature of these helper functions have changed:
+  * `Connect.connectWithSecret`:
+    * `issuerDomain` has been renamed to `issuer`;
+    * `authMethod` are no longer used.
+  * `Connect.connectWithPassword`:
+    * `issuerDomain` has been renamed to `issuer`;
+    * `authMethod` are no longer used.
 
 ### New Features
 * None.
 
 ### Enhancements
-* None.
+* As `createTokenFetcher()` always creates a ZepbenTokenFetcher object, the test case where this doesn't happen is no longer needed.
 
 ### Fixes
 * None.
@@ -95,7 +101,6 @@
 * Added `METRICS` to the `DatabaseType` enum.
 
 ### Enhancements
-
 * None.
 
 ### Fixes
