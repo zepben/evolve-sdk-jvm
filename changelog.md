@@ -4,10 +4,10 @@
 * Updated to latest ewb-conn, and hence the signature of these helper functions have changed:
   * `Connect.connectWithSecret`:
     * `issuerDomain` has been renamed to `issuer`;
-    * `authMethod` are no longer used.
+    * `authMethod` is no longer used.
   * `Connect.connectWithPassword`:
     * `issuerDomain` has been renamed to `issuer`;
-    * `authMethod` are no longer used.
+    * `authMethod` is no longer used.
 
 ### New Features
 * None.
