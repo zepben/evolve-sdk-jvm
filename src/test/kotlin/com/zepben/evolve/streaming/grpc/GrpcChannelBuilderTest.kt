@@ -52,7 +52,8 @@ internal class GrpcChannelBuilderTest {
         }
         assertThat(grpcChannel.channel, equalTo(insecureChannel))
 
-        grpcChannel = GrpcChannelBuilder().forAddress("hostname", 1234).build()
+        grpcChannel = GrpcChannelBuilder().forAddress("hostname", 1234)
+            .build(GrpcBuildArgs(skipConnectionTest = true, debugConnectionTest = false, maxInboundMessageSize = DEFAULT_BUILD_ARGS.maxInboundMessageSize))
 
         verify {
             NettyChannelBuilder.forAddress("hostname", 1234).usePlaintext().maxInboundMessageSize(20971520)
@@ -73,7 +74,7 @@ internal class GrpcChannelBuilderTest {
         val insecureChannel = mockk<ManagedChannel>()
 
         mockkStatic(NettyChannelBuilder::class)
-        every { NettyChannelBuilder.forAddress("localhost", 50051).usePlaintext().build() } returns insecureChannel
+        every { NettyChannelBuilder.forAddress("localhost", 50051).usePlaintext().maxInboundMessageSize(DEFAULT_BUILD_ARGS.maxInboundMessageSize).build() } returns insecureChannel
 
         val builderSpy = spyk(GrpcChannelBuilder())
         every { builderSpy.testConnection(any(), any()) } just runs
@@ -91,7 +92,7 @@ internal class GrpcChannelBuilderTest {
         val insecureChannel = mockk<ManagedChannel>()
 
         mockkStatic(NettyChannelBuilder::class)
-        every { NettyChannelBuilder.forAddress("localhost", 50051).usePlaintext().build() } returns insecureChannel
+        every { NettyChannelBuilder.forAddress("localhost", 50051).usePlaintext().maxInboundMessageSize(7).build() } returns insecureChannel
 
         val builderSpy = spyk(GrpcChannelBuilder())
 
@@ -108,7 +109,7 @@ internal class GrpcChannelBuilderTest {
         val insecureChannel = mockk<ManagedChannel>()
 
         mockkStatic(NettyChannelBuilder::class)
-        every { NettyChannelBuilder.forAddress("localhost", 50051).usePlaintext().build() } returns insecureChannel
+        every { NettyChannelBuilder.forAddress("localhost", 50051).usePlaintext().maxInboundMessageSize(12).build() } returns insecureChannel
 
         val builderSpy = spyk(GrpcChannelBuilder())
         every { builderSpy.testConnection(any(), any()) } just runs

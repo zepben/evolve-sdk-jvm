@@ -7,7 +7,9 @@
 * None.
 
 ### Enhancements
-* None.
+* `GrpcChannelBuilder` tests the connectivity of newly created channels before returning them. This is done by calling `getMetadata()` against all known
+  services, the channel is returned after the first successful response. Any connectivity errors will be propagated to the user. If no connectivity errors are
+  encountered but no successful responses is received from the known services, a `GrpcConnectionException` is thrown.
 
 ### Fixes
 * None.
@@ -234,9 +236,6 @@
 ### Enhancements
 
 * Update docusaurus version and the configuration.
-* `GrpcChannelBuilder` tests the connectivity of newly created channels before returning them. This is done by calling `getMetadata()` against all known
-services, the channel is returned after the first successful response. Any connectivity errors will be propagated to the user. If no connectivity errors are
-encountered but no successful responses is received from the known services, a `GrpcConnectionException` is thrown.
 
 ### Fixes
 

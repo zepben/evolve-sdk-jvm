@@ -99,9 +99,4 @@ internal class TokenCallCredentialsTest {
             assertThat(grpcStatusException.captured.cause, equalTo(e))
         }
     }
-
-    @Test
-    fun thisUsesUnstableApiCoverage() {
-        TokenCallCredentials { "token" }.thisUsesUnstableApi()
-    }
 }
