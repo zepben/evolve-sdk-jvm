@@ -12,10 +12,10 @@ import com.zepben.evolve.cim.iec61970.base.diagramlayout.Diagram
 import com.zepben.evolve.cim.iec61970.base.diagramlayout.DiagramObject
 import com.zepben.evolve.cim.iec61970.base.diagramlayout.DiagramObjectPoint
 import com.zepben.evolve.database.sqlite.cim.CimWriter
-import com.zepben.evolve.database.sqlite.extensions.setNullableString
 import com.zepben.evolve.database.sqlite.cim.tables.iec61970.base.diagramlayout.TableDiagramObjectPoints
 import com.zepben.evolve.database.sqlite.cim.tables.iec61970.base.diagramlayout.TableDiagramObjects
 import com.zepben.evolve.database.sqlite.cim.tables.iec61970.base.diagramlayout.TableDiagrams
+import com.zepben.evolve.database.sqlite.extensions.setNullableString
 import com.zepben.evolve.services.diagram.DiagramService
 import java.sql.SQLException
 
