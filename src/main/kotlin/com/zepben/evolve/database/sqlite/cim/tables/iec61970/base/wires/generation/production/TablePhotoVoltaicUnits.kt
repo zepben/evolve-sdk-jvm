@@ -8,7 +8,7 @@
 
 package com.zepben.evolve.database.sqlite.cim.tables.iec61970.base.wires.generation.production
 
-class TablePhotoVoltaicUnits : TablePowerElectronicsUnit() {
+class TablePhotoVoltaicUnits : TablePowerElectronicsUnits() {
 
     override val name: String = "photo_voltaic_units"
 

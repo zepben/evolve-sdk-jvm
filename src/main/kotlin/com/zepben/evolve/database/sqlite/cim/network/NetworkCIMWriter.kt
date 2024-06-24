@@ -1329,7 +1329,7 @@ class NetworkCimWriter(
 
     @Throws(SQLException::class)
     private fun savePowerElectronicsUnit(
-        table: TablePowerElectronicsUnit,
+        table: TablePowerElectronicsUnits,
         insert: PreparedStatement,
         powerElectronicsUnit: PowerElectronicsUnit,
         description: String

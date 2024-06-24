@@ -13,7 +13,7 @@ import com.zepben.evolve.database.sqlite.cim.tables.Column.Nullable.NOT_NULL
 import com.zepben.evolve.database.sqlite.cim.tables.Column.Nullable.NULL
 
 @Suppress("PropertyName")
-class TableBatteryUnits : TablePowerElectronicsUnit() {
+class TableBatteryUnits : TablePowerElectronicsUnits() {
 
     val BATTERY_STATE: Column = Column(++columnIndex, "battery_state", "TEXT", NOT_NULL)
     val RATED_E: Column = Column(++columnIndex, "rated_e", "INTEGER", NULL)

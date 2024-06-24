@@ -8,9 +8,9 @@
 
 package com.zepben.evolve.database.sqlite.cim.tables.iec61970.infiec61970.wires.generation.production
 
-import com.zepben.evolve.database.sqlite.cim.tables.iec61970.base.wires.generation.production.TablePowerElectronicsUnit
+import com.zepben.evolve.database.sqlite.cim.tables.iec61970.base.wires.generation.production.TablePowerElectronicsUnits
 
-class TableEvChargingUnits : TablePowerElectronicsUnit() {
+class TableEvChargingUnits : TablePowerElectronicsUnits() {
 
     override val name: String = "ev_charging_units"
 

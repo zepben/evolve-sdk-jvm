@@ -13,7 +13,7 @@ import com.zepben.evolve.database.sqlite.cim.tables.Column.Nullable.NULL
 import com.zepben.evolve.database.sqlite.cim.tables.iec61970.base.core.TableEquipment
 
 @Suppress("PropertyName")
-abstract class TablePowerElectronicsUnit : TableEquipment() {
+abstract class TablePowerElectronicsUnits : TableEquipment() {
 
     val POWER_ELECTRONICS_CONNECTION_MRID: Column = Column(++columnIndex, "power_electronics_connection_mrid", "TEXT", NULL)
     val MAX_P: Column = Column(++columnIndex, "max_p", "INTEGER", NULL)

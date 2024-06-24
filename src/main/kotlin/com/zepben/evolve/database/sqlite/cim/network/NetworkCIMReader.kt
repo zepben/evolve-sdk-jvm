@@ -1434,7 +1434,7 @@ class NetworkCimReader(
     }
 
     @Throws(SQLException::class)
-    private fun loadPowerElectronicsUnit(powerElectronicsUnit: PowerElectronicsUnit, table: TablePowerElectronicsUnit, resultSet: ResultSet): Boolean {
+    private fun loadPowerElectronicsUnit(powerElectronicsUnit: PowerElectronicsUnit, table: TablePowerElectronicsUnits, resultSet: ResultSet): Boolean {
         powerElectronicsUnit.apply {
             powerElectronicsConnection = service.ensureGet(
                 resultSet.getNullableString(table.POWER_ELECTRONICS_CONNECTION_MRID.queryIndex),

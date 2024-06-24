@@ -1,7 +1,7 @@
 # Zepben EWB SDK changelog
 ## [0.23.0] - UNRELEASED
 ### Breaking Changes
-* None.
+* Renamed `TablePowerElectronicsUnit` to `TablePowerElectronicsUnits`.
 
 ### New Features
 * None.
