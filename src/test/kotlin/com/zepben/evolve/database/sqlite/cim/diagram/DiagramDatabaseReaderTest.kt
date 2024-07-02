@@ -28,7 +28,7 @@ internal class DiagramDatabaseReaderTest {
     var systemErr: SystemLogExtension = SystemLogExtension.SYSTEM_ERR.captureLog().muteOnSuccess()
 
     private val databaseFile = "databaseFile"
-    private val service = DiagramService()
+    private val service = mockk<DiagramService>(relaxed = true)
 
     private val metadataReader = mockk<MetadataCollectionReader>().also { every { it.load() } returns true }
     private val diagramServiceReader = mockk<DiagramServiceReader>().also { every { it.load() } returns true }

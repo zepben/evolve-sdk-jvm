@@ -8,6 +8,9 @@
 
 package com.zepben.evolve.database.sqlite.cim.network
 
+import com.zepben.evolve.cim.iec61970.base.core.Equipment
+import com.zepben.evolve.cim.iec61970.base.core.Feeder
+import com.zepben.evolve.cim.iec61970.base.wires.EnergySource
 import com.zepben.evolve.database.sqlite.cim.metadata.MetadataCollectionReader
 import com.zepben.evolve.database.sqlite.common.TableVersion
 import com.zepben.evolve.services.network.NetworkService
@@ -34,7 +37,7 @@ internal class NetworkDatabaseReaderTest {
     var systemErr: SystemLogExtension = SystemLogExtension.SYSTEM_ERR.captureLog().muteOnSuccess()
 
     private val databaseFile = "databaseFile"
-    private val service = NetworkService()
+    private val service = mockk<NetworkService>(relaxed = true)
 
     private val metadataReader = mockk<MetadataCollectionReader>().also { every { it.load() } returns true }
     private val networkServiceReader = mockk<NetworkServiceReader>().also { every { it.load() } returns true }
@@ -90,6 +93,12 @@ internal class NetworkDatabaseReaderTest {
         assertThat(systemErr.log, containsString("Assigning equipment to LV feeders..."))
         assertThat(systemErr.log, containsString("Equipment assigned to LV feeders."))
 
+        assertThat(systemErr.log, containsString("Validating that each equipment is assigned to a container..."))
+        assertThat(systemErr.log, containsString("Equipment containers validated."))
+
+        assertThat(systemErr.log, containsString("Validating primary sources vs feeders..."))
+        assertThat(systemErr.log, containsString("Sources vs feeders validated."))
+
         verifySequence {
             tableVersion.supportedVersion
             tableVersion.getVersion(connection)
@@ -103,6 +112,13 @@ internal class NetworkDatabaseReaderTest {
             phaseInferrer.run(service)
             assignToFeeders.run(service)
             assignToLvFeeders.run(service)
+
+            // calls for _validate_equipment_containers()
+            service.listOf<Equipment>(any<(Equipment) -> Boolean>())
+
+            // calls for _validate_sources()
+            service.sequenceOf<Feeder>()
+            service.sequenceOf<EnergySource>()
         }
     }
 

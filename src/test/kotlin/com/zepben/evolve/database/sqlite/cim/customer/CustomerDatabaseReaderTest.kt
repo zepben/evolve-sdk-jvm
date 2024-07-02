@@ -28,7 +28,7 @@ internal class CustomerDatabaseReaderTest {
     var systemErr: SystemLogExtension = SystemLogExtension.SYSTEM_ERR.captureLog().muteOnSuccess()
 
     private val databaseFile = "databaseFile"
-    private val service = CustomerService()
+    private val service = mockk<CustomerService>(relaxed = true)
 
     private val metadataReader = mockk<MetadataCollectionReader>().also { every { it.load() } returns true }
     private val customerServiceReader = mockk<CustomerServiceReader>().also { every { it.load() } returns true }
